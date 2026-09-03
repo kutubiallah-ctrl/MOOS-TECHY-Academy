@@ -136,6 +136,37 @@ export interface PracticeQuestion {
   curriculumStandard?: CurriculumStandard;
 }
 
+export interface SkillLesson {
+  id: string;
+  title: string;
+  hookAndIntuition: string;
+  conceptualExplanation: string;
+  keyTermsAndFormulas?: Array<{
+    termOrSymbol: string;
+    definition: string;
+    practicalExample?: string;
+  }>;
+  workedExamples: Array<{
+    title: string;
+    problemStatement: string;
+    mathExpression?: string;
+    steps: Array<{
+      stepNumber: number;
+      instruction: string;
+      reasoning: string;
+    }>;
+    takeawayRule: string;
+  }>;
+  commonMisconceptionsAndTraps?: Array<{
+    misconception: string;
+    whyItIsWrong: string;
+    correctCorrection: string;
+  }>;
+  guidedPracticePrompt?: string;
+  diagnosticSelfCheck?: string;
+  summaryRecap?: string;
+}
+
 export interface Skill {
   id: string;
   unitId: string;
@@ -148,6 +179,7 @@ export interface Skill {
   masteryPointsRequired: number;
   questions: PracticeQuestion[];
   prerequisiteSkillIds?: string[];
+  lesson?: SkillLesson;
 }
 
 export interface Unit {
@@ -241,6 +273,69 @@ export interface ParentChildSummary {
   recentAchievements: string[];
   curriculumPacing: "On Track" | "Ahead" | "Needs Practice";
   aiAssistanceFrequency: string;
+}
+
+// ---------------------------------------------------------------------------
+// DETERMINISTIC ASSIGNMENT & MASTERY PROGRESSION CANONICAL TYPES
+// ---------------------------------------------------------------------------
+
+export type AssignmentCompletionState =
+  | "unstarted"
+  | "started"
+  | "in_progress"
+  | "completed_with_improvement"
+  | "completed_mastery_retained"
+  | "completed_stagnant"
+  | "mastery_regressed"
+  | "intervention_required"
+  | "abandoned"
+  | "expired";
+
+export interface AssignmentProgressRecord {
+  learnerId: string;
+  learnerName?: string;
+  state: AssignmentCompletionState;
+  preAssignmentMastery: number;
+  postAssignmentMastery: number;
+  masteryDelta: number;
+  scorePercentage?: number;
+  attemptsCount: number;
+  hintsRequestedCount: number;
+  retrievalIndependenceRate?: number;
+  startedAt?: string;
+  completedAt?: string;
+  identifiedMisconceptions?: string[];
+  effectivenessVerdict?:
+    | "improvement_observed"
+    | "performance_increased"
+    | "mastery_evidence_strengthened"
+    | "remediation_remains_unresolved"
+    | "insufficient_evidence";
+}
+
+export interface Assignment {
+  id: string;
+  teacherId?: string;
+  classroomId?: string;
+  title: string;
+  description?: string;
+  unitId: string;
+  skillId: string;
+  assignmentType: "practice" | "guided_remediation" | "exam_prep" | "challenge" | "diagnostic";
+  targetLearnerIds: string[]; // empty array denotes all learners in classroom
+  dueDate: string;
+  status: "draft" | "published" | "active" | "completed" | "archived" | "closed";
+  completionState?: AssignmentCompletionState;
+  provenance?: "OFFICIAL_SYLLABUS" | "PLATFORM_CONTENT" | "AI_GENERATED_DRAFT";
+  createdAt: string;
+  completedLearnerIds: string[];
+  learnerProgress?: Record<string, AssignmentProgressRecord>;
+  differentiationConfig?: {
+    adaptiveDifficulty?: boolean;
+    prerequisiteWarmupEnabled?: boolean;
+    hintScaffoldingIntensity?: "standard" | "high" | "minimal";
+    learnerDifficultyOverrides?: Record<string, "introductory" | "standard" | "advanced">;
+  };
 }
 
 // Re-export canonical profile from learner module

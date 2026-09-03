@@ -574,6 +574,106 @@ export const CURRICULUM_STANDARD_MAPPINGS: CurriculumStandardMapping[] = [
       sourceDate: "2025-2027",
       confidence: 0.95
     }
+  },
+  {
+    id: "map-us-ccss-quad-03",
+    canonicalSkillId: "skill-quad-03",
+    country: "US",
+    jurisdiction: "National / Multi-State CCSS",
+    curriculumSystem: "US_CCSS",
+    educationLevel: "High School (Algebra II)",
+    gradeOrYear: "Grade 10-11",
+    subjectCode: "HSA",
+    standardIdentifier: "CCSS.MATH.CONTENT.HSA.REI.B.4.B.2",
+    standardTitle: "Recognize when the quadratic formula gives complex solutions and solve using the quadratic formula",
+    expectedMasteryScore: 80,
+    assessmentStyle: "multiple_choice_4opt",
+    verificationStatus: "PLATFORM_MAPPING",
+    verificationMetadata: {
+      sourceTitle: "Common Core State Standards for Mathematics - High School: Complex Solutions",
+      sourceDate: "2010",
+      confidence: 0.95
+    }
+  },
+  {
+    id: "map-us-ccss-geom-01",
+    canonicalSkillId: "skill-geom-circle-01",
+    country: "US",
+    jurisdiction: "National / Multi-State CCSS",
+    curriculumSystem: "US_CCSS",
+    educationLevel: "High School (Geometry)",
+    gradeOrYear: "Grade 9-10",
+    subjectCode: "HSG",
+    standardIdentifier: "CCSS.MATH.CONTENT.HSG.C.A.2",
+    standardTitle: "Identify and describe relationships among inscribed angles, radii, and chords in circles",
+    expectedMasteryScore: 80,
+    assessmentStyle: "multiple_choice_4opt",
+    verificationStatus: "PLATFORM_MAPPING",
+    verificationMetadata: {
+      sourceTitle: "Common Core State Standards - High School Geometry: Circles",
+      sourceDate: "2010",
+      confidence: 0.95
+    }
+  },
+  {
+    id: "map-us-ccss-trig-01",
+    canonicalSkillId: "skill-trig-01",
+    country: "US",
+    jurisdiction: "National / Multi-State CCSS",
+    curriculumSystem: "US_CCSS",
+    educationLevel: "High School (Algebra II / Precalculus)",
+    gradeOrYear: "Grade 11-12",
+    subjectCode: "HSF",
+    standardIdentifier: "CCSS.MATH.CONTENT.HSF.TF.A.1",
+    standardTitle: "Understand radian measure of an angle as the length of the arc on the unit circle and define trigonometric functions",
+    expectedMasteryScore: 80,
+    assessmentStyle: "multiple_choice_4opt",
+    verificationStatus: "PLATFORM_MAPPING",
+    verificationMetadata: {
+      sourceTitle: "Common Core State Standards - High School Functions: Trigonometric Functions",
+      sourceDate: "2010",
+      confidence: 0.95
+    }
+  },
+  {
+    id: "map-global-stem-phy-01",
+    canonicalSkillId: "skill-phy-mechanics-dynamics",
+    country: "INTL",
+    jurisdiction: "Global STEM Educational Framework",
+    curriculumSystem: "GLOBAL_STEM",
+    educationLevel: "Senior Secondary (STEM Advanced)",
+    gradeOrYear: "Grade 11/12",
+    subjectCode: "STEM-PHY",
+    standardIdentifier: "STEM-GLOBAL-PHY-01",
+    standardTitle: "Newtonian dynamics, momentum conservation, impulse, and mechanical work-energy theorems",
+    expectedMasteryScore: 85,
+    assessmentStyle: "stepped_written",
+    verificationStatus: "VERIFIED_OFFICIAL",
+    verificationMetadata: {
+      sourceTitle: "Global STEM Advanced Physics Inquiry Standards",
+      sourceDate: "2024",
+      confidence: 0.98
+    }
+  },
+  {
+    id: "map-global-stem-chem-01",
+    canonicalSkillId: "skill-chem-bonding-geometry",
+    country: "INTL",
+    jurisdiction: "Global STEM Educational Framework",
+    curriculumSystem: "GLOBAL_STEM",
+    educationLevel: "Senior Secondary (STEM Advanced)",
+    gradeOrYear: "Grade 11/12",
+    subjectCode: "STEM-CHM",
+    standardIdentifier: "STEM-GLOBAL-CHM-01",
+    standardTitle: "VSEPR molecular geometry, hybridization, and intermolecular forces",
+    expectedMasteryScore: 85,
+    assessmentStyle: "stepped_written",
+    verificationStatus: "VERIFIED_OFFICIAL",
+    verificationMetadata: {
+      sourceTitle: "Global STEM Chemistry Standards & Molecular Geometry",
+      sourceDate: "2024",
+      confidence: 0.98
+    }
   }
 ];
 

@@ -34,8 +34,8 @@ export const LEARNING_DOMAINS: LearningDomain[] = [
     description: "Understand the physical cosmos, molecular mechanisms, genetics, mechanics, and laboratory inquiry.",
     iconName: "Atom",
     accentColor: "teal",
-    isFlagship: false,
-    status: "expanding",
+    isFlagship: true,
+    status: "active",
     subjectsCount: 3
   },
   {
@@ -45,8 +45,8 @@ export const LEARNING_DOMAINS: LearningDomain[] = [
     description: "Computational thinking, structured programming, web architecture, and applied neural networks.",
     iconName: "Cpu",
     accentColor: "cyan",
-    isFlagship: false,
-    status: "expanding",
+    isFlagship: true,
+    status: "active",
     subjectsCount: 4
   },
   {
@@ -67,8 +67,8 @@ export const LEARNING_DOMAINS: LearningDomain[] = [
     description: "Grammar mastery, comprehension synthesis, persuasive discourse, and standardized verbal reasoning.",
     iconName: "BookOpen",
     accentColor: "amber",
-    isFlagship: false,
-    status: "roadmap",
+    isFlagship: true,
+    status: "active",
     subjectsCount: 2
   },
   {
@@ -140,10 +140,10 @@ export const SUBJECTS: Subject[] = [
     code: "PHY-200",
     description: "Kinematics, Newton's laws, energy conversion, electromagnetic wave optics, and atomic physics.",
     iconName: "Zap",
-    levels: ["senior_secondary", "university_prep", "exam_prep"],
+    levels: ["primary_foundations", "upper_primary", "junior_secondary", "senior_secondary", "university_prep", "exam_prep"],
     curricula: ["NERDC_NIGERIAN", "WAEC_WASSCE", "JAMB_UTME", "CAMBRIDGE_IGCSE"],
-    unitsCount: 4,
-    totalMasteryPoints: 1600
+    unitsCount: 6,
+    totalMasteryPoints: 2000
   },
   {
     id: "sci_chemistry",
@@ -176,10 +176,10 @@ export const SUBJECTS: Subject[] = [
     code: "CSC-101",
     description: "Number systems, Boolean algebra, algorithm design, pseudocode, and Python programming foundations.",
     iconName: "Cpu",
-    levels: ["junior_secondary", "senior_secondary", "university_prep"],
+    levels: ["primary_foundations", "upper_primary", "junior_secondary", "senior_secondary", "university_prep", "exam_prep"],
     curricula: ["NERDC_NIGERIAN", "WAEC_WASSCE", "CAMBRIDGE_IGCSE"],
-    unitsCount: 3,
-    totalMasteryPoints: 1200
+    unitsCount: 5,
+    totalMasteryPoints: 1600
   },
   {
     id: "lang_english",
@@ -188,10 +188,10 @@ export const SUBJECTS: Subject[] = [
     code: "ENG-101",
     description: "Subject-verb concord, morphological etymology, sentence structure, and comprehension analysis.",
     iconName: "BookOpen",
-    levels: ["upper_primary", "junior_secondary", "senior_secondary", "exam_prep"],
+    levels: ["primary_foundations", "upper_primary", "junior_secondary", "senior_secondary", "university_prep", "exam_prep"],
     curricula: ["NERDC_NIGERIAN", "WAEC_WASSCE", "JAMB_UTME", "CAMBRIDGE_IGCSE"],
-    unitsCount: 3,
-    totalMasteryPoints: 1200
+    unitsCount: 5,
+    totalMasteryPoints: 1600
   },
   {
     id: "comm_financial_lit",

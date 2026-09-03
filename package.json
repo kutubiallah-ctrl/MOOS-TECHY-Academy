@@ -8,6 +8,7 @@
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
+    "test": "tsx src/tests/institutionalSecurityForensics.test.ts && tsx src/tests/backupRestoreForensics.test.ts && tsx src/tests/teacherStudioIntelligence.test.ts && tsx src/tests/educationalInvariantsAndResilience.test.ts && tsx src/tests/bookpreneurMarketplaceWorkflow.test.ts && tsx src/tests/crossPillarIntegrationVerification.test.ts && tsx src/tests/runtimeStabilityAndDataContractForensics.test.ts && tsx src/tests/auditAndBackupVerification.test.ts && tsx src/tests/flagshipContentSaturation.test.ts && tsx src/tests/realUserAcceptanceJourneys.test.ts && tsx src/tests/aiTeacherCopilotForensics.test.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

@@ -7,6 +7,7 @@ import {
   CountryCode,
   EducationSystemCode
 } from "./curriculum";
+import { ResourceProvenance } from "./learningSupply";
 
 export type UserRole = "learner" | "teacher" | "parent" | "admin";
 
@@ -27,6 +28,9 @@ export interface QuestionAttempt {
   hintsUsedCount: number;
   timeSpentSeconds: number;
   misconceptionTriggered?: string;
+  provenance?: ResourceProvenance;
+  isAiGenerated?: boolean;
+  generatorAgent?: string;
   timestamp: string;
 }
 

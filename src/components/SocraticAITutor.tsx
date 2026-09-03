@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PracticeQuestion } from "../types/curriculum";
 import { useLearner } from "../context/LearnerContext";
+import { curriculumService } from "../services/curriculumService";
 
 interface SocraticAITutorProps {
   currentQuestion?: PracticeQuestion | null;
@@ -85,6 +86,14 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
     try {
       const currentSkillId = currentQuestion?.skillId || activeSkill?.id;
       const currentSkillMastery = currentSkillId && profile?.masteryRecords ? profile.masteryRecords[currentSkillId]?.points : 0;
+      const alerts = (currentQuestion as any)?.misconceptionAlerts || (currentQuestion as any)?.misconceptionTargets || [];
+      const relevantMisconception = alerts.find((m: any) => m.trigger === learnerAttempt);
+
+      // Dynamically resolve subject from curriculum hierarchy
+      const parentUnit = currentSkillId ? curriculumService.getUnitBySkillId(currentSkillId) : null;
+      const resolvedSubject = parentUnit?.subjectId
+        ? curriculumService.getSubjectById(parentUnit.subjectId)?.title || parentUnit.subjectId
+        : activeUnitTitle || "Academic Study";
 
       const response = await fetch("/api/tutor/chat", {
         method: "POST",
@@ -95,19 +104,21 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
             learnerName: profile?.name,
             level: profile?.targetLevel,
             curriculum: profile?.curriculum,
-            subject: "Mathematics",
-            unit: activeUnitTitle,
+            subject: resolvedSubject,
+            unit: parentUnit?.title || activeUnitTitle,
             skill: currentQuestion?.skillId || activeSkill?.title,
             skillMasteryPoints: currentSkillMastery,
             questionText: currentQuestion ? `${currentQuestion.questionText} [${currentQuestion.mathExpression || ""}]` : undefined,
-            learnerAttempt: learnerAttempt || undefined
+            learnerAttempt: learnerAttempt || undefined,
+            misconceptionNote: relevantMisconception?.note || relevantMisconception?.alertText,
+            questionProvenance: (currentQuestion as any)?.provenance || "OFFICIAL_SYLLABUS"
           },
           chatHistory: messages.slice(-6)
         })
       });
 
       const data = await response.json();
-      const tutorReply = data.response || "Let's examine the mathematical rule governing this step together. What do you notice first?";
+      const tutorReply = data.response || `Let's examine the foundational principle governing this ${resolvedSubject} step together. What do you observe first?`;
 
       const tutorMsg: ChatMessage = {
         id: `tut-${Date.now()}`,
@@ -126,7 +137,7 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
       const fallbackMsg: ChatMessage = {
         id: `tut-${Date.now()}`,
         sender: "tutor",
-        text: "Let's break this down into a simpler sub-step: What information do you currently know, and what unknown variable are we trying to isolate?",
+        text: "Let's break this down into a simpler sub-step: What core evidence or principle is given in the problem, and what specific outcome are we trying to reach?",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         suggestionButtons: ["Show me a guiding step", "Explain the formula"]
       };

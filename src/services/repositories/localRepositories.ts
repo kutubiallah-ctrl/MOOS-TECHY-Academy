@@ -35,14 +35,31 @@ import { PlayActivity } from "../../types/learnAndPlay";
 import { CanonicalTutorSession } from "../../types/entities";
 import { TextbookProject } from "../../types/textbookStudio";
 import { BookpreneurProject } from "../../types/bookpreneur";
-import { TeacherLessonPlan, LearnerInterventionPlan, ClassAnalyticsSnapshot } from "../../types/teacherStudio";
+import {
+  TeacherLessonPlan,
+  LearnerInterventionPlan,
+  ClassAnalyticsSnapshot,
+  TeacherClassroom,
+  ClassroomRosterStudent,
+  ClassroomAssignment,
+  TeacherInterventionRecommendation,
+  AssignmentLifecycleStatus,
+  LearnerAssignmentProgress,
+  TeacherInterventionStatus,
+  ClassroomAdaptiveGroup,
+  PrerequisiteBottleneckCluster,
+  MisconceptionCluster,
+  ClassroomNextBestAction
+} from "../../types/teacherStudio";
 import { AgentTask, AgentAuditRecord, HumanApprovalRecord, AgentRole, AgentContextPayload } from "../../types/agentOrchestrator";
 import { DEFAULT_EXTENDED_LEARNER_PROFILE, LEARNING_DOMAINS, SUBJECTS, MATHEMATICS_UNITS } from "../../data/curriculumData";
+import { ALL_CURRICULUM_UNITS } from "../../data/extendedCurriculumUnits";
 import { CURRICULUM_STANDARD_MAPPINGS } from "../../data/curriculumMappingsData";
 import { REGISTERED_QR_RESOURCES } from "../../data/qrResourceData";
 import { ALL_PLAY_ACTIVITIES } from "../../data/learnAndPlayData";
 import { textbookStudioService } from "../textbookStudioService";
 import { bookpreneurService } from "../bookpreneurService";
+import { SEEDED_ADMIN_USER } from "../identityService";
 import { teacherStudioService } from "../teacherStudioService";
 import { agentOrchestrationService } from "../agentOrchestrationService";
 
@@ -63,35 +80,37 @@ export class LocalLearnerRepository implements ILearnerRepository {
     }
 
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const sanitized: ExtendedLearnerProfile = {
-          ...DEFAULT_EXTENDED_LEARNER_PROFILE,
-          ...parsed,
-          masteryRecords: {
-            ...DEFAULT_EXTENDED_LEARNER_PROFILE.masteryRecords,
-            ...(parsed.masteryRecords || {})
-          },
-          streak: {
-            ...DEFAULT_EXTENDED_LEARNER_PROFILE.streak,
-            ...(parsed.streak || {})
-          },
-          preferences: {
-            ...DEFAULT_EXTENDED_LEARNER_PROFILE.preferences,
-            ...(parsed.preferences || {})
-          },
-          streakDays: parsed.streakDays ?? parsed.streak?.count ?? DEFAULT_EXTENDED_LEARNER_PROFILE.streakDays,
-          questionAttempts: Array.isArray(parsed.questionAttempts) ? parsed.questionAttempts : DEFAULT_EXTENDED_LEARNER_PROFILE.questionAttempts || [],
-          activityHistory: Array.isArray(parsed.activityHistory) ? parsed.activityHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.activityHistory || [],
-          examHistory: Array.isArray(parsed.examHistory) ? parsed.examHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.examHistory || [],
-          diagnosticHistory: Array.isArray(parsed.diagnosticHistory) ? parsed.diagnosticHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.diagnosticHistory || [],
-          unlockedBadges: Array.isArray(parsed.unlockedBadges) ? parsed.unlockedBadges : DEFAULT_EXTENDED_LEARNER_PROFILE.unlockedBadges || []
-        };
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const sanitized: ExtendedLearnerProfile = {
+            ...DEFAULT_EXTENDED_LEARNER_PROFILE,
+            ...parsed,
+            masteryRecords: {
+              ...DEFAULT_EXTENDED_LEARNER_PROFILE.masteryRecords,
+              ...(parsed.masteryRecords || {})
+            },
+            streak: {
+              ...DEFAULT_EXTENDED_LEARNER_PROFILE.streak,
+              ...(parsed.streak || {})
+            },
+            preferences: {
+              ...DEFAULT_EXTENDED_LEARNER_PROFILE.preferences,
+              ...(parsed.preferences || {})
+            },
+            streakDays: parsed.streakDays ?? parsed.streak?.count ?? DEFAULT_EXTENDED_LEARNER_PROFILE.streakDays,
+            questionAttempts: Array.isArray(parsed.questionAttempts) ? parsed.questionAttempts : DEFAULT_EXTENDED_LEARNER_PROFILE.questionAttempts || [],
+            activityHistory: Array.isArray(parsed.activityHistory) ? parsed.activityHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.activityHistory || [],
+            examHistory: Array.isArray(parsed.examHistory) ? parsed.examHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.examHistory || [],
+            diagnosticHistory: Array.isArray(parsed.diagnosticHistory) ? parsed.diagnosticHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.diagnosticHistory || [],
+            unlockedBadges: Array.isArray(parsed.unlockedBadges) ? parsed.unlockedBadges : DEFAULT_EXTENDED_LEARNER_PROFILE.unlockedBadges || []
+          };
 
-        const updated = this.checkStreakHealth(sanitized);
-        this.inMemoryCache = updated;
-        return updated;
+          const updated = this.checkStreakHealth(sanitized);
+          this.inMemoryCache = updated;
+          return updated;
+        }
       }
     } catch (e) {
       console.warn("Storage retrieval warning, using default profile", e);
@@ -329,7 +348,9 @@ export class LocalLearnerRepository implements ILearnerRepository {
 
   private persist(profile: ExtendedLearnerProfile) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      }
     } catch (e) {
       console.warn("Storage persist error", e);
     }
@@ -350,17 +371,17 @@ export class LocalCurriculumRepository implements ICurriculumRepository {
 
   public async getUnits(subjectId?: string): Promise<Unit[]> {
     if (subjectId) {
-      return MATHEMATICS_UNITS.filter((u) => u.subjectId === subjectId);
+      return ALL_CURRICULUM_UNITS.filter((u) => u.subjectId === subjectId);
     }
-    return MATHEMATICS_UNITS;
+    return ALL_CURRICULUM_UNITS;
   }
 
   public async getUnitById(unitId: string): Promise<Unit | undefined> {
-    return MATHEMATICS_UNITS.find((u) => u.id === unitId);
+    return ALL_CURRICULUM_UNITS.find((u) => u.id === unitId);
   }
 
   public async getSkillById(skillId: string): Promise<Skill | undefined> {
-    for (const unit of MATHEMATICS_UNITS) {
+    for (const unit of ALL_CURRICULUM_UNITS) {
       const match = unit.skills.find((s) => s.id === skillId);
       if (match) return match;
     }
@@ -499,11 +520,80 @@ export class LocalBookpreneurRepository implements IBookpreneurRepository {
   }
 
   public async saveProject(project: BookpreneurProject): Promise<BookpreneurProject> {
-    return bookpreneurService.createProject(project);
+    const existing = bookpreneurService.getProjectById(project.id);
+    if (existing) {
+      const updated = bookpreneurService.updateProject(SEEDED_ADMIN_USER, project.id, project);
+      return updated || project;
+    }
+    return bookpreneurService.createProject(SEEDED_ADMIN_USER, project);
   }
 }
 
 export class LocalTeacherStudioRepository implements ITeacherStudioRepository {
+  public async getClassrooms(): Promise<TeacherClassroom[]> {
+    return teacherStudioService.getClassrooms();
+  }
+
+  public async getClassroomById(id: string): Promise<TeacherClassroom | undefined> {
+    return teacherStudioService.getClassroomById(id);
+  }
+
+  public async createClassroom(data: Partial<TeacherClassroom>): Promise<TeacherClassroom> {
+    return teacherStudioService.createClassroom(data);
+  }
+
+  public async getRoster(classroomId: string): Promise<ClassroomRosterStudent[]> {
+    return teacherStudioService.getRoster(classroomId);
+  }
+
+  public async getAssignments(classroomId?: string): Promise<ClassroomAssignment[]> {
+    return teacherStudioService.getAssignments(classroomId);
+  }
+
+  public async getAssignmentById(id: string): Promise<ClassroomAssignment | undefined> {
+    return teacherStudioService.getAssignmentById(id);
+  }
+
+  public async createAssignment(data: Partial<ClassroomAssignment>): Promise<ClassroomAssignment> {
+    return teacherStudioService.createAssignment(data);
+  }
+
+  public async updateAssignmentStatus(assignmentId: string, status: AssignmentLifecycleStatus): Promise<void> {
+    teacherStudioService.updateAssignmentStatus(assignmentId, status);
+  }
+
+  public async updateLearnerProgress(assignmentId: string, learnerId: string, progress: Partial<LearnerAssignmentProgress>): Promise<void> {
+    teacherStudioService.updateLearnerProgress(assignmentId, learnerId, progress);
+  }
+
+  public async completeAssignment(assignmentId: string, learnerId: string): Promise<void> {
+    teacherStudioService.completeAssignment(assignmentId, learnerId);
+  }
+
+  public async getTeacherInterventions(classroomId: string): Promise<TeacherInterventionRecommendation[]> {
+    return teacherStudioService.getTeacherInterventions(classroomId);
+  }
+
+  public async updateInterventionStatus(interventionId: string, status: TeacherInterventionStatus): Promise<void> {
+    teacherStudioService.updateInterventionStatus(interventionId, status);
+  }
+
+  public async getAdaptiveGroups(classroomId: string): Promise<ClassroomAdaptiveGroup[]> {
+    return teacherStudioService.getAdaptiveGroups(classroomId);
+  }
+
+  public async getPrerequisiteBottlenecks(classroomId: string): Promise<PrerequisiteBottleneckCluster[]> {
+    return teacherStudioService.getPrerequisiteBottlenecks(classroomId);
+  }
+
+  public async getMisconceptionClusters(classroomId: string): Promise<MisconceptionCluster[]> {
+    return teacherStudioService.getMisconceptionClusters(classroomId);
+  }
+
+  public async getNextBestActions(classroomId: string): Promise<ClassroomNextBestAction[]> {
+    return teacherStudioService.getNextBestActions(classroomId);
+  }
+
   public async getLessonPlans(): Promise<TeacherLessonPlan[]> {
     return teacherStudioService.getLessonPlans();
   }
@@ -512,8 +602,8 @@ export class LocalTeacherStudioRepository implements ITeacherStudioRepository {
     return teacherStudioService.getInterventions();
   }
 
-  public async getClassAnalytics(): Promise<ClassAnalyticsSnapshot> {
-    return teacherStudioService.getClassAnalytics();
+  public async getClassAnalytics(classroomId?: string): Promise<ClassAnalyticsSnapshot> {
+    return teacherStudioService.getClassAnalytics(classroomId);
   }
 
   public async saveLessonPlan(plan: TeacherLessonPlan): Promise<TeacherLessonPlan> {

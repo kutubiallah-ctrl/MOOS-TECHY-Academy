@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sparkles,
   Flame,
@@ -16,13 +16,21 @@ import {
   QrCode,
   PenTool,
   BrainCircuit,
-  ChevronDown
+  ChevronDown,
+  UserCheck,
+  CheckCircle2,
+  ShieldCheck,
+  User,
+  Network
 } from "lucide-react";
 import { LearnerProfile } from "../types/curriculum";
+import { identityService, ALL_SEEDED_IDENTITIES } from "../services/identityService";
+import { InstitutionalUser, UserSession } from "../types/identity";
 
 export type ActiveView =
   | "dashboard"
   | "curriculum"
+  | "lesson"
   | "practice"
   | "play"
   | "qr_companion"
@@ -33,7 +41,8 @@ export type ActiveView =
   | "teacher_studio"
   | "textbook_studio"
   | "bookpreneur_studio"
-  | "agent_hub";
+  | "agent_hub"
+  | "architecture";
 
 interface NavbarProps {
   activeView: ActiveView;
@@ -51,8 +60,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   onQuickDiagnostic
 }) => {
   const [showStudioDropdown, setShowStudioDropdown] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [currentSession, setCurrentSession] = useState<UserSession>(() => identityService.getActiveSession());
+  const [allUsers] = useState<InstitutionalUser[]>(() => identityService.getIdentities());
 
-  const isStudioActive = ["teacher_studio", "textbook_studio", "bookpreneur_studio", "agent_hub"].includes(activeView);
+  const isStudioActive = ["teacher_studio", "textbook_studio", "bookpreneur_studio", "agent_hub", "architecture", "stakeholders"].includes(activeView);
+
+  const handleSwitchUser = (userId: string) => {
+    try {
+      const newSession = identityService.switchUser(userId);
+      setCurrentSession(newSession);
+      setShowUserMenu(false);
+    } catch (e) {
+      console.error("Failed to switch user:", e);
+    }
+  };
 
   return (
     <header id="main-header" className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
@@ -228,6 +250,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   type="button"
                   onClick={() => {
+                    onNavigate("stakeholders");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "stakeholders" ? "bg-rose-50 text-rose-700 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Users className="h-4 w-4 text-rose-600 shrink-0" />
+                  <div>
+                    <span className="font-bold block text-slate-900">Parent & Teacher Portals</span>
+                    <span className="text-[10px] text-slate-500">Learner oversight & encouraging notes</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
                     onNavigate("textbook_studio");
                     setShowStudioDropdown(false);
                   }}
@@ -256,6 +295,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div>
                     <span className="font-bold block text-slate-900">Bookpreneur Studio</span>
                     <span className="text-[10px] text-slate-500">Nonfiction authoring & claim rigor</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate("architecture");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "architecture" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Network className="h-4 w-4 text-indigo-600 shrink-0" />
+                  <div>
+                    <span className="font-bold block text-slate-900">System Blueprint</span>
+                    <span className="text-[10px] text-slate-500">Institutional architecture & flow</span>
                   </div>
                 </button>
 
@@ -292,6 +348,121 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-indigo-900 bg-indigo-50 border border-indigo-100 px-2.5 py-1.5 rounded-xl">
             <Trophy className="h-4 w-4 text-amber-500" />
             <span>{profile.masteryPoints} pts</span>
+          </div>
+
+          {/* Institutional Role Switcher */}
+          <div className="relative">
+            <button
+              id="nav-role-switcher-btn"
+              type="button"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition shadow-2xs ${
+                currentSession.role === "ADMIN"
+                  ? "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100"
+                  : currentSession.role === "TEACHER"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100"
+                  : "bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100"
+              }`}
+              title="Switch Institutional User Role"
+            >
+              <div className="h-5 w-5 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-slate-900">
+                {currentSession.role === "ADMIN" ? "AD" : currentSession.role === "TEACHER" ? "TC" : "LN"}
+              </div>
+              <div className="text-left hidden md:block">
+                <span className="block text-[11px] font-extrabold leading-tight truncate max-w-[100px]">
+                  {currentSession.displayName.split(" ")[0]}
+                </span>
+                <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75 leading-tight">
+                  {currentSession.role}
+                </span>
+              </div>
+              <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
+            </button>
+
+            {showUserMenu && (
+              <div
+                className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl p-2.5 z-50 space-y-1.5"
+                onMouseLeave={() => setShowUserMenu(false)}
+              >
+                <div className="px-2 py-1.5 border-b border-slate-100 mb-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Institutional Role Switcher
+                  </span>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Local shared-device profile context
+                  </p>
+                </div>
+
+                {allUsers.map((user) => {
+                  const isSelected = user.id === currentSession.userId;
+                  return (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => handleSwitchUser(user.id)}
+                      className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center justify-between transition border ${
+                        isSelected
+                          ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                          : "hover:bg-slate-50 border-transparent text-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`h-8 w-8 rounded-xl flex items-center justify-center font-extrabold text-xs shrink-0 ${
+                            isSelected
+                              ? "bg-indigo-500 text-white"
+                              : user.role === "ADMIN"
+                              ? "bg-rose-100 text-rose-700"
+                              : user.role === "TEACHER"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-indigo-100 text-indigo-700"
+                          }`}
+                        >
+                          {user.role === "ADMIN" ? "AD" : user.role === "TEACHER" ? "TC" : "LN"}
+                        </div>
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5">
+                            <span>{user.displayName}</span>
+                            <span
+                              className={`text-[9px] px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wider ${
+                                isSelected
+                                  ? "bg-white/20 text-white"
+                                  : user.role === "ADMIN"
+                                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                  : user.role === "TEACHER"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                              }`}
+                            >
+                              {user.role}
+                            </span>
+                          </div>
+                          <span
+                            className={`text-[10px] block truncate max-w-[160px] ${
+                              isSelected ? "text-slate-300" : "text-slate-400"
+                            }`}
+                          >
+                            {user.email}
+                          </span>
+                        </div>
+                      </div>
+
+                      {isSelected && <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+
+                <div className="pt-1.5 border-t border-slate-100 px-1 text-[10px] text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                    <span>Deterministic Local Session</span>
+                  </span>
+                  <span className="font-mono text-[9px] text-slate-400">
+                    {currentSession.sessionId.substring(0, 10)}...
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Socratic AI Launcher */}
@@ -337,6 +508,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           className={`whitespace-nowrap font-bold ${activeView === "teacher_studio" ? "text-indigo-600" : "text-slate-600"}`}
         >
           Teacher Studio
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate("stakeholders")}
+          className={`whitespace-nowrap font-bold ${activeView === "stakeholders" ? "text-rose-600" : "text-slate-600"}`}
+        >
+          Portals
         </button>
         <button
           type="button"

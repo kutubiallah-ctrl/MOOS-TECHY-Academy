@@ -15,25 +15,35 @@ import { TeacherStudio } from "./components/TeacherStudio";
 import { TextbookStudio } from "./components/TextbookStudio";
 import { BookpreneurStudio } from "./components/BookpreneurStudio";
 import { AgentIntelligenceHub } from "./components/AgentIntelligenceHub";
+import { InstitutionalArchitectureMap } from "./components/InstitutionalArchitectureMap";
+import { LessonViewer } from "./components/LessonViewer";
+import { ALL_CURRICULUM_UNITS } from "./data/extendedCurriculumUnits";
 import { Skill, Unit, PracticeQuestion, EducationalLevel, DiagnosticResult } from "./types/curriculum";
 
 function MainAppContent() {
   const { profile, activeUnit, activeSkill, setActiveSkillAndUnit, recordDiagnosticResult } = useLearner();
 
   const [activeView, setActiveView] = useState<ActiveView>("dashboard");
-  const [currentLevel, setCurrentLevel] = useState<EducationalLevel>(profile.targetLevel || "senior_secondary");
+  const [currentLevel, setCurrentLevel] = useState<EducationalLevel | "all">(profile.targetLevel || "senior_secondary");
   const [stakeholderTab, setStakeholderTab] = useState<"teacher" | "parent">("teacher");
   const [selectedPlayActivityId, setSelectedPlayActivityId] = useState<string | undefined>(undefined);
   const [selectedQRResourceCode, setSelectedQRResourceCode] = useState<string | undefined>(undefined);
+  const [activeAssignmentId, setActiveAssignmentId] = useState<string | undefined>(undefined);
 
   // Socratic AI Tutor Drawer state
   const [isAITutorOpen, setIsAITutorOpen] = useState(false);
   const [tutorContextQuestion, setTutorContextQuestion] = useState<PracticeQuestion | null>(null);
   const [tutorLearnerAttempt, setTutorLearnerAttempt] = useState<string>("");
 
-  const handleSelectSkillToPractice = (skill: Skill, unit: Unit) => {
+  const handleSelectSkillToPractice = (skill: Skill, unit: Unit, assignmentId?: string) => {
     setActiveSkillAndUnit(skill, unit);
+    setActiveAssignmentId(assignmentId);
     setActiveView("practice");
+  };
+
+  const handleSelectSkillToStudy = (skill: Skill, unit: Unit) => {
+    setActiveSkillAndUnit(skill, unit);
+    setActiveView("lesson");
   };
 
   const handleCompleteDiagnostic = (result: DiagnosticResult) => {
@@ -45,6 +55,22 @@ function MainAppContent() {
     setTutorContextQuestion(question);
     setTutorLearnerAttempt(attempt);
     setIsAITutorOpen(true);
+  };
+
+  const handleLaunchSkillById = (skillId: string) => {
+    for (const unit of ALL_CURRICULUM_UNITS) {
+      const found = unit.skills.find((s) => s.id === skillId || s.code === skillId);
+      if (found) {
+        handleSelectSkillToPractice(found, unit);
+        return;
+      }
+    }
+    // Fallback if direct match not found: use activeUnit / activeSkill or first unit skill
+    if (activeSkill && activeUnit) {
+      handleSelectSkillToPractice(activeSkill, activeUnit);
+    } else if (ALL_CURRICULUM_UNITS[0]?.skills[0]) {
+      handleSelectSkillToPractice(ALL_CURRICULUM_UNITS[0].skills[0], ALL_CURRICULUM_UNITS[0]);
+    }
   };
 
   const handleLaunchPlayActivity = (activityId: string) => {
@@ -61,7 +87,7 @@ function MainAppContent() {
       correctAnswer: "",
       explanation: contextPrompt,
       hintLadder: ["Review the foundational concepts and apply Socratic inquiry."],
-      skillId: "general-inquiry",
+      skillId: activeSkill?.id || "general-inquiry",
       difficulty: "medium"
     });
     setTutorLearnerAttempt(contextPrompt);
@@ -87,6 +113,7 @@ function MainAppContent() {
         {activeView === "dashboard" && (
           <LearnerDashboard
             onLaunchSkill={handleSelectSkillToPractice}
+            onStudyLesson={handleSelectSkillToStudy}
             onRetakeDiagnostic={() => setActiveView("diagnostic")}
             onOpenExamHall={() => setActiveView("exam_hall")}
             onOpenAITutor={() => {
@@ -95,21 +122,45 @@ function MainAppContent() {
             }}
             onOpenPlayArena={() => setActiveView("play")}
             onOpenQRHub={() => setActiveView("qr_companion")}
+            onOpenParentPortal={() => {
+              setStakeholderTab("parent");
+              setActiveView("stakeholders");
+            }}
           />
         )}
 
         {activeView === "curriculum" && (
           <CurriculumNavigator
             onSelectSkill={handleSelectSkillToPractice}
+            onStudyLesson={handleSelectSkillToStudy}
             masteryRecords={profile?.masteryRecords || {}}
             currentLevel={currentLevel}
             onLevelChange={setCurrentLevel}
           />
         )}
 
+        {activeView === "lesson" && (
+          <LessonViewer
+            skill={activeSkill}
+            unit={activeUnit}
+            onStartPractice={(skill, unit) => handleSelectSkillToPractice(skill, unit)}
+            onOpenAITutor={(skill, unit) => {
+              handleOpenAITutorWithCustomContext(
+                `Lesson Guidance: ${skill.title}`,
+                `I am studying the lesson on "${skill.title}" in "${unit.title}". Could you guide me through the foundational concepts and explain any tricky parts?`
+              );
+            }}
+            onBack={() => setActiveView("curriculum")}
+            onNavigateNextSkill={(nextSkill, unit) => {
+              setActiveSkillAndUnit(nextSkill, unit);
+            }}
+          />
+        )}
+
         {activeView === "practice" && (
           <PracticeArena
             skill={activeSkill}
+            assignmentId={activeAssignmentId}
             onSkillComplete={() => {}}
             onOpenAITutorWithContext={handleOpenAITutorWithContext}
             onBackToNavigator={() => setActiveView("curriculum")}
@@ -169,11 +220,21 @@ function MainAppContent() {
         )}
 
         {activeView === "bookpreneur_studio" && (
-          <BookpreneurStudio />
+          <BookpreneurStudio
+            onNavigateToPractice={handleLaunchSkillById}
+            onNavigateToQRHub={(code) => {
+              setSelectedQRResourceCode(code);
+              setActiveView("qr_companion");
+            }}
+          />
         )}
 
         {activeView === "agent_hub" && (
-          <AgentIntelligenceHub />
+          <AgentIntelligenceHub onNavigate={setActiveView} />
+        )}
+
+        {activeView === "architecture" && (
+          <InstitutionalArchitectureMap onNavigate={setActiveView} />
         )}
 
         {activeView === "stakeholders" && (

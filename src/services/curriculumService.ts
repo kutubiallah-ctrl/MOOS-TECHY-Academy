@@ -35,6 +35,7 @@ export interface ICurriculumService {
   getSkillById(skillId: string): Skill | undefined;
   getUnitBySkillId(skillId: string): Unit | undefined;
   getPrerequisitesForSkill(skillId: string): Skill[];
+  getPrerequisiteChain(skillId: string): Skill[];
   searchCurriculum(query: string): Array<{ unit: Unit; skill: Skill }>;
   getCompetencyMappings(skillId: string): CurriculumStandardMapping[];
   getMappingsForSystem(system: EducationSystemCode | string): CurriculumStandardMapping[];
@@ -83,6 +84,23 @@ class CurriculumService implements ICurriculumService {
       const skill = unit.skills.find((s) => s.id === skillId);
       if (skill) return skill;
     }
+
+    // Canonical skill alias mapping for historical and cross-syllabus identifiers
+    const CANONICAL_SKILL_ALIASES: Record<string, string> = {
+      "skill-quad-02": "skill-quad-factoring",
+      "skill-lin-01": "skill-linear-equations",
+      "skill-geom-01": "skill-circle-theorems",
+      "skill-geom-02": "skill-circle-theorems"
+    };
+
+    const targetAliasId = CANONICAL_SKILL_ALIASES[skillId];
+    if (targetAliasId) {
+      for (const unit of ALL_CURRICULUM_UNITS) {
+        const skill = unit.skills.find((s) => s.id === targetAliasId);
+        if (skill) return skill;
+      }
+    }
+
     return undefined;
   }
 
@@ -104,6 +122,34 @@ class CurriculumService implements ICurriculumService {
       if (found) prereqs.push(found);
     }
     return prereqs;
+  }
+
+  public getPrerequisiteChain(skillId: string): Skill[] {
+    const visited = new Set<string>();
+    const chain: Skill[] = [];
+
+    const traverse = (currentId: string) => {
+      if (visited.has(currentId)) return;
+      visited.add(currentId);
+
+      const skill = this.getSkillById(currentId);
+      if (!skill || !skill.prerequisiteSkillIds) return;
+
+      for (const pId of skill.prerequisiteSkillIds) {
+        if (!visited.has(pId)) {
+          const prereqSkill = this.getSkillById(pId);
+          if (prereqSkill) {
+            traverse(pId);
+            if (!chain.some((s) => s.id === prereqSkill.id)) {
+              chain.push(prereqSkill);
+            }
+          }
+        }
+      }
+    };
+
+    traverse(skillId);
+    return chain;
   }
 
   public searchCurriculum(query: string): Array<{ unit: Unit; skill: Skill }> {

@@ -267,7 +267,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     subtitle: "Complete worked solutions, Socratic error analysis, and interactive identities",
     curriculumStandard: "WAEC_WASSCE",
     targetUnitId: "unit-sss-quadratics",
-    targetSkillId: "skill-quadratic-factoring",
+    targetSkillId: "skill-quad-factoring",
     associatedPlayActivityId: "act-concept-match-algebra",
     learningObjectives: [
       "Find two integers m and n whose sum is b and product is ac",
@@ -333,8 +333,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "C.E.M.M Digital Companion: Right-Angled Triangles & Exact Ratios",
     subtitle: "Interactive diagrams, trigonometric definitions, and bearing applications",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-sss-trig-geom",
-    targetSkillId: "skill-pythagoras-trig",
+    targetUnitId: "unit-sss-trig-bearings",
+    targetSkillId: "skill-sine-cosine-rule",
     associatedPlayActivityId: "act-trig-ratios-match",
     learningObjectives: [
       "Identify Hypotenuse, Opposite, and Adjacent sides relative to a reference angle θ",
@@ -389,8 +389,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "C.E.M.M Digital Companion: Differential Power Rule",
     subtitle: "From limits of secant lines to instantaneous velocity and tangents",
     curriculumStandard: "JAMB_UTME",
-    targetUnitId: "unit-adv-calculus",
-    targetSkillId: "skill-calculus-derivatives",
+    targetUnitId: "unit-sss-quadratics",
+    targetSkillId: "skill-quad-factoring",
     associatedPlayActivityId: "act-calculus-derivatives-matcher",
     learningObjectives: [
       "Understand the derivative as the limit of average rate of change Δy/Δx as Δx → 0",
@@ -444,7 +444,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "C.E.M.M Digital Companion: Multi-Step Linear Equations",
     subtitle: "Interactive scale balance, transposition rules, and word problem formulation",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-jss-algebra",
+    targetUnitId: "unit-jss-algebra-linear",
     targetSkillId: "skill-linear-equations",
     associatedPlayActivityId: "act-eq-balance-linear",
     learningObjectives: [
@@ -504,8 +504,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "C.E.M.M Digital Companion: Logarithmic Equations (Q32)",
     subtitle: "Step-by-step resolution of exponential to logarithmic conversions and base equivalence",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-sss-quadratics",
-    targetSkillId: "skill-quadratic-factoring",
+    targetUnitId: "unit-indices-logs",
+    targetSkillId: "skill-logarithms",
     associatedPlayActivityId: "act-concept-match-algebra",
     learningObjectives: [
       "Convert exponential forms a^y = x into logarithmic forms log_a(x) = y",
@@ -575,8 +575,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "C.E.M.P Digital Companion: Vector Resolution & Direction",
     subtitle: "Decomposition into orthogonal components (Fx = F cos θ, Fy = F sin θ)",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-sss-trig-geom",
-    targetSkillId: "skill-pythagoras-trig",
+    targetUnitId: "unit-phy-mechanics-motion",
+    targetSkillId: "skill-phy-kinematics",
     associatedPlayActivityId: "act-phy-vectors-classification",
     learningObjectives: [
       "Differentiate between scalar and vector quantities",
@@ -611,7 +611,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
         }
       ]
     },
-    additionalPracticeQuestionIds: ["q-sss-trig-1"],
+    additionalPracticeQuestionIds: ["q-phy-1"],
     tutorStarterPrompt: "I am studying C.E.M.P Chapter 2 on vector resolution. Can you guide me on resolving multiple concurrent coplanar forces step-by-step?"
   },
 
@@ -633,8 +633,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "C.E.M.C Digital Companion: Elemental Periodicity & Valence",
     subtitle: "Periodic table trends, ionization potential, and electron affinity",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-jss-algebra",
-    targetSkillId: "skill-linear-equations",
+    targetUnitId: "unit-chm-atomic-periodicity",
+    targetSkillId: "skill-chm-atomic-structure",
     associatedPlayActivityId: "act-chm-periodic-classification",
     learningObjectives: [
       "Identify the s, p, d, and f orbital blocks in the modern Periodic Table",
@@ -661,7 +661,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
         }
       ]
     },
-    additionalPracticeQuestionIds: ["q-jss-lin-1"],
+    additionalPracticeQuestionIds: ["q-chm-1"],
     tutorStarterPrompt: "I am reading C.E.M.C Chapter 3 on periodic trends. Can you explain why electronegativity increases across a period but decreases down a group?"
   },
 
@@ -683,8 +683,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "Essential English Digital Companion: Morphological Roots",
     subtitle: "Greek and Latin affixes for academic vocabulary expansion",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-jss-algebra",
-    targetSkillId: "skill-linear-equations",
+    targetUnitId: "unit-eng-lexis-vocabulary",
+    targetSkillId: "skill-eng-roots-affixes",
     associatedPlayActivityId: "act-eng-vocab-roots-matcher",
     learningObjectives: [
       "Identify common Greek and Latin root morphemes",
@@ -709,7 +709,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
         }
       ]
     },
-    additionalPracticeQuestionIds: ["q-jss-lin-1"],
+    additionalPracticeQuestionIds: ["q-eng-root-1"],
     tutorStarterPrompt: "I'm working on Essential Senior English Chapter 1. Can you help me practice identifying Greek and Latin roots in context?"
   },
 
@@ -731,8 +731,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "Essential Biology Companion: Mitotic Cell Division",
     subtitle: "Chromosomal condensation, spindle alignment, and daughter cell formation",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-sss-quadratics",
-    targetSkillId: "skill-quadratic-factoring",
+    targetUnitId: "unit-bio-cell-genetics",
+    targetSkillId: "skill-bio-cell-structure",
     associatedPlayActivityId: "act-bio-mitosis-sequencing",
     learningObjectives: [
       "Identify the chronological phases of mitosis: Prophase, Metaphase, Anaphase, Telophase",
@@ -758,7 +758,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
         }
       ]
     },
-    additionalPracticeQuestionIds: ["q-sss-quad-1"],
+    additionalPracticeQuestionIds: ["q-bio-1"],
     tutorStarterPrompt: "I'm studying Essential Biology Chapter 4 on cell division. Can you test my understanding of mitosis vs meiosis?"
   },
 
@@ -780,8 +780,8 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
     title: "Applied CS Companion: Boolean Logic & Digital Circuits",
     subtitle: "Truth table synthesis, De Morgan's laws, and logic circuit design",
     curriculumStandard: "WAEC_WASSCE",
-    targetUnitId: "unit-jss-algebra",
-    targetSkillId: "skill-linear-equations",
+    targetUnitId: "unit-cs-architecture-number-systems",
+    targetSkillId: "skill-cs-logic-gates",
     associatedPlayActivityId: "act-cs-boolean-logic-matcher",
     learningObjectives: [
       "Construct truth tables for composite boolean expressions",
@@ -810,7 +810,7 @@ export const REGISTERED_QR_RESOURCES: QRResourceRecord[] = [
         }
       ]
     },
-    additionalPracticeQuestionIds: ["q-jss-lin-1"],
+    additionalPracticeQuestionIds: ["q-cs-num-1"],
     tutorStarterPrompt: "I am working through Applied Computer Science Chapter 2 on logic gates. Can you give me a boolean expression to simplify using De Morgan's laws?"
   }
 ];

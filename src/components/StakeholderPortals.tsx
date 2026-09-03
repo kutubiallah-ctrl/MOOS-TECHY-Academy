@@ -33,6 +33,7 @@ export const StakeholderPortals: React.FC<StakeholderPortalsProps> = ({
   const [parentEncouragement, setParentEncouragement] = useState("");
   const [sentEncouragement, setSentEncouragement] = useState(false);
   const [selectedClass, setSelectedClass] = useState("SSS 2 Science & Math (Set A)");
+  const [assignedFeedback, setAssignedFeedback] = useState(false);
 
   const handleResolveIntervention = (studentId: string) => {
     setInterventions((prev) =>
@@ -190,11 +191,20 @@ export const StakeholderPortals: React.FC<StakeholderPortalsProps> = ({
               </select>
               <button
                 type="button"
-                onClick={() => alert("Assigned module to SSS 2 Math Class with automated diagnostic tracking!")}
+                onClick={() => {
+                  setAssignedFeedback(true);
+                  setTimeout(() => setAssignedFeedback(false), 3500);
+                }}
                 className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition"
               >
                 Dispatch to 34 Students
               </button>
+              {assignedFeedback && (
+                <span className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl font-semibold">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  Assigned module to SSS 2 Math Class with automated diagnostic tracking!
+                </span>
+              )}
             </div>
           </div>
         </div>

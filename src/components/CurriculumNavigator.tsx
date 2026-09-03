@@ -21,9 +21,12 @@ import {
   Globe,
   CheckCheck,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  FlaskConical,
+  Dna,
+  Zap
 } from "lucide-react";
-import { LEARNING_DOMAINS, MATHEMATICS_UNITS, SUBJECTS } from "../data/curriculumData";
+import { LEARNING_DOMAINS, SUBJECTS } from "../data/curriculumData";
 import {
   EducationalLevel,
   CurriculumStandard,
@@ -36,28 +39,33 @@ import { curriculumService } from "../services/curriculumService";
 
 interface CurriculumNavigatorProps {
   onSelectSkill: (skill: Skill, unit: Unit) => void;
+  onStudyLesson?: (skill: Skill, unit: Unit) => void;
   masteryRecords: Record<string, MasteryRecord>;
-  currentLevel: EducationalLevel;
-  onLevelChange: (level: EducationalLevel) => void;
+  currentLevel: EducationalLevel | "all";
+  onLevelChange: (level: EducationalLevel | "all") => void;
 }
 
 export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
   onSelectSkill,
+  onStudyLesson,
   masteryRecords,
   currentLevel,
   onLevelChange
 }) => {
   const [selectedDomainId, setSelectedDomainId] = useState<string>("mathematics");
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStandard, setSelectedStandard] = useState<string>("ALL");
   const [inspectedMapping, setInspectedMapping] = useState<CurriculumStandardMapping | null>(null);
 
-  const levelOptions: { id: EducationalLevel; label: string }[] = [
-    { id: "primary_foundations", label: "Foundations Primary" },
+  const levelOptions: { id: EducationalLevel | "all"; label: string }[] = [
+    { id: "all", label: "All Levels" },
+    { id: "primary_foundations", label: "Primary Foundations (Pri 1-3)" },
     { id: "upper_primary", label: "Upper Primary (Pri 4-6)" },
     { id: "junior_secondary", label: "Junior Secondary (JSS 1-3)" },
     { id: "senior_secondary", label: "Senior Secondary (SSS 1-3)" },
-    { id: "university_prep", label: "University & Advanced Prep" }
+    { id: "university_prep", label: "University & Advanced Prep" },
+    { id: "exam_prep", label: "Exam Prep (WAEC / JAMB CBT)" }
   ];
 
   const supportedSystems = curriculumService.getSupportedEducationSystems();
@@ -82,12 +90,29 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
     }
   };
 
-  const filteredUnits = MATHEMATICS_UNITS.filter((unit) => {
-    const matchesLevel = unit.level === currentLevel || currentLevel === "senior_secondary" || unit.level === "senior_secondary";
+  const domainSubjects = curriculumService.getSubjects(selectedDomainId);
+  const domainSubjectIds = new Set(domainSubjects.map((s) => s.id));
+
+  const allUnits = curriculumService.getAllUnits();
+  const availableUnits = allUnits.filter((unit) => {
+    if (selectedSubjectId !== "all") {
+      return unit.subjectId === selectedSubjectId;
+    }
+    return domainSubjectIds.has(unit.subjectId);
+  });
+
+  const filteredUnits = availableUnits.filter((unit) => {
+    const matchesLevel = currentLevel === "all" ? true : unit.level === currentLevel;
     const matchesSearch =
+      !searchQuery ||
       unit.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      unit.skills.some((s) => s.title.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+      (unit.description && unit.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      unit.skills.some(
+        (s) =>
+          s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.summary.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
     // Filter by standard if selected
     if (selectedStandard !== "ALL") {
       const unitHasMappedSkill = unit.skills.some((s) => {
@@ -97,8 +122,15 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
       if (!unitHasMappedSkill) return false;
     }
 
-    return matchesSearch;
+    return matchesLevel && matchesSearch;
   });
+
+  const handleDomainChange = (domainId: string) => {
+    setSelectedDomainId(domainId);
+    setSelectedSubjectId("all");
+  };
+
+  const activeDomain = LEARNING_DOMAINS.find((d) => d.id === selectedDomainId);
 
   return (
     <div id="curriculum-navigator-view" className="space-y-6 max-w-6xl mx-auto">
@@ -122,7 +154,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 key={domain.id}
                 id={`domain-tab-${domain.id}`}
                 type="button"
-                onClick={() => setSelectedDomainId(domain.id)}
+                onClick={() => handleDomainChange(domain.id)}
                 className={`flex flex-col items-start p-3 rounded-xl border text-left transition ${
                   isSelected
                     ? "border-indigo-600 bg-indigo-50/70 shadow-xs ring-1 ring-indigo-500/20"
@@ -154,6 +186,40 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
             );
           })}
         </div>
+
+        {/* Subject Filter Pills (When domain has multiple subjects) */}
+        {domainSubjects.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto pb-1">
+            <span className="text-xs font-semibold text-slate-500 shrink-0 pr-1">Subject Focus:</span>
+            <button
+              type="button"
+              id="subject-pill-all"
+              onClick={() => setSelectedSubjectId("all")}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                selectedSubjectId === "all"
+                  ? "bg-slate-900 text-white font-semibold shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              All Subjects ({domainSubjects.length})
+            </button>
+            {domainSubjects.map((subj) => (
+              <button
+                key={subj.id}
+                id={`subject-pill-${subj.id}`}
+                type="button"
+                onClick={() => setSelectedSubjectId(subj.id)}
+                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition border ${
+                  selectedSubjectId === subj.id
+                    ? "bg-indigo-50 border-indigo-400 text-indigo-900 font-semibold shadow-xs"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                }`}
+              >
+                {subj.title}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Level & Standard Filter Bar */}
@@ -185,7 +251,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search concepts, quadratics, calculus..."
+              placeholder="Search concepts, mechanics, python, concord..."
               className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-9 pr-3.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none"
             />
           </div>
@@ -218,27 +284,66 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
         </div>
       </div>
 
-      {/* Non-Flagship Domain Notice */}
-      {selectedDomainId !== "mathematics" && (
-        <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-6 text-center space-y-2">
-          <Sparkles className="h-6 w-6 text-teal-600 mx-auto" />
-          <h3 className="text-sm font-bold text-teal-950">
-            {LEARNING_DOMAINS.find((d) => d.id === selectedDomainId)?.name} Architecture Active
-          </h3>
-          <p className="text-xs text-teal-800 max-w-xl mx-auto leading-relaxed">
-            The underlying taxonomy, diagnostic engine, mastery records, and Socratic AI tutor natively support this domain. Mathematics is currently the primary live production roll-out.
-          </p>
-          <button
-            type="button"
-            onClick={() => setSelectedDomainId("mathematics")}
-            className="mt-2 text-xs font-semibold text-teal-700 underline hover:text-teal-900"
-          >
-            Switch to Flagship Mathematics Rollout
-          </button>
+      {/* Domain Header Description */}
+      {activeDomain && (
+        <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/70 via-white to-slate-50 p-4 flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-800">
+                {activeDomain.name}
+              </span>
+              {activeDomain.isFlagship && (
+                <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">
+                  Flagship Active
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-600 font-medium">
+              {activeDomain.tagline} — {activeDomain.description}
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-slate-500 shrink-0">
+            {filteredUnits.length} Units Available
+          </span>
         </div>
       )}
 
-      {/* Units & Skills Grid (Flagship Math) */}
+      {/* Empty State when no units match */}
+      {filteredUnits.length === 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center space-y-3">
+          <Sparkles className="h-8 w-8 text-indigo-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-900">
+            No Units Found for Current Filters
+          </h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
+            Try switching to Senior Secondary level, clearing your search query, or selecting "All Curricula".
+          </p>
+          <div className="pt-2 flex justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedStandard("ALL");
+                setSelectedSubjectId("all");
+              }}
+              className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition"
+            >
+              Reset Filters
+            </button>
+            {selectedDomainId !== "mathematics" && (
+              <button
+                type="button"
+                onClick={() => handleDomainChange("mathematics")}
+                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition"
+              >
+                View Mathematics Flagship
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Units & Skills Grid */}
       <div className="space-y-6">
         {filteredUnits.map((unit) => (
           <div
@@ -367,19 +472,31 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                       })()}
                     </div>
 
-                    {/* Launch Practice Button */}
-                    <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                    {/* Launch Practice & Study Lesson Buttons */}
+                    <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2">
                       <span className="text-[11px] text-slate-400">
-                        {skill.questions.length} Core Questions
+                        {skill.questions.length} Questions
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => onSelectSkill(skill, unit)}
-                        className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition py-1 px-2.5 rounded-lg hover:bg-indigo-50"
-                      >
-                        <span>Enter Practice</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {onStudyLesson && (
+                          <button
+                            type="button"
+                            onClick={() => onStudyLesson(skill, unit)}
+                            className="flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-indigo-700 transition py-1 px-2.5 rounded-lg border border-slate-200 hover:bg-slate-50"
+                          >
+                            <BookOpen className="h-3.5 w-3.5 text-indigo-600" />
+                            <span>Study Lesson</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onSelectSkill(skill, unit)}
+                          className="flex items-center gap-1 text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition py-1 px-2.5 rounded-lg shadow-2xs"
+                        >
+                          <span>Enter Practice</span>
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

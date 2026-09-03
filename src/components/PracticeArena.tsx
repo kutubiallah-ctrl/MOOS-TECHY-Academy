@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import {
   Sparkles,
@@ -14,15 +14,24 @@ import {
   Brain,
   Lightbulb,
   Award,
-  Maximize2
+  Maximize2,
+  Shuffle,
+  ShieldCheck,
+  Cpu,
+  ClipboardList
 } from "lucide-react";
 import { PracticeQuestion, Skill, MasteryRecord } from "../types/curriculum";
 import { useLearner } from "../context/LearnerContext";
 import { MathScratchpad } from "./MathScratchpad";
 import { evaluateMathematicalAnswer } from "../utils/mathEvaluator";
+import { learningSupplyService } from "../services/learningSupplyService";
+import { VariationEngine } from "../services/variationEngine";
+import { curriculumService } from "../services/curriculumService";
+import { teacherStudioService } from "../services/teacherStudioService";
 
 interface PracticeArenaProps {
   skill: Skill;
+  assignmentId?: string;
   onSkillComplete?: (updatedPoints: number) => void;
   onOpenAITutorWithContext?: (question: PracticeQuestion, attempt: string) => void;
   onBackToNavigator?: () => void;
@@ -31,12 +40,13 @@ interface PracticeArenaProps {
 
 export const PracticeArena: React.FC<PracticeArenaProps> = ({
   skill,
+  assignmentId,
   onSkillComplete,
   onOpenAITutorWithContext,
   onBackToNavigator,
   currentMasteryRecord
 }) => {
-  const { recordQuestionAttempt, recordPracticeCompletion } = useLearner();
+  const { profile, recordQuestionAttempt, recordPracticeCompletion } = useLearner();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [typedAnswer, setTypedAnswer] = useState<string>("");
@@ -48,9 +58,70 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
   const [isGeneratingCustom, setIsGeneratingCustom] = useState(false);
   const [customGeneratedQuestions, setCustomGeneratedQuestions] = useState<PracticeQuestion[]>([]);
   const [activeMisconception, setActiveMisconception] = useState<string | null>(null);
+  const [supplyMessage, setSupplyMessage] = useState<string | null>(null);
+  const [detectedMisconceptions, setDetectedMisconceptions] = useState<string[]>([]);
 
-  const allQuestions = [...skill.questions, ...customGeneratedQuestions];
-  const activeQuestion = allQuestions[currentQuestionIndex] || skill.questions[0];
+  const fallbackSkill: Skill = {
+    id: skill?.id || "fallback-skill",
+    unitId: skill?.unitId || "unit-mth-ss1-03",
+    title: skill?.title || "Quadratic Equations Practice",
+    code: skill?.code || "MTH-SS-QUAD",
+    summary: skill?.summary || "Practice problem sets with Socratic guidance.",
+    objectives: skill?.objectives || ["Apply algebraic techniques accurately"],
+    difficulty: skill?.difficulty || "intermediate",
+    masteryPointsRequired: skill?.masteryPointsRequired || 100,
+    questions: (skill?.questions && skill.questions.length > 0) ? skill.questions : [
+      {
+        id: "fb-q-1",
+        type: "multiple_choice",
+        questionText: "Solve the quadratic equation: x² - 5x + 6 = 0",
+        mathExpression: "x^2 - 5x + 6 = 0",
+        options: ["x = 2 or x = 3", "x = -2 or x = -3", "x = 1 or x = 6", "x = -1 or x = -6"],
+        correctAnswer: "x = 2 or x = 3",
+        explanation: "Factor as (x - 2)(x - 3) = 0, giving roots x = 2 and x = 3.",
+        hintLadder: [
+          "Look for two numbers that multiply to +6 and add to -5.",
+          "The factors of +6 are (-2) and (-3).",
+          "Set each factor equal to zero: (x - 2) = 0 or (x - 3) = 0."
+        ],
+        skillId: skill?.id || "fallback-skill",
+        difficulty: "medium"
+      }
+    ]
+  };
+
+  const effectiveSkill = skill && skill.questions ? skill : fallbackSkill;
+
+  // Find linked assignment if any
+  const activeAssignment = assignmentId
+    ? teacherStudioService.getAssignmentById(assignmentId)
+    : teacherStudioService.getAssignments().find(
+        (a) => a.skillId === effectiveSkill.id && a.status === "active" && (!a.targetLearnerIds.length || a.targetLearnerIds.includes(profile.id))
+      );
+
+  useEffect(() => {
+    if (activeAssignment) {
+      teacherStudioService.updateLearnerProgress(activeAssignment.id, profile.id, {
+        status: "started",
+        startedAt: new Date().toISOString()
+      });
+    }
+  }, [activeAssignment?.id, profile.id]);
+
+  const parentUnit = curriculumService.getUnitBySkillId(effectiveSkill.id) || {
+    id: effectiveSkill.unitId,
+    subjectId: "math_core",
+    level: "senior_secondary" as const,
+    title: "Curriculum Unit",
+    code: "UNIT",
+    description: "",
+    order: 1,
+    category: "core" as const,
+    skills: [effectiveSkill]
+  };
+
+  const allQuestions = [...effectiveSkill.questions, ...customGeneratedQuestions];
+  const activeQuestion = allQuestions[currentQuestionIndex] || effectiveSkill.questions[0];
 
   const currentAttemptValue = selectedOption || typedAnswer;
 
@@ -79,18 +150,28 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
       if (misconception) {
         triggeredMisconception = misconception.note;
         setActiveMisconception(misconception.note);
+        setDetectedMisconceptions((prev) => Array.from(new Set([...prev, misconception.note])));
       }
     }
+
+    // Determine provenance metadata
+    const isVar = activeQuestion.id.startsWith("var-");
+    const isAi = activeQuestion.id.startsWith("gen-");
+    const provenance = isVar ? "PLATFORM_CONTENT" : isAi ? "AI_GENERATED_DRAFT" : "OFFICIAL_SYLLABUS";
+    const generatorAgent = isVar ? "variation_engine" : isAi ? "practice_agent" : undefined;
 
     // Record persistent attempt
     recordQuestionAttempt({
       questionId: activeQuestion.id,
-      skillId: skill.id,
+      skillId: effectiveSkill.id,
       selectedOption: userAns,
       isCorrect,
       hintsUsedCount: revealedHintsCount,
       timeSpentSeconds: 45 + revealedHintsCount * 15,
-      misconceptionTriggered: triggeredMisconception
+      misconceptionTriggered: triggeredMisconception,
+      provenance,
+      isAiGenerated: isAi,
+      generatorAgent
     });
 
     if (isCorrect) {
@@ -110,6 +191,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
     setHasSubmitted(false);
     setRevealedHintsCount(0);
     setActiveMisconception(null);
+    setSupplyMessage(null);
 
     if (currentQuestionIndex + 1 < allQuestions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -117,9 +199,21 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
       // Completed all questions in this set
       const delta = Math.round(((score + 1) / Math.max(allQuestions.length, 1)) * 30) + 10;
       const newPoints = Math.min(100, (currentMasteryRecord?.points || 0) + delta);
+      const scorePct = Math.round((score / Math.max(1, allQuestions.length)) * 100);
       
       // Update persistent mastery
-      recordPracticeCompletion(skill.id, delta, score > 0);
+      recordPracticeCompletion(effectiveSkill.id, delta, score > 0);
+
+      // Synchronize with active classroom assignment if present
+      if (activeAssignment) {
+        teacherStudioService.completeAssignment(
+          activeAssignment.id,
+          profile.id,
+          scorePct,
+          revealedHintsCount,
+          detectedMisconceptions
+        );
+      }
 
       if (onSkillComplete) {
         onSkillComplete(newPoints);
@@ -133,26 +227,80 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
     }
   };
 
+  // Generate Parametric Variation (Infinite local replayability)
+  const handleGenerateVariation = () => {
+    setIsGeneratingCustom(true);
+    try {
+      const variantIndex = customGeneratedQuestions.length + effectiveSkill.questions.length + 1;
+      const variationResource = VariationEngine.generateVariation({
+        baseQuestion: activeQuestion,
+        skill: effectiveSkill,
+        unit: parentUnit,
+        variantIndex
+      });
+
+      const newQ: PracticeQuestion = {
+        id: variationResource.id,
+        type: variationResource.questionType === "numeric_input" ? "numeric_input" : "multiple_choice",
+        questionText: variationResource.questionText || "",
+        mathExpression: variationResource.mathExpression,
+        options: variationResource.options,
+        correctAnswer: variationResource.correctAnswer || "",
+        explanation: variationResource.explanation,
+        hintLadder: variationResource.hintLadder,
+        misconceptionAlerts: variationResource.misconceptionTargets,
+        skillId: effectiveSkill.id,
+        difficulty: variationResource.difficulty === "hard" ? "hard" : variationResource.difficulty === "easy" ? "easy" : "medium"
+      };
+
+      setCustomGeneratedQuestions((prev) => [...prev, newQ]);
+      setCurrentQuestionIndex(allQuestions.length);
+      setSelectedOption(null);
+      setTypedAnswer("");
+      setHasSubmitted(false);
+      setRevealedHintsCount(0);
+      setSupplyMessage(`Generated Parametric Practice Variant #${variantIndex} (Concept Preserved).`);
+    } catch (err) {
+      console.error("Variation generation error:", err);
+    } finally {
+      setIsGeneratingCustom(false);
+    }
+  };
+
+  // Generate Governed AI Question
   const handleGenerateAIQuestion = async () => {
     setIsGeneratingCustom(true);
     try {
-      const res = await fetch("/api/tutor/generate-practice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          skillName: skill.title,
-          difficulty: activeQuestion.difficulty,
-          targetLevel: "Senior Secondary"
-        })
+      const delivery = await learningSupplyService.getLearningResources({
+        learnerProfile: profile,
+        targetSkillId: effectiveSkill.id,
+        allowAiGeneration: true,
+        allowParametricVariations: true
       });
-      const newQ = await res.json();
-      if (newQ && newQ.questionText) {
+
+      if (delivery.resources.length > 0) {
+        const res = delivery.resources[0];
+        const newQ: PracticeQuestion = {
+          id: res.id,
+          type: res.questionType === "numeric_input" ? "numeric_input" : "multiple_choice",
+          questionText: res.questionText || "",
+          mathExpression: res.mathExpression,
+          options: res.options,
+          correctAnswer: res.correctAnswer || "",
+          explanation: res.explanation,
+          hintLadder: res.hintLadder,
+          misconceptionAlerts: res.misconceptionTargets,
+          skillId: effectiveSkill.id,
+          difficulty: res.difficulty === "hard" ? "hard" : res.difficulty === "easy" ? "easy" : "medium"
+        };
+
         setCustomGeneratedQuestions((prev) => [...prev, newQ]);
         setCurrentQuestionIndex(allQuestions.length);
         setSelectedOption(null);
         setTypedAnswer("");
         setHasSubmitted(false);
         setRevealedHintsCount(0);
+        setSupplyMessage(delivery.message || "Synthesized Governed AI Practice Problem.");
       }
     } catch (e) {
       console.error("Failed to generate custom AI problem", e);
@@ -167,6 +315,9 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
   ).isEquivalent;
   const isFinishedSet = hasSubmitted && currentQuestionIndex + 1 >= allQuestions.length;
 
+  const isGenerated = activeQuestion.id.startsWith("var-") || activeQuestion.id.startsWith("gen-");
+  const isVariation = activeQuestion.id.startsWith("var-");
+
   return (
     <div id="practice-arena-view" className="space-y-6 max-w-6xl mx-auto">
       {/* Skill Practice Header */}
@@ -176,10 +327,10 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             <BookOpen className="h-4 w-4" />
             <span>Mastery Practice Arena</span>
             <span className="text-slate-300">•</span>
-            <span className="text-slate-500 font-mono">{skill.code}</span>
+            <span className="text-slate-500 font-mono">{effectiveSkill.code}</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mt-1">{skill.title}</h2>
-          <p className="text-sm text-slate-500 max-w-2xl mt-0.5">{skill.summary}</p>
+          <h2 className="text-xl font-bold text-slate-900 mt-1">{effectiveSkill.title}</h2>
+          <p className="text-sm text-slate-500 max-w-2xl mt-0.5">{effectiveSkill.summary}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -217,6 +368,35 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
         </div>
       </div>
 
+      {/* Dynamic Supply Notification Bar */}
+      {supplyMessage && (
+        <div className="flex items-center justify-between rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2.5 text-xs text-indigo-900 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-600 shrink-0" />
+            <span>{supplyMessage}</span>
+          </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wider bg-indigo-200/70 text-indigo-800 px-2 py-0.5 rounded-full">
+            Dynamic Supply Active
+          </span>
+        </div>
+      )}
+
+      {/* Linked Classroom Assignment Banner */}
+      {activeAssignment && (
+        <div className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-xs text-emerald-950 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <ClipboardList className="h-4 w-4 text-emerald-600 shrink-0" />
+            <div>
+              <span className="font-semibold text-emerald-900">Assigned Task: {activeAssignment.title}</span>
+              <span className="text-emerald-700 ml-2 text-[11px]">(Due {activeAssignment.dueDate})</span>
+            </div>
+          </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-200/80 text-emerald-900 px-2.5 py-0.5 rounded-full">
+            Classroom Sync Active
+          </span>
+        </div>
+      )}
+
       {/* Main Grid: Problem Panel + Scratchpad / Socratic Support */}
       <div className={`grid gap-6 ${isScratchpadOpen ? "lg:grid-cols-12" : "grid-cols-1"}`}>
         {/* Left / Main Question Arena */}
@@ -226,11 +406,31 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             id="active-question-card"
             className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs relative overflow-hidden"
           >
-            {/* Header info */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                Question {currentQuestionIndex + 1} • {activeQuestion.difficulty.toUpperCase()}
-              </span>
+            {/* Header info with Provenance Badge */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4 gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                  Question {currentQuestionIndex + 1} • {activeQuestion.difficulty.toUpperCase()}
+                </span>
+
+                {/* Content Provenance Badge */}
+                {isVariation ? (
+                  <span className="flex items-center gap-1 rounded-full bg-cyan-50 border border-cyan-200 px-2.5 py-0.5 text-[11px] font-medium text-cyan-800">
+                    <Shuffle className="h-3 w-3 text-cyan-600" />
+                    <span>Parametric Variant</span>
+                  </span>
+                ) : isGenerated ? (
+                  <span className="flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-[11px] font-medium text-purple-800">
+                    <Cpu className="h-3 w-3 text-purple-600" />
+                    <span>Governed AI Draft</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800">
+                    <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                    <span>Official Syllabus Item</span>
+                  </span>
+                )}
+              </div>
 
               <button
                 type="button"
@@ -420,22 +620,48 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             </div>
           )}
 
-          {/* AI Generator Expansion Card */}
-          <div className="flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-            <div className="flex items-center gap-2 text-xs text-indigo-900">
-              <Sparkles className="h-4 w-4 text-indigo-600" />
-              <span>Want more practice? Generate dynamic Socratic math problems with AI.</span>
+          {/* Dynamic Learning Supply: Infinite Variations & AI Problem Scaffolding */}
+          <div className="grid sm:grid-cols-2 gap-3">
+            {/* Parametric Variation Trigger */}
+            <div className="flex items-center justify-between rounded-xl border border-cyan-200/80 bg-cyan-50/50 p-4">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-950">
+                  <Shuffle className="h-3.5 w-3.5 text-cyan-600" />
+                  <span>Parametric Variation</span>
+                </div>
+                <p className="text-[11px] text-cyan-800">Permute numbers & context (preserved skill).</p>
+              </div>
+              <button
+                id="generate-variation-btn"
+                type="button"
+                onClick={handleGenerateVariation}
+                disabled={isGeneratingCustom}
+                className="flex items-center gap-1 rounded-lg bg-white border border-cyan-300 px-3 py-1.5 text-xs font-semibold text-cyan-700 hover:bg-cyan-600 hover:text-white transition shadow-xs disabled:opacity-50"
+              >
+                <span>+1 Variant</span>
+              </button>
             </div>
-            <button
-              id="generate-ai-practice-btn"
-              type="button"
-              onClick={handleGenerateAIQuestion}
-              disabled={isGeneratingCustom}
-              className="flex items-center gap-1.5 rounded-lg bg-white border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-600 hover:text-white transition shadow-xs disabled:opacity-50"
-            >
-              <Brain className="h-3.5 w-3.5" />
-              <span>{isGeneratingCustom ? "Synthesizing..." : "Generate +1 Problem"}</span>
-            </button>
+
+            {/* AI Custom Problem Trigger */}
+            <div className="flex items-center justify-between rounded-xl border border-indigo-200/80 bg-indigo-50/50 p-4">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-950">
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                  <span>Governed AI Synthesis</span>
+                </div>
+                <p className="text-[11px] text-indigo-800">Scaffold a new difficulty level.</p>
+              </div>
+              <button
+                id="generate-ai-practice-btn"
+                type="button"
+                onClick={handleGenerateAIQuestion}
+                disabled={isGeneratingCustom}
+                className="flex items-center gap-1 rounded-lg bg-white border border-indigo-300 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-600 hover:text-white transition shadow-xs disabled:opacity-50"
+              >
+                <Brain className="h-3.5 w-3.5" />
+                <span>{isGeneratingCustom ? "Synthesizing..." : "+1 AI Problem"}</span>
+              </button>
+            </div>
           </div>
         </div>
 

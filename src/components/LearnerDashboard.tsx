@@ -22,32 +22,51 @@ import {
   Zap,
   GraduationCap,
   Gamepad2,
-  QrCode
+  QrCode,
+  ShieldCheck,
+  ClipboardList,
+  Heart
 } from "lucide-react";
 import { useLearner } from "../context/LearnerContext";
 import { Skill, Unit } from "../types/curriculum";
-import { MATHEMATICS_UNITS, SAMPLE_BADGES } from "../data/curriculumData";
+import { SAMPLE_BADGES } from "../data/curriculumData";
+import { curriculumService } from "../services/curriculumService";
+import { teacherStudioService } from "../services/teacherStudioService";
 import { LearnerProfileModal } from "./LearnerProfileModal";
 
 interface LearnerDashboardProps {
-  onLaunchSkill: (skill: Skill, unit: Unit) => void;
+  onLaunchSkill: (skill: Skill, unit: Unit, assignmentId?: string) => void;
+  onStudyLesson?: (skill: Skill, unit: Unit) => void;
   onRetakeDiagnostic: () => void;
   onOpenExamHall: () => void;
   onOpenAITutor: () => void;
   onOpenPlayArena?: () => void;
   onOpenQRHub?: () => void;
+  onOpenParentPortal?: () => void;
 }
 
 export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
   onLaunchSkill,
+  onStudyLesson,
   onRetakeDiagnostic,
   onOpenExamHall,
   onOpenAITutor,
   onOpenPlayArena,
-  onOpenQRHub
+  onOpenQRHub,
+  onOpenParentPortal
 }) => {
   const { profile, metrics, activeUnit } = useLearner();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const classroomAssignments = (teacherStudioService.getAssignments() || []).filter(
+    (a) =>
+      a &&
+      a.status === "active" &&
+      (!a.targetLearnerIds ||
+        !a.targetLearnerIds.length ||
+        a.targetLearnerIds.includes(profile?.id) ||
+        a.targetLearnerIds.includes("demo-learner-01"))
+  );
 
   const formatLevel = (level: string) => {
     switch (level) {
@@ -152,6 +171,19 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
               <span>Talk with Tutor Moos</span>
             </button>
 
+            {/* Parent Oversight Portal */}
+            {onOpenParentPortal && (
+              <button
+                id="dash-open-parent-portal-btn"
+                type="button"
+                onClick={onOpenParentPortal}
+                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-rose-300 hover:text-rose-200 transition border border-white/10"
+                title="Parent Learning Oversight & Transparency"
+              >
+                <Heart className="h-5 w-5" />
+              </button>
+            )}
+
             {/* Profile Settings */}
             <button
               id="dash-open-settings-btn"
@@ -254,6 +286,11 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
               <Sparkles className="h-4 w-4 text-amber-500" />
               <span>Recommended Immediate Activity</span>
             </div>
+            {metrics.sessionPhase && (
+              <span className="text-[11px] font-bold bg-indigo-600 text-white px-2.5 py-0.5 rounded-full">
+                Phase: {metrics.sessionPhase.phaseTitle}
+              </span>
+            )}
             {metrics.recommendationType === "remediation" && (
               <span className="text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full">
                 Remediation Target
@@ -284,16 +321,189 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {onStudyLesson && (
+            <button
+              id="study-recommended-lesson-btn"
+              type="button"
+              onClick={() => onStudyLesson(metrics.recommendedSkill, metrics.recommendedUnit)}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+            >
+              <BookOpen className="h-4 w-4 text-indigo-600" />
+              <span>Read Lesson</span>
+            </button>
+          )}
           <button
             id="launch-recommended-practice-btn"
             type="button"
             onClick={() => onLaunchSkill(metrics.recommendedSkill, metrics.recommendedUnit)}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-indigo-700 transition cursor-pointer"
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-indigo-700 transition cursor-pointer"
           >
             <Play className="h-4 w-4 fill-white" />
             <span>Start Practice Arena</span>
           </button>
+        </div>
+      </div>
+
+      {/* Institutional Classroom Assignments (If Any) */}
+      {classroomAssignments.length > 0 && (
+        <div className="rounded-3xl border border-indigo-200 bg-white p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-md">
+                <ClipboardList className="h-3.5 w-3.5 text-indigo-600" />
+                Assigned by Classroom Teacher
+              </span>
+              <span className="text-xs text-slate-500 font-medium">
+                {classroomAssignments.length} Active Tasks
+              </span>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3 pt-1">
+            {classroomAssignments.map((asg) => {
+              const allUnits = curriculumService.getAllUnits();
+              const unit = (asg.unitId ? curriculumService.getUnitById(asg.unitId) : undefined) || allUnits[0];
+              const skill = (asg.skillId ? unit?.skills.find((s) => s.id === asg.skillId) : undefined) || unit?.skills[0];
+              const isCompleted = Boolean(
+                asg.completedLearnerIds?.includes(profile?.id) ||
+                asg.completedLearnerIds?.includes("demo-learner-01")
+              );
+
+              return (
+                <div
+                  key={asg.id}
+                  className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                        {asg.assignmentType.replace("_", " ")}
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Due {asg.dueDate}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900">{asg.title}</h4>
+                    <p className="text-xs text-slate-600 line-clamp-2">{asg.description}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {isCompleted ? (
+                        <span className="text-emerald-600 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Completed
+                        </span>
+                      ) : (
+                        "Pending Submission"
+                      )}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => onLaunchSkill(skill, unit, asg.id)}
+                      className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition cursor-pointer"
+                    >
+                      <span>{isCompleted ? "Review Skill" : "Start Task"}</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Exam Readiness & Retrieval Independence Intelligence Strip */}
+      <div className="grid md:grid-cols-2 gap-5">
+        {/* Exam Readiness Card */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
+                WAEC / JAMB / IGCSE Readiness
+              </span>
+              <span className="text-xs font-extrabold text-indigo-700">
+                Score: {metrics.examReadiness.readinessScore}/100
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900">
+              {metrics.examReadiness.headline}
+            </h3>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs text-slate-600">
+                <span>Syllabus Coverage</span>
+                <span className="font-bold">{metrics.examReadiness.syllabusCoveragePercentage}%</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${metrics.examReadiness.syllabusCoveragePercentage}%` }}
+                />
+              </div>
+            </div>
+            {metrics.examReadiness.unresolvedBlockers.length > 0 && (
+              <p className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 font-medium">
+                {metrics.examReadiness.unresolvedBlockers[0]}
+              </p>
+            )}
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-500">
+              {metrics.examReadiness.proficientOrMasteredCount} of {metrics.examReadiness.totalSyllabusSkillsCount} Core Skills Mastered
+            </span>
+            <button
+              type="button"
+              onClick={onOpenExamHall}
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1 cursor-pointer"
+            >
+              <span>CBT Exam Hall</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Retrieval Independence & Scaffolding Ratio Card */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                <Clock className="h-3.5 w-3.5 text-emerald-600" />
+                Retrieval Independence Ratio
+              </span>
+              <span className="text-xs font-bold text-emerald-700">
+                {metrics.hintDependency.independentAccuracyRate}% Independent
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900">
+              {metrics.hintDependency.interpretation === "high_independence"
+                ? "High Cognitive Independence"
+                : metrics.hintDependency.interpretation === "balanced_scaffolding"
+                ? "Balanced Scaffolding & Hint Adoption"
+                : "Active Scaffolding Required"}
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {metrics.hintDependency.interpretation === "high_independence"
+                ? "Solves mathematical problems with zero step-hint assistance, exhibiting unprompted conceptual recall."
+                : "Frequently leverages graduated Socratic hints to verify algebra steps and sign logic."}
+            </p>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-500">
+              {metrics.hintDependency.attemptsWithHints} of {metrics.hintDependency.totalAttempts} Attempts Used Hints
+            </span>
+            <button
+              type="button"
+              onClick={() => onLaunchSkill(metrics.recommendedSkill, metrics.recommendedUnit)}
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-800 inline-flex items-center gap-1 cursor-pointer"
+            >
+              <span>Practice Arena</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -405,8 +615,8 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
           </div>
 
           {/* Skill Mastery Sliders */}
-          <div className="space-y-3.5 pt-1">
-            {MATHEMATICS_UNITS.flatMap((u) => u.skills).map((skill) => {
+          <div className="space-y-3.5 pt-1 max-h-[380px] overflow-y-auto pr-1">
+            {curriculumService.getAllUnits().flatMap((u) => u.skills).map((skill) => {
               const record = (profile?.masteryRecords || {})[skill.id];
               const points = record?.points || 0;
               const status = record?.status || "unstarted";

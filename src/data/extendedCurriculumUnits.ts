@@ -895,210 +895,177 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ]
       }
     ]
-  }
-];
-
-export const SCIENCE_PHYSICS_UNITS: Unit[] = [
+  },
   {
-    id: "unit-phy-mechanics-motion",
-    subjectId: "sci_physics",
-    level: "senior_secondary",
-    title: "Classical Mechanics, Kinematics & Newton's Laws",
-    code: "PHY-UNIT-01",
-    description: "Equations of uniformly accelerated motion, projectile trajectories, Newton's three laws of motion, momentum conservation, and work-energy equivalence.",
-    order: 1,
+    id: "unit-factors-multiples-primes",
+    subjectId: "math_core",
+    level: "upper_primary",
+    title: "Factors, Multiples & Prime Factorization",
+    code: "MTH-FMP-01",
+    description: "Fundamental number theory covering prime factorization, index notation, HCF, LCM, and real-world cyclical synchronization problems.",
+    order: 2,
     category: "core",
     skills: [
       {
-        id: "skill-phy-kinematics",
-        unitId: "unit-phy-mechanics-motion",
-        title: "Uniform Acceleration & Equations of Motion",
-        code: "SKL-PHY-201",
-        summary: "Solving motion problems using v = u + at, s = ut + 0.5at², and v² = u² + 2as.",
+        id: "skill-prime-factorization-hcf-lcm",
+        unitId: "unit-factors-multiples-primes",
+        title: "Prime Factorization, HCF & LCM Applications",
+        code: "SKL-MTH-FMP-101",
+        summary: "Decomposing composite numbers into prime factors using trees and repeated division to determine HCF and LCM.",
         objectives: [
-          "Select the appropriate kinematic equation based on given initial velocity, final velocity, acceleration, time, and displacement",
-          "Analyze vertical motion under gravity (g = 9.8 or 10 m/s²)",
-          "Distinguish scalar distance/speed from vector displacement/velocity"
+          "Express integers as unique products of prime factors using index notation",
+          "Determine Highest Common Factor (HCF) of multiple integers using prime power intersections",
+          "Apply Lowest Common Multiple (LCM) to solve real-world periodic synchronization problems"
         ],
-        difficulty: "intermediate",
+        difficulty: "foundational",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-frac-operations"],
         questions: [
           {
-            id: "q-phy-1",
+            id: "q-math-fmp-1",
             type: "multiple_choice",
-            questionText: "A car accelerates uniformly from rest at 2.5 m/s² for 8 seconds. What total distance does it cover?",
-            mathExpression: "s = ut + \\frac{1}{2}at^2",
-            options: ["80 \\text{ m}", "100 \\text{ m}", "20 \\text{ m}", "64 \\text{ m}"],
-            correctAnswer: "80 \\text{ m}",
-            explanation: "Initial velocity u = 0. s = (0)(8) + 0.5(2.5)(8²) = 0.5 × 2.5 × 64 = 1.25 × 64 = 80 meters.",
+            questionText: "Express 360 as a product of its prime factors in index form:",
+            mathExpression: "360 = 2^a \\times 3^b \\times 5^c",
+            options: ["2^3 \\times 3^2 \\times 5", "2^2 \\times 3^3 \\times 5", "2^4 \\times 3 \\times 5", "2^3 \\times 3 \\times 5^2"],
+            correctAnswer: "2^3 \\times 3^2 \\times 5",
+            explanation: "360 ÷ 2 = 180; 180 ÷ 2 = 90; 90 ÷ 2 = 45; 45 ÷ 3 = 15; 15 ÷ 3 = 5; 5 ÷ 5 = 1. Gathering factors: 2 × 2 × 2 × 3 × 3 × 5 = 2³ × 3² × 5.",
             hintLadder: [
-              "Identify: u = 0, a = 2.5 m/s², t = 8 s.",
-              "Use equation: s = ut + 0.5at².",
-              "Since u = 0, s = 0.5 × 2.5 × 64 = 80 m."
+              "Divide 360 repeatedly by the smallest prime number 2 until you get an odd number.",
+              "360 ÷ 2 = 180, 180 ÷ 2 = 90, 90 ÷ 2 = 45 (three 2s).",
+              "Now divide 45 by 3: 45 ÷ 3 = 15, 15 ÷ 3 = 5 (two 3s), leaving one 5. Thus 2³ × 3² × 5."
             ],
             misconceptionAlerts: [
-              { trigger: "20 \\text{ m}", note: "20 m/s is the final velocity (v = at = 2.5 × 8), not the distance." }
+              { trigger: "2^2 \\times 3^3 \\times 5", note: "2² × 3³ × 5 = 4 × 27 × 5 = 540, not 360. Verify the powers of 2 and 3." },
+              { trigger: "2^4 \\times 3 \\times 5", note: "2⁴ × 3 × 5 = 16 × 15 = 240. Check your repeated division by 2." }
             ],
-            skillId: "skill-phy-kinematics",
+            skillId: "skill-prime-factorization-hcf-lcm",
             difficulty: "easy"
           },
           {
-            id: "q-phy-2",
+            id: "q-math-fmp-2",
             type: "multiple_choice",
-            questionText: "A ball is thrown vertically upwards with a speed of 20 m/s. Assuming g = 10 m/s², what is the maximum height reached?",
-            mathExpression: "h_{\\max} = \\frac{u^2}{2g}",
-            options: ["20 \\text{ m}", "40 \\text{ m}", "10 \\text{ m}", "25 \\text{ m}"],
-            correctAnswer: "20 \\text{ m}",
-            explanation: "At maximum height, v = 0. Using v² = u² - 2gh: 0 = 20² - 2(10)h => 20h = 400 => h = 20 meters.",
+            questionText: "Find the Highest Common Factor (HCF) of 72 and 108:",
+            mathExpression: "\\text{HCF}(72, 108) = 2^{\\min(a_1, a_2)} \\times 3^{\\min(b_1, b_2)}",
+            options: ["36", "18", "24", "12"],
+            correctAnswer: "36",
+            explanation: "72 = 2³ × 3² and 108 = 2² × 3³. The HCF takes the lowest power of each common prime factor: 2² × 3² = 4 × 9 = 36.",
             hintLadder: [
-              "At the top of the trajectory, the vertical velocity v = 0.",
-              "Apply v² = u² - 2gh.",
-              "0 = 400 - 20h => 20h = 400 => h = 20 m."
+              "Write prime factorizations: 72 = 8 × 9 = 2³ × 3², 108 = 4 × 27 = 2² × 3³.",
+              "For HCF, choose the minimum exponent for each shared prime factor.",
+              "Minimum exponent of 2 is 2 (giving 2² = 4). Minimum exponent of 3 is 2 (giving 3² = 9). 4 × 9 = 36."
             ],
             misconceptionAlerts: [
-              { trigger: "40 \\text{ m}", note: "Did you divide by g instead of 2g?" }
+              { trigger: "18", note: "18 is a common factor, but not the highest common factor. 36 divides both 72 and 108." },
+              { trigger: "24", note: "24 divides 72 (72 ÷ 24 = 3), but does not divide 108 (108 ÷ 24 = 4.5)." }
             ],
-            skillId: "skill-phy-kinematics",
+            skillId: "skill-prime-factorization-hcf-lcm",
             difficulty: "medium"
           },
           {
-            id: "q-phy-3",
+            id: "q-math-fmp-3",
             type: "multiple_choice",
-            questionText: "A constant resultant force of 60 N acts on a body of mass 15 kg. What is the acceleration produced?",
-            mathExpression: "F = ma \\implies a = \\frac{F}{m}",
-            options: ["4 \\text{ m/s}^2", "900 \\text{ m/s}^2", "0.25 \\text{ m/s}^2", "45 \\text{ m/s}^2"],
-            correctAnswer: "4 \\text{ m/s}^2",
-            explanation: "According to Newton's Second Law: a = F / m = 60 N / 15 kg = 4 m/s².",
+            questionText: "Three school bells chime at intervals of 12, 18, and 30 seconds respectively. If they chime together at 12:00 noon, at what time will they next chime simultaneously?",
+            mathExpression: "\\text{LCM}(12, 18, 30) = 2^{\\max} \\times 3^{\\max} \\times 5^{\\max}",
+            options: ["12:03 PM", "12:06 PM", "12:02 PM", "12:05 PM"],
+            correctAnswer: "12:03 PM",
+            explanation: "12 = 2² × 3; 18 = 2 × 3²; 30 = 2 × 3 × 5. LCM takes highest powers: 2² × 3² × 5 = 4 × 9 × 5 = 180 seconds. 180 seconds = 3 minutes. 12:00 + 3 minutes = 12:03 PM.",
             hintLadder: [
-              "Newton's Second Law states F = ma.",
-              "Rearrange to solve for acceleration: a = F / m.",
-              "60 / 15 = 4 m/s²."
+              "Find the LCM of 12, 18, and 30 to determine the number of seconds until they chime together.",
+              "12 = 2² × 3, 18 = 2 × 3², 30 = 2 × 3 × 5. LCM = 2² × 3² × 5 = 180 seconds.",
+              "Convert 180 seconds into minutes: 180 ÷ 60 = 3 minutes. 12:00 noon + 3 minutes = 12:03 PM."
             ],
             misconceptionAlerts: [
-              { trigger: "900 \\text{ m/s}^2", note: "Did you multiply force by mass (60 × 15) instead of dividing?" }
+              { trigger: "12:06 PM", note: "Did you use 360 seconds? The LCM is 180 seconds, not 360 seconds." },
+              { trigger: "12:02 PM", note: "120 seconds is not divisible by 18 (120 ÷ 18 ≈ 6.67)." }
             ],
-            skillId: "skill-phy-kinematics",
-            difficulty: "easy"
+            skillId: "skill-prime-factorization-hcf-lcm",
+            difficulty: "hard"
           }
         ]
       }
     ]
   },
   {
-    id: "unit-phy-waves-optics",
-    subjectId: "sci_physics",
-    level: "senior_secondary",
-    title: "Wave Motion, Sound & Geometrical Optics",
-    code: "PHY-UNIT-02",
-    description: "Wave parameters, general wave equation v = fλ, reflection, refraction, Snell's Law, sound resonance, and electromagnetic spectrum.",
-    order: 2,
+    id: "unit-ratio-proportion-rates",
+    subjectId: "math_core",
+    level: "junior_secondary",
+    title: "Ratio, Proportion & Rate Problems",
+    code: "MTH-RPR-02",
+    description: "Proportional reasoning covering part-to-part and part-to-whole ratios, direct and inverse variation, unitary method, and scale factor maps.",
+    order: 3,
     category: "core",
     skills: [
       {
-        id: "skill-phy-wave-optics",
-        unitId: "unit-phy-waves-optics",
-        title: "Wave Properties & Snell's Law of Refraction",
-        code: "SKL-PHY-202",
-        summary: "Calculations involving wave speed, frequency, wavelength, and refractive index n = sin(i)/sin(r).",
+        id: "skill-ratio-rates-proportions",
+        unitId: "unit-ratio-proportion-rates",
+        title: "Direct & Inverse Proportion, Unitary Rates & Scale Factors",
+        code: "SKL-MTH-RPR-201",
+        summary: "Solving compound division in given ratios, inversely proportional worker-time problems, and linear map scale conversions.",
         objectives: [
-          "Apply the universal wave speed formula v = f λ",
-          "Calculate refractive index using Snell's Law n = sin(i) / sin(r) = c / v",
-          "Understand critical angle and total internal reflection criteria"
+          "Divide a physical or monetary quantity according to a multi-part ratio",
+          "Distinguish direct proportion (y = kx) from inverse proportion (xy = k) in word problems",
+          "Convert map distances to actual ground measurements using representative fraction scales (1 : n)"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-frac-operations"],
         questions: [
           {
-            id: "q-phy-wave-1",
+            id: "q-math-rpr-1",
             type: "multiple_choice",
-            questionText: "A radio transmitter broadcasts electromagnetic waves at a frequency of 100 MHz (10^8 Hz). If the speed of light is 3 × 10^8 m/s, find the wavelength.",
-            mathExpression: "\\lambda = \\frac{v}{f}",
-            options: ["3 \\text{ m}", "30 \\text{ m}", "0.33 \\text{ m}", "300 \\text{ m}"],
-            correctAnswer: "3 \\text{ m}",
-            explanation: "λ = v / f = (3 × 10^8 m/s) / (10^8 Hz) = 3 meters.",
+            questionText: "Divide ₦150,000 among Ade, Bola, and Chidi in the ratio 3 : 5 : 7. How much does Chidi receive?",
+            mathExpression: "\\text{Share} = \\frac{7}{3 + 5 + 7} \\times 150,000",
+            options: ["₦70,000", "₦50,000", "₦30,000", "₦75,000"],
+            correctAnswer: "₦70,000",
+            explanation: "Total parts = 3 + 5 + 7 = 15 parts. Value of one part = ₦150,000 ÷ 15 = ₦10,000. Chidi's share = 7 × ₦10,000 = ₦70,000.",
             hintLadder: [
-              "Use wave equation: v = f × λ.",
-              "Rearrange for wavelength: λ = v / f.",
-              "(3 × 10^8) / (1 × 10^8) = 3 meters."
+              "Add all the parts of the ratio together: 3 + 5 + 7 = 15 total parts.",
+              "Calculate the value of a single part: ₦150,000 ÷ 15 = ₦10,000.",
+              "Multiply ₦10,000 by Chidi's ratio component (7): 7 × ₦10,000 = ₦70,000."
             ],
             misconceptionAlerts: [
-              { trigger: "0.33 \\text{ m}", note: "Did you divide frequency by velocity instead of velocity by frequency?" }
+              { trigger: "₦50,000", note: "₦50,000 is Bola's share (5 parts), not Chidi's." },
+              { trigger: "₦30,000", note: "₦30,000 is Ade's share (3 parts), not Chidi's." }
             ],
-            skillId: "skill-phy-wave-optics",
-            difficulty: "easy"
-          }
-        ]
-      }
-    ]
-  }
-];
-
-export const SCIENCE_CHEMISTRY_UNITS: Unit[] = [
-  {
-    id: "unit-chm-atomic-periodicity",
-    subjectId: "sci_chemistry",
-    level: "senior_secondary",
-    title: "Atomic Structure, Quantum Orbitals & Periodic Trends",
-    code: "CHM-UNIT-01",
-    description: "Subatomic particles, isotopes, electronic configurations in s, p, d, f subshells, ionization energy trends, and electronegativity.",
-    order: 1,
-    category: "core",
-    skills: [
-      {
-        id: "skill-chm-atomic-structure",
-        unitId: "unit-chm-atomic-periodicity",
-        title: "Electronic Configurations & Periodic Trends",
-        code: "SKL-CHM-201",
-        summary: "Applying Aufbau principle, Pauli exclusion principle, and Hund's rule for electron filling.",
-        objectives: [
-          "Write spdf electronic configurations for elements Z = 1 to 30",
-          "Explain periodic variation of atomic radius, ionization energy, and electron affinity across periods and down groups",
-          "Distinguish ionic, covalent, and metallic bonding models"
-        ],
-        difficulty: "intermediate",
-        masteryPointsRequired: 100,
-        questions: [
-          {
-            id: "q-chm-1",
-            type: "multiple_choice",
-            questionText: "What is the ground-state electronic configuration of a chlorine atom (Atomic Number Z = 17)?",
-            mathExpression: "\\text{Cl } (Z = 17)",
-            options: [
-              "1s^2 2s^2 2p^6 3s^2 3p^5",
-              "1s^2 2s^2 2p^6 3s^2 3p^6",
-              "1s^2 2s^2 2p^6 3s^1 3p^6",
-              "1s^2 2s^2 2p^5 3s^2 3p^6"
-            ],
-            correctAnswer: "1s^2 2s^2 2p^6 3s^2 3p^5",
-            explanation: "Chlorine has 17 electrons. Filling order: 1s² (2), 2s² (2), 2p⁶ (6), 3s² (2), 3p⁵ (5) = 2 + 2 + 6 + 2 + 5 = 17 electrons.",
-            hintLadder: [
-              "Total electrons = 17.",
-              "Fill lowest energy orbitals first: 1s² (2), 2s² 2p⁶ (8). Total so far = 10.",
-              "Remaining 7 electrons go into 3rd shell: 3s² 3p⁵."
-            ],
-            misconceptionAlerts: [
-              { trigger: "1s^2 2s^2 2p^6 3s^2 3p^6", note: "18 electrons represents the chloride ion (Cl⁻), not neutral chlorine." }
-            ],
-            skillId: "skill-chm-atomic-structure",
+            skillId: "skill-ratio-rates-proportions",
             difficulty: "easy"
           },
           {
-            id: "q-chm-2",
+            id: "q-math-rpr-2",
             type: "multiple_choice",
-            questionText: "Which of the following elements has the highest first ionization energy?",
-            mathExpression: "\\text{Ionization Energy Periodic Trend}",
-            options: ["Helium (He)", "Fluorine (F)", "Sodium (Na)", "Cesium (Cs)"],
-            correctAnswer: "Helium (He)",
-            explanation: "Helium has the highest ionization energy of all elements because its 2 electrons are closest to the nucleus in a full 1s shell with maximum effective nuclear charge and minimal shielding.",
+            questionText: "Six construction workers take 10 days to build a perimeter wall working at a steady pace. If 15 workers work at the identical rate, how many days will they take to complete the wall?",
+            mathExpression: "W = n_1 \\times t_1 = n_2 \\times t_2 \\implies t_2 = \\frac{6 \\times 10}{15}",
+            options: ["4 days", "25 days", "5 days", "8 days"],
+            correctAnswer: "4 days",
+            explanation: "This is an inverse proportion: more workers require fewer days. Total work = 6 workers × 10 days = 60 worker-days. For 15 workers: t = 60 ÷ 15 = 4 days.",
             hintLadder: [
-              "Ionization energy increases across a period (left to right) and decreases down a group.",
-              "Helium is at the very top right of the periodic table.",
-              "Helium's full 1s² duet experiences extreme electrostatic nuclear attraction."
+              "Recognize that as worker count increases, days decrease (inverse proportion: n × t = constant).",
+              "Compute total work: 6 × 10 = 60 worker-days.",
+              "Divide total worker-days by 15 workers: 60 ÷ 15 = 4 days."
             ],
             misconceptionAlerts: [
-              { trigger: "Fluorine (F)", note: "Fluorine has the highest electronegativity, but Helium has the highest first ionization energy." }
+              { trigger: "25 days", note: "Did you treat this as direct proportion (15 × 10 / 6)? More workers must take LESS time, not more!" }
             ],
-            skillId: "skill-chm-atomic-structure",
+            skillId: "skill-ratio-rates-proportions",
+            difficulty: "medium"
+          },
+          {
+            id: "q-math-rpr-3",
+            type: "multiple_choice",
+            questionText: "On a survey map drawn to a scale of 1 : 50,000, two transmission towers are 4 cm apart. What is the actual straight-line distance between them on the ground?",
+            mathExpression: "\\text{Distance} = 4\\text{ cm} \\times 50,000 = 200,000\\text{ cm}",
+            options: ["2.0 km", "20 km", "0.2 km", "12.5 km"],
+            correctAnswer: "2.0 km",
+            explanation: "Ground distance = 4 cm × 50,000 = 200,000 cm. Convert to meters: 200,000 ÷ 100 = 2,000 m. Convert to kilometers: 2,000 ÷ 1,000 = 2.0 km.",
+            hintLadder: [
+              "Multiply map length by scale factor: 4 cm × 50,000 = 200,000 cm.",
+              "Convert centimeters to meters by dividing by 100: 200,000 ÷ 100 = 2,000 m.",
+              "Convert meters to kilometers by dividing by 1,000: 2,000 ÷ 1,000 = 2 km."
+            ],
+            misconceptionAlerts: [
+              { trigger: "20 km", note: "Check metric conversion: 1 km = 100,000 cm, so 200,000 cm is 2 km, not 20 km." }
+            ],
+            skillId: "skill-ratio-rates-proportions",
             difficulty: "medium"
           }
         ]
@@ -1106,215 +1073,441 @@ export const SCIENCE_CHEMISTRY_UNITS: Unit[] = [
     ]
   },
   {
-    id: "unit-chm-stoichiometry",
-    subjectId: "sci_chemistry",
-    level: "senior_secondary",
-    title: "The Mole Concept, Stoichiometry & Chemical Equations",
-    code: "CHM-UNIT-02",
-    description: "Avogadro's constant, molar mass, empirical and molecular formulas, balancing chemical equations, molar volume of gases at STP (22.4 dm³), and percentage yield.",
+    id: "unit-algebraic-expressions-fractions",
+    subjectId: "math_algebra",
+    level: "junior_secondary",
+    title: "Algebraic Expansion, Grouping & Rational Fractions",
+    code: "MTH-AEF-03",
+    description: "Systematic expansion of binomials, factorization by grouping in pairs, difference of two squares, and algebraic fraction reduction.",
     order: 2,
     category: "core",
     skills: [
       {
-        id: "skill-chm-mole-stoichiometry",
-        unitId: "unit-chm-stoichiometry",
-        title: "Mole Calculations & Quantitative Reactions",
-        code: "SKL-CHM-202",
-        summary: "Calculations connecting mass, moles n = m / M, concentration C = n / V, and stoichiometric ratios.",
+        id: "skill-algebraic-expansion-factorization",
+        unitId: "unit-algebraic-expressions-fractions",
+        title: "Binomial Expansion, Factorization by Grouping & Algebraic Fractions",
+        code: "SKL-MTH-AEF-201",
+        summary: "Expanding (ax + b)(cx + d), factorizing four-term expressions by grouping, and cancelling common factors in rational algebraic fractions.",
         objectives: [
-          "Calculate molar mass from relative atomic masses",
-          "Convert between mass, moles, and number of particles (6.02 × 10²³)",
-          "Determine limiting reactants and theoretical yields"
+          "Expand and simplify products of binomials containing positive and negative coefficients",
+          "Factorize multi-variable expressions by grouping into pairs with common binomial factors",
+          "Simplify rational algebraic expressions by factoring quadratic and difference-of-squares terms"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
         questions: [
           {
-            id: "q-chm-mole-1",
+            id: "q-math-aef-1",
             type: "multiple_choice",
-            questionText: "How many moles of carbon dioxide (CO₂) are present in 88 grams of the gas? (Given C = 12, O = 16)",
-            mathExpression: "n = \\frac{\\text{mass}}{\\text{Molar Mass}}",
-            options: ["2.0 \\text{ moles}", "4.0 \\text{ moles}", "1.5 \\text{ moles}", "0.5 \\text{ moles}"],
-            correctAnswer: "2.0 \\text{ moles}",
-            explanation: "Molar mass of CO₂ = 12 + 2(16) = 12 + 32 = 44 g/mol. Moles n = 88 g / 44 g/mol = 2.0 moles.",
+            questionText: "Expand and simplify the algebraic product:",
+            mathExpression: "(3x - 4)(2x + 5)",
+            options: ["6x^2 + 7x - 20", "6x^2 - 7x - 20", "6x^2 + 23x - 20", "6x^2 - 20"],
+            correctAnswer: "6x^2 + 7x - 20",
+            explanation: "Using FOIL: (3x)(2x) + (3x)(5) + (-4)(2x) + (-4)(5) = 6x² + 15x - 8x - 20 = 6x² + 7x - 20.",
             hintLadder: [
-              "Calculate molar mass of CO₂: 12 + (2 × 16) = 44 g/mol.",
-              "Use formula n = mass / molar mass.",
-              "88 / 44 = 2.0 moles."
+              "Multiply First terms: 3x × 2x = 6x².",
+              "Multiply Outer and Inner terms: (3x × 5) + (-4 × 2x) = 15x - 8x = 7x.",
+              "Multiply Last terms: (-4) × 5 = -20. Combine: 6x² + 7x - 20."
             ],
             misconceptionAlerts: [
-              { trigger: "4.0 \\text{ moles}", note: "Did you divide 88 by 22 instead of the molar mass 44?" }
+              { trigger: "6x^2 - 7x - 20", note: "Watch signs: +15x - 8x is +7x, not -7x." },
+              { trigger: "6x^2 - 20", note: "Do not omit the middle cross-multiplication terms (+15x and -8x)!" }
             ],
-            skillId: "skill-chm-mole-stoichiometry",
-            difficulty: "easy"
-          }
-        ]
-      }
-    ]
-  }
-];
-
-export const SCIENCE_BIOLOGY_UNITS: Unit[] = [
-  {
-    id: "unit-bio-cell-genetics",
-    subjectId: "sci_biology",
-    level: "senior_secondary",
-    title: "Cellular Architecture, Mitosis & Mendelian Genetics",
-    code: "BIO-UNIT-01",
-    description: "Plant vs animal cell ultrastructure, enzyme kinetics, DNA structure, chromosomes, monohybrid crosses, and sex linkage.",
-    order: 1,
-    category: "core",
-    skills: [
-      {
-        id: "skill-bio-genetics",
-        unitId: "unit-bio-cell-genetics",
-        title: "Monohybrid Inheritance & Punnett Squares",
-        code: "SKL-BIO-201",
-        summary: "Predicting genotype and phenotype ratios using Mendel's law of segregation.",
-        objectives: [
-          "Differentiate homozygous vs heterozygous alleles and dominant vs recessive traits",
-          "Construct Punnett squares for monohybrid crosses (3:1 phenotypic ratio)",
-          "Analyze co-dominance and ABO blood group genetics"
-        ],
-        difficulty: "intermediate",
-        masteryPointsRequired: 100,
-        questions: [
-          {
-            id: "q-bio-1",
-            type: "multiple_choice",
-            questionText: "In pea plants, tallness (T) is dominant over dwarfness (t). What is the expected phenotypic ratio of offspring from a cross between two heterozygous tall plants (Tt × Tt)?",
-            mathExpression: "Tt \\times Tt \\implies 1\\,TT : 2\\,Tt : 1\\,tt",
-            options: ["3 Tall : 1 Dwarf", "1 Tall : 1 Dwarf", "All Tall", "2 Tall : 2 Dwarf"],
-            correctAnswer: "3 Tall : 1 Dwarf",
-            explanation: "Cross Tt × Tt gives genotypes: 1 TT, 2 Tt, 1 tt. TT and Tt are both tall (3 parts), and tt is dwarf (1 part). Phenotypic ratio = 3 Tall : 1 Dwarf.",
-            hintLadder: [
-              "Draw a 2x2 Punnett square with gametes T and t on both sides.",
-              "Boxes contain: TT, Tt, Tt, tt.",
-              "Since T is dominant, TT, Tt, and Tt express tall phenotype (3). tt expresses dwarf (1)."
-            ],
-            misconceptionAlerts: [
-              { trigger: "1 Tall : 1 Dwarf", note: "1:1 ratio occurs when crossing heterozygous (Tt) with homozygous recessive (tt), not Tt × Tt." }
-            ],
-            skillId: "skill-bio-genetics",
-            difficulty: "easy"
-          }
-        ]
-      }
-    ]
-  }
-];
-
-export const COMPUTING_UNITS: Unit[] = [
-  {
-    id: "unit-cs-binary-logic",
-    subjectId: "tech_compsci",
-    level: "senior_secondary",
-    title: "Data Representation, Boolean Logic & Algorithmic Design",
-    code: "CSC-UNIT-01",
-    description: "Binary, octal, hexadecimal conversions, ASCII/Unicode character encoding, Boolean logic gates (AND, OR, NOT, XOR, NAND), and structured pseudocode algorithms.",
-    order: 1,
-    category: "core",
-    skills: [
-      {
-        id: "skill-cs-logic-gates",
-        unitId: "unit-cs-binary-logic",
-        title: "Boolean Algebra, Truth Tables & Binary Representation",
-        code: "SKL-CSC-201",
-        summary: "Evaluating Boolean logic expressions and converting decimal integers to binary and hexadecimal.",
-        objectives: [
-          "Convert integers between Decimal, Binary (Base 2), and Hexadecimal (Base 16)",
-          "Construct truth tables for composite logic circuits",
-          "Trace algorithmic loops and conditional branching structures"
-        ],
-        difficulty: "intermediate",
-        masteryPointsRequired: 100,
-        questions: [
-          {
-            id: "q-cs-1",
-            type: "multiple_choice",
-            questionText: "Convert the decimal integer 45 into its 8-bit binary representation.",
-            mathExpression: "45_{10} = (?)_2",
-            options: ["00101101", "00110101", "00101111", "00010101"],
-            correctAnswer: "00101101",
-            explanation: "45 = 32 + 8 + 4 + 1. Powers of 2: 128(0), 64(0), 32(1), 16(0), 8(1), 4(1), 2(0), 1(1) = 00101101.",
-            hintLadder: [
-              "Break 45 down into powers of 2 (32, 16, 8, 4, 2, 1).",
-              "45 = 32 + 8 + 4 + 1.",
-              "Place 1 at 32, 8, 4, 1 positions and 0 elsewhere: 00101101."
-            ],
-            misconceptionAlerts: [
-              { trigger: "00110101", note: "00110101 equals 32 + 16 + 4 + 1 = 53, not 45." }
-            ],
-            skillId: "skill-cs-logic-gates",
+            skillId: "skill-algebraic-expansion-factorization",
             difficulty: "easy"
           },
           {
-            id: "q-cs-2",
+            id: "q-math-aef-2",
             type: "multiple_choice",
-            questionText: "What is the output of an XOR (Exclusive OR) gate when both inputs A and B are 1 (True)?",
-            mathExpression: "A \\oplus B \\text{ when } A=1, B=1",
-            options: ["0 (False)", "1 (True)", "Undefined", "High Impedance"],
-            correctAnswer: "0 (False)",
-            explanation: "An XOR gate produces 1 if and only if exactly one input is true. When both inputs are 1, the output is 0.",
+            questionText: "Factorize the four-term expression completely by grouping:",
+            mathExpression: "2ax - 3bx + 4ay - 6by",
+            options: ["(2a - 3b)(x + 2y)", "(2a + 3b)(x - 2y)", "(a - b)(2x + 6y)", "(2a - 3b)(x - 2y)"],
+            correctAnswer: "(2a - 3b)(x + 2y)",
+            explanation: "Group first two and last two terms: x(2a - 3b) + 2y(2a - 3b). Factoring out common binomial (2a - 3b) yields (2a - 3b)(x + 2y).",
             hintLadder: [
-              "XOR stands for Exclusive OR (either A or B is true, but NOT both).",
-              "When A = 1 and B = 1, they are identical, so output is 0."
+              "Group into two pairs: (2ax - 3bx) + (4ay - 6by).",
+              "Factor out x from first pair: x(2a - 3b). Factor out 2y from second pair: 2y(2a - 3b).",
+              "Extract the common binomial factor (2a - 3b): (2a - 3b)(x + 2y)."
             ],
             misconceptionAlerts: [
-              { trigger: "1 (True)", note: "1 is the output of an inclusive OR gate, not an XOR gate." }
+              { trigger: "(2a - 3b)(x - 2y)", note: "Check the sign of the second bracket: 4ay ÷ 2a = +2y, so the bracket is (x + 2y)." }
             ],
-            skillId: "skill-cs-logic-gates",
-            difficulty: "easy"
+            skillId: "skill-algebraic-expansion-factorization",
+            difficulty: "medium"
+          },
+          {
+            id: "q-math-aef-3",
+            type: "multiple_choice",
+            questionText: "Simplify the rational algebraic fraction to its lowest terms:",
+            mathExpression: "\\frac{x^2 - 9}{x^2 + 5x + 6}",
+            options: ["\\frac{x - 3}{x + 2}", "\\frac{x + 3}{x + 2}", "\\frac{x - 3}{x + 3}", "\\frac{-9}{5x + 6}"],
+            correctAnswer: "\\frac{x - 3}{x + 2}",
+            explanation: "Numerator is difference of two squares: (x - 3)(x + 3). Denominator factors into (x + 2)(x + 3). Cancel common factor (x + 3) to get (x - 3)/(x + 2).",
+            hintLadder: [
+              "Factor the numerator as a difference of squares: x² - 9 = (x - 3)(x + 3).",
+              "Factor the quadratic denominator: find two numbers that multiply to 6 and add to 5 (2 and 3) -> (x + 2)(x + 3).",
+              "Cancel the common factor (x + 3) from numerator and denominator, leaving (x - 3)/(x + 2)."
+            ],
+            misconceptionAlerts: [
+              { trigger: "\\frac{-9}{5x + 6}", note: "You cannot cancel x² terms across addition! Factor first before cancelling." }
+            ],
+            skillId: "skill-algebraic-expansion-factorization",
+            difficulty: "hard"
           }
         ]
       }
     ]
-  }
-];
-
-export const LANGUAGE_UNITS: Unit[] = [
+  },
   {
-    id: "unit-eng-lexis-concord",
-    subjectId: "lang_english",
+    id: "unit-linear-inequalities",
+    subjectId: "math_algebra",
+    level: "junior_secondary",
+    title: "Linear Inequalities & Number Line Solutions",
+    code: "MTH-LI-04",
+    description: "One-variable linear inequalities, reversal of direction with negative divisors, compound inequalities, and graphical representation on number lines.",
+    order: 3,
+    category: "core",
+    skills: [
+      {
+        id: "skill-linear-inequalities-1d",
+        unitId: "unit-linear-inequalities",
+        title: "Solving Linear Inequalities & Compound Solution Sets",
+        code: "SKL-MTH-LI-201",
+        summary: "Solving single and compound inequalities with sign inversion on negative multiplication/division, and determining integral solution sets.",
+        objectives: [
+          "Apply inequality inversion rules when multiplying or dividing by negative numbers",
+          "Represent single and compound inequality solution sets on real number lines",
+          "Identify the set of integers satisfying compound boundary constraints a < f(x) <= b"
+        ],
+        difficulty: "intermediate",
+        masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
+        questions: [
+          {
+            id: "q-math-ineq-1",
+            type: "multiple_choice",
+            questionText: "Solve the linear inequality for x:",
+            mathExpression: "-3x + 7 \\le 22",
+            options: ["x \\ge -5", "x \\le -5", "x \\ge 5", "x \\le 5"],
+            correctAnswer: "x \\ge -5",
+            explanation: "Subtract 7 from both sides: -3x <= 15. Divide both sides by -3 and reverse the inequality sign: x >= -5.",
+            hintLadder: [
+              "Subtract 7 from both sides: -3x <= 22 - 7 = 15.",
+              "Recall the golden rule of inequalities: dividing or multiplying by a negative number reverses the inequality sign (<= becomes >=).",
+              "Divide 15 by -3: 15 ÷ (-3) = -5, yielding x >= -5."
+            ],
+            misconceptionAlerts: [
+              { trigger: "x \\le -5", note: "Did you forget to reverse the inequality sign when dividing by -3?" }
+            ],
+            skillId: "skill-linear-inequalities-1d",
+            difficulty: "easy"
+          },
+          {
+            id: "q-math-ineq-2",
+            type: "multiple_choice",
+            questionText: "How many integers satisfy the compound inequality:",
+            mathExpression: "-5 < 2x + 1 \\le 9",
+            options: ["7", "6", "8", "5"],
+            correctAnswer: "7",
+            explanation: "Subtract 1 across the inequality: -6 < 2x <= 8. Divide by 2: -3 < x <= 4. The satisfying integers are {-2, -1, 0, 1, 2, 3, 4}. Total = 7 integers.",
+            hintLadder: [
+              "Subtract 1 from all three parts: -5 - 1 < 2x <= 9 - 1, so -6 < 2x <= 8.",
+              "Divide all parts by 2: -3 < x <= 4.",
+              "List the integers strictly greater than -3 and less than or equal to 4: -2, -1, 0, 1, 2, 3, 4 (7 integers)."
+            ],
+            misconceptionAlerts: [
+              { trigger: "8", note: "Did you include -3? Notice the strict inequality '<', so -3 is excluded." }
+            ],
+            skillId: "skill-linear-inequalities-1d",
+            difficulty: "medium"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "unit-functions-relations-graphs",
+    subjectId: "math_algebra",
     level: "senior_secondary",
-    title: "Lexis, Grammatical Concord & Morphological Roots",
-    code: "ENG-UNIT-01",
-    description: "Subject-verb agreement rules (proximity, accompaniment, correlatives), Latin and Greek etymology, phrasal verbs, and structural ambiguity.",
+    title: "Relations, Functions & Curve Analysis",
+    code: "MTH-FRG-05",
+    description: "Function definitions, mapping, composition of functions, finding algebraic inverse functions, and vertex analysis of parabolic graphs.",
+    order: 4,
+    category: "core",
+    skills: [
+      {
+        id: "skill-functions-mapping-graphs",
+        unitId: "unit-functions-relations-graphs",
+        title: "Function Notation, Composite/Inverse Functions & Parabola Vertices",
+        code: "SKL-MTH-FRG-301",
+        summary: "Evaluating f(g(x)), determining f⁻¹(x), and computing vertex coordinates and symmetry axes of quadratic curves.",
+        objectives: [
+          "Evaluate nested composite functions f(g(x)) and g(f(x)) for specified inputs",
+          "Determine algebraic expressions for inverse functions f⁻¹(x) by isolating x",
+          "Calculate turning point coordinates (vertex) and axis of symmetry of quadratic curves"
+        ],
+        difficulty: "advanced",
+        masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-quad-factoring"],
+        questions: [
+          {
+            id: "q-math-func-1",
+            type: "multiple_choice",
+            questionText: "Given functions f(x) = 2x + 3 and g(x) = x^2 - 1, evaluate the composite value f(g(3)):",
+            mathExpression: "f(g(3)) \\text{ where } f(x) = 2x + 3, \\, g(x) = x^2 - 1",
+            options: ["19", "63", "17", "21"],
+            correctAnswer: "19",
+            explanation: "Evaluate the inner function first: g(3) = 3² - 1 = 9 - 1 = 8. Now evaluate outer function: f(8) = 2(8) + 3 = 16 + 3 = 19.",
+            hintLadder: [
+              "Work from the inside out: evaluate g(3) first.",
+              "g(3) = 3² - 1 = 8.",
+              "Substitute 8 into f(x): f(8) = 2(8) + 3 = 19."
+            ],
+            misconceptionAlerts: [
+              { trigger: "63", note: "Did you compute g(f(3)) instead of f(g(3))? f(3) = 9, g(9) = 80." }
+            ],
+            skillId: "skill-functions-mapping-graphs",
+            difficulty: "easy"
+          },
+          {
+            id: "q-math-func-2",
+            type: "multiple_choice",
+            questionText: "Find the inverse function f⁻¹(x) for the linear bijection:",
+            mathExpression: "f(x) = \\frac{3x - 5}{2}",
+            options: ["\\frac{2x + 5}{3}", "\\frac{2x - 5}{3}", "\\frac{3x + 5}{2}", "\\frac{2}{3x - 5}"],
+            correctAnswer: "\\frac{2x + 5}{3}",
+            explanation: "Let y = (3x - 5)/2. Multiply by 2: 2y = 3x - 5. Add 5: 3x = 2y + 5. Divide by 3: x = (2y + 5)/3. Swap variables: f⁻¹(x) = (2x + 5)/3.",
+            hintLadder: [
+              "Set y = (3x - 5)/2 and solve for x in terms of y.",
+              "Multiply by 2: 2y = 3x - 5, then add 5: 2y + 5 = 3x.",
+              "Divide by 3: x = (2y + 5)/3. Swap variables to get f⁻¹(x) = (2x + 5)/3."
+            ],
+            misconceptionAlerts: [
+              { trigger: "\\frac{2}{3x - 5}", note: "Inverse function f⁻¹(x) is not the reciprocal 1/f(x)." }
+            ],
+            skillId: "skill-functions-mapping-graphs",
+            difficulty: "medium"
+          },
+          {
+            id: "q-math-func-3",
+            type: "multiple_choice",
+            questionText: "Find the coordinates of the turning point (vertex) of the parabola:",
+            mathExpression: "y = x^2 - 6x + 5",
+            options: ["(3, -4)", "(3, 4)", "(-3, 32)", "(6, 5)"],
+            correctAnswer: "(3, -4)",
+            explanation: "The x-coordinate of the vertex is x = -b/(2a) = -(-6)/(2 × 1) = 3. Substituting x = 3 into the equation: y = 3² - 6(3) + 5 = 9 - 18 + 5 = -4. Vertex is (3, -4).",
+            hintLadder: [
+              "Use the axis of symmetry formula: x = -b / (2a) where a = 1 and b = -6.",
+              "x = -(-6) / (2 × 1) = 6 / 2 = 3.",
+              "Substitute x = 3 into the quadratic equation: y = (3)² - 6(3) + 5 = 9 - 18 + 5 = -4."
+            ],
+            misconceptionAlerts: [
+              { trigger: "(3, 4)", note: "Check the sign: 9 - 18 + 5 = -4, not +4." }
+            ],
+            skillId: "skill-functions-mapping-graphs",
+            difficulty: "hard"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "unit-plane-geometry-polygons",
+    subjectId: "math_geom_trig",
+    level: "junior_secondary",
+    title: "Plane Geometry, Parallel Lines & Polygon Theorems",
+    code: "MTH-PGP-01",
+    description: "Angle relationships on parallel lines and transversals, triangle angle sum theorems, exterior angle properties, and regular polygon calculations.",
     order: 1,
     category: "core",
     skills: [
       {
-        id: "skill-eng-concord",
-        unitId: "unit-eng-lexis-concord",
-        title: "Subject-Verb Concord & Grammatical Agreement",
-        code: "SKL-ENG-201",
-        summary: "Navigating complex sentence structures, intervening prepositional phrases, and collective nouns.",
+        id: "skill-angles-triangles-polygons",
+        unitId: "unit-plane-geometry-polygons",
+        title: "Parallel Line Theorems, Interior/Exterior Angles & Polygons",
+        code: "SKL-MTH-PGP-201",
+        summary: "Solving alternate/co-interior angle problems, proving triangle angle relationships, and calculating interior/exterior angles of n-sided polygons.",
         objectives: [
-          "Apply subject-verb agreement across singular and plural indefinite pronouns",
-          "Resolve sentences with 'as well as', 'together with', 'either...or', and 'neither...nor'",
-          "Identify root morphemes, prefixes, and suffixes in standardized vocabulary"
+          "Apply alternate, corresponding, and allied (co-interior) angle theorems across parallel lines",
+          "Calculate the sum of interior angles (n - 2) × 180° and exterior angles (360°) of any convex polygon",
+          "Deduce the number of sides of regular polygons from specified interior or exterior angle values"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
         questions: [
           {
-            id: "q-eng-1",
+            id: "q-math-geom-1",
             type: "multiple_choice",
-            questionText: "Choose the grammatically correct option to complete the sentence: 'The captain, together with all his team members, ______ arriving on the evening flight.'",
-            mathExpression: "\\text{Subject Concord Rule: Parenthetical Expressions}",
-            options: ["is", "are", "were", "have been"],
-            correctAnswer: "is",
-            explanation: "Parenthetical phrases introduced by 'together with', 'as well as', or 'along with' do not change the grammatical number of the subject. The singular subject 'The captain' requires the singular verb 'is'.",
+            questionText: "Each interior angle of a regular polygon measures 144°. How many sides does the polygon possess?",
+            mathExpression: "\\text{Exterior Angle} = 180^\\circ - 144^\\circ = 36^\\circ \\implies n = \\frac{360^\\circ}{36^\\circ}",
+            options: ["10 sides (decagon)", "12 sides (dodecagon)", "8 sides (octagon)", "9 sides (nonagon)"],
+            correctAnswer: "10 sides (decagon)",
+            explanation: "Exterior angle = 180° - 144° = 36°. For any regular polygon, the sum of exterior angles is 360°. Therefore, number of sides n = 360° ÷ 36° = 10 sides.",
             hintLadder: [
-              "Identify the true grammatical subject before the parenthetical commas.",
-              "'The captain' is singular.",
-              "Expressions like 'together with his team members' are parenthetical modifiers and do not make the subject plural. Use singular verb 'is'."
+              "Remember that an interior angle and an exterior angle on a straight line add up to 180°.",
+              "Calculate exterior angle: 180° - 144° = 36°.",
+              "Since the sum of all exterior angles is always 360°, n = 360° ÷ 36° = 10."
             ],
             misconceptionAlerts: [
-              { trigger: "are", note: "Common trap: Do not be distracted by the plural noun 'members' right next to the verb." }
+              { trigger: "8 sides (octagon)", note: "An octagon has interior angles of (8 - 2) × 180° / 8 = 135°, not 144°." }
             ],
-            skillId: "skill-eng-concord",
+            skillId: "skill-angles-triangles-polygons",
+            difficulty: "easy"
+          },
+          {
+            id: "q-math-geom-2",
+            type: "multiple_choice",
+            questionText: "Two parallel lines are cut by a transversal. Two co-interior (allied) angles on the same side of the transversal are represented by (3x + 15)° and (2x + 25)°. Find the value of x:",
+            mathExpression: "(3x + 15)^\\circ + (2x + 25)^\\circ = 180^\\circ",
+            options: ["28", "32", "25", "30"],
+            correctAnswer: "28",
+            explanation: "Co-interior angles are supplementary (sum to 180°): (3x + 15) + (2x + 25) = 180 => 5x + 40 = 180 => 5x = 140 => x = 28.",
+            hintLadder: [
+              "Recall that interior angles on the same side of a transversal are supplementary (their sum is 180°).",
+              "Set up equation: (3x + 15) + (2x + 25) = 180°.",
+              "Simplify: 5x + 40 = 180 => 5x = 140 => x = 28."
+            ],
+            misconceptionAlerts: [
+              { trigger: "32", note: "Check your subtraction: 180 - 40 = 140, and 140 ÷ 5 = 28, not 32." }
+            ],
+            skillId: "skill-angles-triangles-polygons",
             difficulty: "medium"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "unit-mensuration-perimeter-area-volume",
+    subjectId: "math_geom_trig",
+    level: "senior_secondary",
+    title: "Mensuration: Perimeters, Areas & Solid Volumes",
+    code: "MTH-MEN-02",
+    description: "Length of circular arcs, area of sectors, surface areas and volumes of prisms, cylinders, right circular cones, pyramids, and spheres.",
+    order: 3,
+    category: "core",
+    skills: [
+      {
+        id: "skill-mensuration-2d-3d",
+        unitId: "unit-mensuration-perimeter-area-volume",
+        title: "Arc Lengths, Sector Areas & Cylindrical Volumes",
+        code: "SKL-MTH-MEN-301",
+        summary: "Computing sector arc lengths and areas using central angle ratios, and calculating surface areas and volumes of 3D solids.",
+        objectives: [
+          "Calculate arc lengths and sector areas subtending angle θ at the center of a circle",
+          "Calculate total surface areas and internal capacities (volumes) of right circular cylinders",
+          "Apply volume formulas for cones (1/3 π r² h) and spheres (4/3 π r³) to solve composite solid problems"
+        ],
+        difficulty: "intermediate",
+        masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-line-gradients"],
+        questions: [
+          {
+            id: "q-math-men-1",
+            type: "multiple_choice",
+            questionText: "A solid cylindrical metal rod has a base diameter of 14 cm and a length (height) of 10 cm. Taking π = 22/7, calculate its total volume in cm³:",
+            mathExpression: "V = \\pi r^2 h = \\frac{22}{7} \\times 7^2 \\times 10",
+            options: ["1,540 cm³", "6,160 cm³", "770 cm³", "1,760 cm³"],
+            correctAnswer: "1,540 cm³",
+            explanation: "Radius r = diameter ÷ 2 = 14 ÷ 2 = 7 cm. Volume V = π r² h = (22/7) × 7² × 10 = (22/7) × 49 × 10 = 22 × 7 × 10 = 1,540 cm³.",
+            hintLadder: [
+              "Remember radius is half of diameter: r = 14 / 2 = 7 cm.",
+              "Use cylinder volume formula: V = π r² h.",
+              "Substitute: (22/7) × 7 × 7 × 10 = 22 × 7 × 10 = 1,540 cm³."
+            ],
+            misconceptionAlerts: [
+              { trigger: "6,160 cm³", note: "Did you use the diameter (14) instead of the radius (7) in r²? 14² = 196 gives 4x the actual volume!" }
+            ],
+            skillId: "skill-mensuration-2d-3d",
+            difficulty: "easy"
+          },
+          {
+            id: "q-math-men-2",
+            type: "multiple_choice",
+            questionText: "Calculate the area of a sector of a circle of radius 7 cm which subtends a central angle of 60° at the center (take π = 22/7):",
+            mathExpression: "A = \\frac{\\theta}{360^\\circ} \\times \\pi r^2 = \\frac{60}{360} \\times \\frac{22}{7} \\times 7^2",
+            options: ["25 \\frac{2}{3} cm²", "51 \\frac{1}{3} cm²", "14 \\frac{2}{3} cm²", "22 cm²"],
+            correctAnswer: "25 \\frac{2}{3} cm²",
+            explanation: "Area of sector = (θ/360) × π r² = (60/360) × (22/7) × 49 = (1/6) × 154 = 154/6 = 77/3 = 25 2/3 cm².",
+            hintLadder: [
+              "Fraction of circle = 60° / 360° = 1/6.",
+              "Full circle area = π r² = (22/7) × 7² = 154 cm².",
+              "Sector area = (1/6) × 154 = 154 / 6 = 77 / 3 = 25 2/3 cm²."
+            ],
+            misconceptionAlerts: [
+              { trigger: "51 \\frac{1}{3} cm²", note: "Did you use 120° instead of 60°? The fraction is 1/6, not 1/3." }
+            ],
+            skillId: "skill-mensuration-2d-3d",
+            difficulty: "medium"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "unit-integral-calculus-applications",
+    subjectId: "math_calculus",
+    level: "university_prep",
+    title: "Integral Calculus & Kinematic Modeling",
+    code: "MTH-INT-02",
+    description: "Indefinite and definite integration of polynomials, calculation of area bounded beneath curves, and kinematic recovery of displacement from velocity functions.",
+    order: 2,
+    category: "core",
+    skills: [
+      {
+        id: "skill-indefinite-definite-integration",
+        unitId: "unit-integral-calculus-applications",
+        title: "Polynomial Integration, Definite Integrals & Kinematic Velocity",
+        code: "SKL-MTH-INT-401",
+        summary: "Applying the power rule for integration, evaluating definite bounds, and reconstructing displacement functions s(t) from velocity v(t).",
+        objectives: [
+          "Integrate algebraic polynomials using ∫ xⁿ dx = (xⁿ⁺¹)/(n + 1) + C",
+          "Evaluate definite integrals between limits a and b using the Fundamental Theorem of Calculus",
+          "Reconstruct displacement functions s(t) = ∫ v(t) dt using initial boundary conditions s(0)"
+        ],
+        difficulty: "advanced",
+        masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-derivatives"],
+        questions: [
+          {
+            id: "q-math-int-1",
+            type: "multiple_choice",
+            questionText: "Evaluate the definite integral:",
+            mathExpression: "\\int_{1}^{3} (3x^2 - 4x + 1) \\, dx",
+            options: ["12", "14", "10", "16"],
+            correctAnswer: "12",
+            explanation: "Antiderivative F(x) = x³ - 2x² + x. Evaluate at upper limit: F(3) = 3³ - 2(3²) + 3 = 27 - 18 + 3 = 12. Evaluate at lower limit: F(1) = 1³ - 2(1²) + 1 = 1 - 2 + 1 = 0. F(3) - F(1) = 12 - 0 = 12.",
+            hintLadder: [
+              "Find the antiderivative of each term: ∫ 3x² dx = x³, ∫ -4x dx = -2x², ∫ 1 dx = x.",
+              "F(x) = x³ - 2x² + x.",
+              "Calculate F(3) = 27 - 18 + 3 = 12 and F(1) = 1 - 2 + 1 = 0. Then subtract: 12 - 0 = 12."
+            ],
+            misconceptionAlerts: [
+              { trigger: "14", note: "Check your antiderivative of 4x: ∫ 4x dx = 2x², not 4x²." }
+            ],
+            skillId: "skill-indefinite-definite-integration",
+            difficulty: "medium"
+          },
+          {
+            id: "q-math-int-2",
+            type: "multiple_choice",
+            questionText: "A projectile travels along a straight track such that its velocity at time t seconds is given by v(t) = 6t² - 2t m/s. Given that its initial displacement at t = 0 is s(0) = 5 meters, find its displacement at t = 2 seconds:",
+            mathExpression: "s(t) = \\int (6t^2 - 2t) \\, dt + C, \\quad s(0) = 5",
+            options: ["17 meters", "12 meters", "21 meters", "15 meters"],
+            correctAnswer: "17 meters",
+            explanation: "Displacement is integral of velocity: s(t) = ∫(6t² - 2t)dt = 2t³ - t² + C. At t = 0, s(0) = C = 5. So s(t) = 2t³ - t² + 5. At t = 2: s(2) = 2(2³) - (2²) + 5 = 2(8) - 4 + 5 = 16 - 4 + 5 = 17 meters.",
+            hintLadder: [
+              "Integrate v(t) to obtain s(t): ∫(6t² - 2t) dt = 2t³ - t² + C.",
+              "Use initial condition s(0) = 5 to find C = 5, giving s(t) = 2t³ - t² + 5.",
+              "Substitute t = 2 into s(t): s(2) = 2(8) - 4 + 5 = 16 - 4 + 5 = 17 meters."
+            ],
+            misconceptionAlerts: [
+              { trigger: "12 meters", note: "Did you forget to add the initial displacement constant C = 5? 16 - 4 = 12, plus 5 = 17." }
+            ],
+            skillId: "skill-indefinite-definite-integration",
+            difficulty: "hard"
           }
         ]
       }
@@ -1372,12 +1565,24 @@ export const BUSINESS_FINANCE_UNITS: Unit[] = [
   }
 ];
 
+import { SCIENCE_PHYSICS_UNITS as FLAGSHIP_PHYSICS, SCIENCE_CHEMISTRY_UNITS as FLAGSHIP_CHEMISTRY, SCIENCE_BIOLOGY_UNITS as FLAGSHIP_BIOLOGY } from "./scienceCurriculumUnits";
+import { COMPUTING_UNITS as FLAGSHIP_COMPUTING } from "./computingCurriculumUnits";
+import { LANGUAGE_ENGLISH_UNITS as FLAGSHIP_ENGLISH } from "./englishCurriculumUnits";
+import { ALL_LEVELS_CURRICULUM_UNITS } from "./allLevelsCurriculumUnits";
+
+export { FLAGSHIP_PHYSICS as SCIENCE_PHYSICS_UNITS, FLAGSHIP_CHEMISTRY as SCIENCE_CHEMISTRY_UNITS, FLAGSHIP_BIOLOGY as SCIENCE_BIOLOGY_UNITS };
+export { FLAGSHIP_COMPUTING as COMPUTING_UNITS };
+export { FLAGSHIP_ENGLISH as LANGUAGE_ENGLISH_UNITS, FLAGSHIP_ENGLISH as LANGUAGE_UNITS };
+export { ALL_LEVELS_CURRICULUM_UNITS };
+
 export const ALL_CURRICULUM_UNITS: Unit[] = [
+  ...ALL_LEVELS_CURRICULUM_UNITS,
   ...ENRICHED_MATHEMATICS_UNITS,
-  ...SCIENCE_PHYSICS_UNITS,
-  ...SCIENCE_CHEMISTRY_UNITS,
-  ...SCIENCE_BIOLOGY_UNITS,
-  ...COMPUTING_UNITS,
-  ...LANGUAGE_UNITS,
+  ...FLAGSHIP_PHYSICS,
+  ...FLAGSHIP_CHEMISTRY,
+  ...FLAGSHIP_BIOLOGY,
+  ...FLAGSHIP_COMPUTING,
+  ...FLAGSHIP_ENGLISH,
   ...BUSINESS_FINANCE_UNITS
 ];
+

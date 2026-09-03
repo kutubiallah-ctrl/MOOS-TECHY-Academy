@@ -14,7 +14,8 @@ import {
   Flame,
   Clock,
   Target,
-  Globe
+  Globe,
+  Database
 } from "lucide-react";
 import { useLearner } from "../context/LearnerContext";
 import {
@@ -25,6 +26,7 @@ import {
 } from "../types/curriculum";
 import { AcademicContext } from "../types/learner";
 import { curriculumService } from "../services/curriculumService";
+import { BackupRestoreModal } from "./BackupRestoreModal";
 
 interface LearnerProfileModalProps {
   isOpen: boolean;
@@ -50,6 +52,7 @@ export const LearnerProfileModal: React.FC<LearnerProfileModalProps> = ({
   );
   const [activeTab, setActiveTab] = useState<"settings" | "activity" | "attempts">("settings");
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
   const supportedSystems = curriculumService.getSupportedEducationSystems();
 
@@ -277,15 +280,26 @@ export const LearnerProfileModal: React.FC<LearnerProfileModalProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-800 transition"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Reset to Demonstration State</span>
-                </button>
+              <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-800 transition"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Reset Demo State</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsBackupModalOpen(true)}
+                    className="flex items-center gap-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl border border-indigo-200/80 transition"
+                  >
+                    <Database className="h-3.5 w-3.5 text-indigo-600" />
+                    <span>Backup & Export Data</span>
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-2">
                   {saveSuccess && (
@@ -366,6 +380,13 @@ export const LearnerProfileModal: React.FC<LearnerProfileModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Backup & Export Modal */}
+      <BackupRestoreModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        defaultScope="learner_only"
+      />
     </div>
   );
 };

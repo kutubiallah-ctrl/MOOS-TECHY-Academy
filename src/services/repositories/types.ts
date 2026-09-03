@@ -23,7 +23,22 @@ import { PlayActivity } from "../../types/learnAndPlay";
 import { CanonicalTutorSession } from "../../types/entities";
 import { TextbookProject, TextbookSection } from "../../types/textbookStudio";
 import { BookpreneurProject } from "../../types/bookpreneur";
-import { TeacherLessonPlan, LearnerInterventionPlan, ClassAnalyticsSnapshot } from "../../types/teacherStudio";
+import {
+  TeacherLessonPlan,
+  LearnerInterventionPlan,
+  ClassAnalyticsSnapshot,
+  TeacherClassroom,
+  ClassroomRosterStudent,
+  ClassroomAssignment,
+  TeacherInterventionRecommendation,
+  ClassroomAdaptiveGroup,
+  PrerequisiteBottleneckCluster,
+  MisconceptionCluster,
+  ClassroomNextBestAction,
+  AssignmentLifecycleStatus,
+  LearnerAssignmentProgress,
+  TeacherInterventionStatus
+} from "../../types/teacherStudio";
 import { AgentTask, AgentAuditRecord, HumanApprovalRecord, AgentRole, AgentContextPayload } from "../../types/agentOrchestrator";
 
 export interface ILearnerRepository {
@@ -91,9 +106,25 @@ export interface IBookpreneurRepository {
 }
 
 export interface ITeacherStudioRepository {
+  getClassrooms(): Promise<TeacherClassroom[]>;
+  getClassroomById(id: string): Promise<TeacherClassroom | undefined>;
+  createClassroom(data: Partial<TeacherClassroom>): Promise<TeacherClassroom>;
+  getRoster(classroomId: string): Promise<ClassroomRosterStudent[]>;
+  getAssignments(classroomId?: string): Promise<ClassroomAssignment[]>;
+  getAssignmentById(id: string): Promise<ClassroomAssignment | undefined>;
+  createAssignment(data: Partial<ClassroomAssignment>): Promise<ClassroomAssignment>;
+  updateAssignmentStatus(assignmentId: string, status: AssignmentLifecycleStatus): Promise<void>;
+  updateLearnerProgress(assignmentId: string, learnerId: string, progress: Partial<LearnerAssignmentProgress>): Promise<void>;
+  completeAssignment(assignmentId: string, learnerId: string): Promise<void>;
+  getTeacherInterventions(classroomId: string): Promise<TeacherInterventionRecommendation[]>;
+  updateInterventionStatus(interventionId: string, status: TeacherInterventionStatus): Promise<void>;
+  getAdaptiveGroups(classroomId: string): Promise<ClassroomAdaptiveGroup[]>;
+  getPrerequisiteBottlenecks(classroomId: string): Promise<PrerequisiteBottleneckCluster[]>;
+  getMisconceptionClusters(classroomId: string): Promise<MisconceptionCluster[]>;
+  getNextBestActions(classroomId: string): Promise<ClassroomNextBestAction[]>;
   getLessonPlans(): Promise<TeacherLessonPlan[]>;
   getInterventions(): Promise<LearnerInterventionPlan[]>;
-  getClassAnalytics(): Promise<ClassAnalyticsSnapshot>;
+  getClassAnalytics(classroomId?: string): Promise<ClassAnalyticsSnapshot>;
   saveLessonPlan(plan: TeacherLessonPlan): Promise<TeacherLessonPlan>;
 }
 

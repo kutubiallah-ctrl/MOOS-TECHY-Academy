@@ -19,7 +19,7 @@ import {
 import { storageService } from "../services/storageService";
 import { AnalyticsService, DashboardMetrics } from "../services/analyticsService";
 import { curriculumService } from "../services/curriculumService";
-import { MATHEMATICS_UNITS } from "../data/curriculumData";
+import { MATHEMATICS_UNITS, DEFAULT_EXTENDED_LEARNER_PROFILE } from "../data/curriculumData";
 
 interface LearnerContextType {
   profile: ExtendedLearnerProfile;
@@ -41,8 +41,8 @@ interface LearnerContextType {
 const LearnerContext = createContext<LearnerContextType | undefined>(undefined);
 
 export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [profile, setProfile] = useState<ExtendedLearnerProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<ExtendedLearnerProfile>(DEFAULT_EXTENDED_LEARNER_PROFILE);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Active navigation selection
   const defaultUnit = MATHEMATICS_UNITS[2]; // Quadratics
@@ -56,11 +56,19 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
     async function init() {
       try {
         const loadedProfile = await storageService.getProfile();
-        setProfile(loadedProfile);
+        if (loadedProfile) {
+          setProfile(loadedProfile);
 
-        // Match initial active unit with profile's activeUnitId if present
-        if (loadedProfile.activeUnitId) {
-          const matchingUnit = curriculumService.getUnitById(loadedProfile.activeUnitId);
+          // Match initial active unit with profile's activeUnitId or targetLevel
+          const allUnits = curriculumService.getAllUnits();
+          let matchingUnit = loadedProfile.activeUnitId
+            ? curriculumService.getUnitById(loadedProfile.activeUnitId)
+            : undefined;
+
+          if (!matchingUnit || (matchingUnit.level !== loadedProfile.targetLevel && loadedProfile.targetLevel)) {
+            matchingUnit = allUnits.find((u) => u.level === loadedProfile.targetLevel) || matchingUnit || allUnits[0];
+          }
+
           if (matchingUnit) {
             setActiveUnit(matchingUnit);
             setActiveSkill(matchingUnit.skills[0]);
@@ -86,6 +94,18 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateProfileInfo = async (updates: Partial<ExtendedLearnerProfile>) => {
     if (!profile) return;
     const updated = { ...profile, ...updates };
+
+    // If targetLevel changed, automatically align active unit to the new level
+    if (updates.targetLevel && updates.targetLevel !== profile.targetLevel) {
+      const allUnits = curriculumService.getAllUnits();
+      const levelUnit = allUnits.find((u) => u.level === updates.targetLevel);
+      if (levelUnit) {
+        updated.activeUnitId = levelUnit.id;
+        setActiveUnit(levelUnit);
+        setActiveSkill(levelUnit.skills[0]);
+      }
+    }
+
     const saved = await storageService.saveProfile(updated);
     setProfile(saved);
   };

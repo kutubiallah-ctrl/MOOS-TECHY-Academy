@@ -16,13 +16,20 @@ import {
   UserCheck,
   Cpu,
   ArrowRight,
-  Database
+  Database,
+  Network
 } from "lucide-react";
 import { agentOrchestrationService, AGENT_REGISTRY } from "../services/agentOrchestrationService";
 import { AgentRole, AgentTask, HumanApprovalRecord, AgentAuditRecord } from "../types/agentOrchestrator";
+import { InstitutionalArchitectureMap } from "./InstitutionalArchitectureMap";
+import { ActiveView } from "./Navbar";
 
-export const AgentIntelligenceHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"registry" | "orchestrator" | "approvals" | "audit">("registry");
+interface AgentIntelligenceHubProps {
+  onNavigate?: (view: ActiveView) => void;
+}
+
+export const AgentIntelligenceHub: React.FC<AgentIntelligenceHubProps> = ({ onNavigate = () => {} }) => {
+  const [activeTab, setActiveTab] = useState<"blueprint" | "registry" | "orchestrator" | "approvals" | "audit">("blueprint");
   const [selectedAgentRole, setSelectedAgentRole] = useState<AgentRole>("tutor_agent");
   const [taskObjective, setTaskObjective] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
@@ -110,6 +117,19 @@ export const AgentIntelligenceHub: React.FC = () => {
         <div className="flex items-center gap-2 mt-6 pt-6 border-t border-slate-800/80 overflow-x-auto">
           <button
             type="button"
+            onClick={() => setActiveTab("blueprint")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition whitespace-nowrap ${
+              activeTab === "blueprint"
+                ? "bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/25"
+                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+            }`}
+          >
+            <Network className="h-4 w-4" />
+            <span>Institutional Blueprint</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("registry")}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition whitespace-nowrap ${
               activeTab === "registry"
@@ -161,6 +181,11 @@ export const AgentIntelligenceHub: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Tab: Institutional Blueprint */}
+      {activeTab === "blueprint" && (
+        <InstitutionalArchitectureMap onNavigate={onNavigate} />
+      )}
 
       {/* Tab: Registry */}
       {activeTab === "registry" && (
