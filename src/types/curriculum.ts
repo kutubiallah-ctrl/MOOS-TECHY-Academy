@@ -11,10 +11,15 @@ export type CurriculumStandard =
   | "WAEC_WASSCE"
   | "JAMB_UTME"
   | "CAMBRIDGE_IGCSE"
+  | "IB_DIPLOMA"
+  | "IJMB_NIGERIA"
+  | "JUPEB_NIGERIA"
+  | "CAMBRIDGE_AS_A_LEVEL"
+  | "UNIVERSITY_PREPARATION"
   | "COMMON_ENTRANCE"
   | "GLOBAL_STEM";
 
-export type CountryCode = "NG" | "UK" | "US" | "INTL" | string;
+export type CountryCode = "NG" | "UK" | "US" | "CA" | "JP" | "CN" | "KR" | "IN" | "AU" | "ZA" | "INTL" | string;
 
 export type EducationSystemCode =
   | "NERDC"
@@ -27,8 +32,34 @@ export type EducationSystemCode =
   | "US_STATE"
   | "CAMBRIDGE_LOWER_SEC"
   | "CAMBRIDGE_IGCSE"
+  | "CAMBRIDGE_AS_LEVEL"
   | "CAMBRIDGE_A_LEVEL"
+  | "IB"
+  | "IJMB"
+  | "JUPEB"
+  | "UNIVERSITY_PREP"
+  | "CANADA_PROVINCIAL"
+  | "JAPAN_MEXT"
+  | "CHINA_NATIONAL"
+  | "KOREA_CSAT"
+  | "INDIA_CBSE"
+  | "AUSTRALIA_ACARA"
+  | "SOUTH_AFRICA_CAPS"
   | "GLOBAL_STEM";
+
+export interface CurriculumVersionRecord {
+  curriculumId: string;
+  curriculumVersion: string;
+  effectiveDate: string; // ISO date format (YYYY-MM-DD)
+  country: CountryCode;
+  educationalSystem: EducationSystemCode;
+  qualification: string;
+  subject: string;
+  level: EducationalLevel;
+  status: "ACTIVE" | "ARCHIVED" | "DRAFT" | "DEPRECATED";
+  syllabusDocumentHash: string;
+  progressionRules: string[];
+}
 
 export type VerificationStatus =
   | "VERIFIED_OFFICIAL"      // Direct 1:1 match verified against official government/board syllabus
@@ -105,6 +136,10 @@ export interface Subject {
   curricula: CurriculumStandard[];
   unitsCount: number;
   totalMasteryPoints: number;
+  stage?: "primary" | "secondary" | "advanced" | "all";
+  keywords?: string[];
+  tagline?: string;
+  courseCount?: number;
 }
 
 export interface Topic {
@@ -141,6 +176,7 @@ export interface SkillLesson {
   title: string;
   hookAndIntuition: string;
   conceptualExplanation: string;
+  conceptualModel?: string;
   keyTermsAndFormulas?: Array<{
     termOrSymbol: string;
     definition: string;
@@ -163,8 +199,14 @@ export interface SkillLesson {
     correctCorrection: string;
   }>;
   guidedPracticePrompt?: string;
+  independentPracticePrompt?: string;
   diagnosticSelfCheck?: string;
+  transferApplication?: string;
+  masteryAssessment?: string;
+  reflectionPrompt?: string;
+  extensionActivity?: string;
   summaryRecap?: string;
+  estimatedMinutes?: number;
 }
 
 export interface Skill {
@@ -192,6 +234,11 @@ export interface Unit {
   order: number;
   category: "core" | "applied" | "exam_focus";
   skills: Skill[];
+  estimatedHours?: number;
+  estimationMethod?: string;
+  provenanceVersion?: string;
+  isDeepSaturated?: boolean;
+  curriculumStandardMappings?: string[];
 }
 
 export interface MasteryRecord {

@@ -1,0 +1,234 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------------------------------------------------------------------------
+    // GLOBAL SECURITY GUARDS & HELPERS
+    // --------------------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAcademyOwner() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true && (
+          request.auth.token.email == "kutubiallah@gmail.com" ||
+          request.auth.token.email == "osomarufdamilare@gmail.com"
+        );
+    }
+
+    function isAdmin() {
+      return isAcademyOwner();
+    }
+
+    // DEFAULT DENY CATCH-ALL
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --------------------------------------------------------------------------
+    // ADMIN REGISTRY (ADMIN / OWNER-ONLY: NOTHING ELSE MAY READ)
+    // --------------------------------------------------------------------------
+    match /admins/{adminId} {
+      // Nothing else may read admin collections; writable only by the two owner accounts
+      allow read, write: if isAcademyOwner();
+    }
+
+    // --------------------------------------------------------------------------
+    // USERS COLLECTION (PII ISOLATION & IDENTITY RESTRICTION)
+    // --------------------------------------------------------------------------
+    match /users/{userId} {
+      // PII Protection: users may only read their own user record; no blanket public reads
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow list: if isAdmin();
+      
+      // Any visitor may create an account with email + password (email verification flow unchanged)
+      allow create: if isValidId(userId) && (
+        isOwner(userId) ||
+        !isSignedIn() ||
+        isAdmin()
+      );
+        
+      allow update: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+        
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // --------------------------------------------------------------------------
+    // LEARNER PROFILES (CROSS-LEARNER DATA ISOLATION)
+    // --------------------------------------------------------------------------
+    match /learnerProfiles/{userId} {
+      // Learner data cannot be read by another learner
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow list: if isAdmin();
+
+      allow create: if isOwner(userId) && isValidId(userId) &&
+        request.resource.data.userId == userId;
+
+      allow update: if (isOwner(userId) || isAdmin()) && isValidId(userId) &&
+        request.resource.data.userId == userId;
+
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // --------------------------------------------------------------------------
+    // TEACHER MATERIALS (PROVENANCE & STATE MACHINE GOVERNANCE)
+    // --------------------------------------------------------------------------
+    match /teacherMaterials/{materialId} {
+      // Published / approved curriculum materials are readable across the academy;
+      // drafts are strictly isolated to author teacher or admin
+      allow get: if isSignedIn() && isValidId(materialId) && (
+        resource.data.lifecycleStatus in ['approved', 'published'] ||
+        resource.data.teacherId == request.auth.uid ||
+        isAdmin()
+      );
+
+      allow list: if isSignedIn();
+
+      allow create: if isSignedIn() && isValidId(materialId) &&
+        request.resource.data.teacherId == request.auth.uid;
+
+      allow update: if isSignedIn() && isValidId(materialId) && (
+        resource.data.teacherId == request.auth.uid || isAdmin()
+      );
+
+      allow delete: if isSignedIn() && isValidId(materialId) && (
+        resource.data.teacherId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // --------------------------------------------------------------------------
+    // VEO 3 GENERATED VIDEOS (USER OWNERSHIP ISOLATION)
+    // --------------------------------------------------------------------------
+    match /generatedVideos/{videoId} {
+      allow get: if isSignedIn() && isValidId(videoId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow list: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow create: if isSignedIn() && isValidId(videoId) &&
+        request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn() && isValidId(videoId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow delete: if isSignedIn() && isValidId(videoId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // --------------------------------------------------------------------------
+    // AUDIO TRANSCRIPTIONS (VOICE TRANSCRIPT PRIVACY & ISOLATION)
+    // --------------------------------------------------------------------------
+    match /audioTranscriptions/{transcriptionId} {
+      allow get: if isSignedIn() && isValidId(transcriptionId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow list: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow create: if isSignedIn() && isValidId(transcriptionId) &&
+        request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn() && isValidId(transcriptionId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow delete: if isSignedIn() && isValidId(transcriptionId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // --------------------------------------------------------------------------
+    // STORAGE ARTIFACTS (FILE METADATA & OWNERSHIP ISOLATION)
+    // --------------------------------------------------------------------------
+    match /storageArtifacts/{artifactId} {
+      allow get: if isSignedIn() && isValidId(artifactId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow list: if isSignedIn();
+
+      allow create: if isSignedIn() && isValidId(artifactId) &&
+        request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn() && isValidId(artifactId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      allow delete: if isSignedIn() && isValidId(artifactId) && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // --------------------------------------------------------------------------
+    // SECURITY AUDIT LOGS (IMMUTABLE AUDIT TRAIL - ADMIN / OWNER-ONLY READ)
+    // --------------------------------------------------------------------------
+    match /auditLogs/{logId} {
+      // Nothing else may read admin collections
+      allow get: if isAcademyOwner();
+      allow list: if isAcademyOwner();
+
+      // Append-only audit record creation
+      allow create: if (isSignedIn() && isValidId(logId)) || isAcademyOwner();
+
+      // Strict immutability: Audit logs cannot be modified or destroyed
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // --------------------------------------------------------------------------
+    // MFA PROFILES (STATUS & FACTOR METADATA)
+    // --------------------------------------------------------------------------
+    match /mfaProfiles/{userId} {
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow list: if isAdmin();
+      allow create, update: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // --------------------------------------------------------------------------
+    // MFA RECOVERY CODES (STRICT OWNER-ONLY HASH STORAGE ENCLAVE)
+    // --------------------------------------------------------------------------
+    match /mfaRecoveryCodes/{userId} {
+      // Strictly owner-only: neither other users nor anonymous callers can read recovery hashes
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false; // Blanket prohibition on listing recovery codes
+      allow create, update: if isOwner(userId) && isValidId(userId);
+      allow delete: if isOwner(userId) && isValidId(userId);
+    }
+
+    // --------------------------------------------------------------------------
+    // EMAIL ALLOWLIST (INSTITUTIONAL ACCESS GATE)
+    // --------------------------------------------------------------------------
+    match /emailAllowlist/{emailDoc} {
+      // Verification status lookup
+      allow get: if true;
+      // Admin list is restricted to the two owner accounts; nothing else may read
+      allow list: if isAcademyOwner();
+      // Any visitor may create an account with email + password (email verification flow unchanged)
+      allow create: if isValidId(emailDoc) && (
+        isAcademyOwner() ||
+        request.resource.data.insertedBy == "SELF_PUBLIC_REGISTRATION" ||
+        !isSignedIn() ||
+        (isSignedIn() && request.resource.data.email == request.auth.token.email)
+      );
+      // Admin/owner collections are writable only by the two owner accounts
+      allow update, delete: if isAcademyOwner();
+    }
+  }
+}

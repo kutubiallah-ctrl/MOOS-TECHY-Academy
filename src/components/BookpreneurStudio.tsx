@@ -32,7 +32,8 @@ import {
   Tag,
   Check,
   ShieldAlert,
-  Coins
+  Coins,
+  UploadCloud
 } from "lucide-react";
 import { bookpreneurService } from "../services/bookpreneurService";
 import {
@@ -47,6 +48,8 @@ import {
 } from "../types/bookpreneur";
 import { agentOrchestrationService } from "../services/agentOrchestrationService";
 import { identityService } from "../services/identityService";
+import { ManuscriptIngestionSection } from "./bookpreneur/ManuscriptIngestionSection";
+import { CreatorRoyaltySection } from "./bookpreneur/CreatorRoyaltySection";
 
 interface BookpreneurStudioProps {
   onNavigateToPractice?: (skillId: string) => void;
@@ -65,7 +68,7 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
   );
 
   // Master Pillar Tabs
-  const [mainPillarTab, setMainPillarTab] = useState<"marketplace" | "authoring" | "creator_hub" | "governance">("marketplace");
+  const [mainPillarTab, setMainPillarTab] = useState<"marketplace" | "ingestion" | "creator_hub" | "authoring" | "governance">("marketplace");
   const [activeAuthorTab, setActiveAuthorTab] = useState<"positioning" | "promise" | "research" | "manuscript" | "editorial">("positioning");
   const [isClassifyingClaims, setIsClassifyingClaims] = useState(false);
 
@@ -79,6 +82,13 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
   });
   const [selectedResourceModal, setSelectedResourceModal] = useState<MarketplaceResource | null>(null);
   const [statusNotification, setStatusNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [purchaseReceipt, setPurchaseReceipt] = useState<{
+    resource: MarketplaceResource;
+    grossPaid: number;
+    creatorShare: number;
+    platformShare: number;
+    txRef: string;
+  } | null>(null);
 
   // Creation State
   const [showCreateResourceModal, setShowCreateResourceModal] = useState(false);
@@ -96,6 +106,24 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
   const notify = (message: string, type: "success" | "error" = "success") => {
     setStatusNotification({ message, type });
     setTimeout(() => setStatusNotification(null), 4000);
+  };
+
+  const handlePurchaseResource = (resource: MarketplaceResource) => {
+    try {
+      const result = bookpreneurService.purchaseMarketplaceResource(activeSession, resource.id);
+      setPurchaseReceipt({
+        resource: result.resource,
+        grossPaid: result.grossPaid,
+        creatorShare: result.creatorShare,
+        platformShare: result.platformShare,
+        txRef: result.royaltyTransactionId
+      });
+      notify(
+        `Acquired '${resource.title}'! ₦${result.creatorShare.toLocaleString()} (70%) credited to creator ledger.`
+      );
+    } catch (err: any) {
+      notify(err.message || "Purchase failed", "error");
+    }
   };
 
   const handleRunClaimVerification = async () => {
@@ -202,7 +230,7 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs font-bold uppercase tracking-wider">
               <PenTool className="h-3.5 w-3.5" />
-              MOOS TECHY BOOKPRENEUR PILLAR • AUTHORING & MARKETPLACE
+              MOOS BOOKPRENEUR PILLAR • AUTHORING & MARKETPLACE
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Educational Publishing, Research Rigor & Codex Marketplace
@@ -243,6 +271,16 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
               </button>
             )}
 
+            <button
+              id="btn-upload-manuscript"
+              type="button"
+              onClick={() => setMainPillarTab("ingestion")}
+              className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/30 flex items-center gap-2 transition cursor-pointer"
+            >
+              <UploadCloud className="h-4 w-4" />
+              <span>Submit Manuscript (PDF / Word)</span>
+            </button>
+
             {(activeSession.role === "TEACHER" || activeSession.role === "ADMIN") && (
               <button
                 id="btn-new-resource"
@@ -251,7 +289,7 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
                 className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
-                <span>Create Marketplace Resource</span>
+                <span>Create Resource (Manual)</span>
               </button>
             )}
           </div>
@@ -274,15 +312,15 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
 
           <button
             type="button"
-            onClick={() => setMainPillarTab("authoring")}
+            onClick={() => setMainPillarTab("ingestion")}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition whitespace-nowrap cursor-pointer ${
-              mainPillarTab === "authoring"
+              mainPillarTab === "ingestion"
                 ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
                 : "text-slate-300 hover:text-white hover:bg-slate-800/60"
             }`}
           >
-            <PenTool className="h-4 w-4 text-purple-300" />
-            <span>Nonfiction Manuscript Studio</span>
+            <UploadCloud className="h-4 w-4 text-purple-300" />
+            <span>Manuscript Ingestion (PDF / DOCX)</span>
           </button>
 
           <button
@@ -296,6 +334,19 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
           >
             <Coins className="h-4 w-4 text-amber-300" />
             <span>Creator Revenue & Royalties</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainPillarTab("authoring")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition whitespace-nowrap cursor-pointer ${
+              mainPillarTab === "authoring"
+                ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
+                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+            }`}
+          >
+            <PenTool className="h-4 w-4 text-purple-300" />
+            <span>Nonfiction Manuscript Studio</span>
           </button>
 
           {(activeSession.role === "ADMIN" || activeSession.role === "TEACHER") && (
@@ -540,6 +591,18 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
                       <span>Preview</span>
                     </button>
 
+                    {resource.price > 0 && resource.publicationStatus === "PUBLISHED" && (
+                      <button
+                        type="button"
+                        onClick={() => handlePurchaseResource(resource)}
+                        className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition cursor-pointer"
+                        title="Acquire resource and execute 70/30 creator revenue split"
+                      >
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                        <span>Acquire</span>
+                      </button>
+                    )}
+
                     {resource.learningSupplyIntegration?.practiceArenaDirectSkillId && onNavigateToPractice && (
                       <button
                         type="button"
@@ -561,61 +624,27 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* 2. CREATOR REVENUE & COMMERCIAL MODEL                                     */}
+      {/* 2. MANUSCRIPT INGESTION (PDF / WORD) PIPELINE                             */}
+      {/* ========================================================================= */}
+      {mainPillarTab === "ingestion" && (
+        <ManuscriptIngestionSection
+          activeSession={activeSession}
+          onResourceCreated={(createdResource) => {
+            notify(`Manuscript converted to draft resource: ${createdResource.title}`);
+            setMainPillarTab("marketplace");
+          }}
+          notify={notify}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3. CREATOR REVENUE, ROYALTIES & CONNECTED PAYOUT ACCOUNTS                 */}
       {/* ========================================================================= */}
       {mainPillarTab === "creator_hub" && (
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-600">Commercial Architecture</span>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">Creator Economics & Royalty Projections</h2>
-              <p className="text-xs text-slate-500">Transparent 70/30 creator revenue split, institutional site licensing, and print companion calculations.</p>
-            </div>
-
-            <div className="text-right">
-              <span className="text-xs font-bold text-slate-500 block">Creator Split</span>
-              <span className="text-2xl font-black text-emerald-600">70% Creator / 30% Platform</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-5 rounded-2xl bg-purple-50 border border-purple-200/80 space-y-1">
-              <span className="text-xs font-bold text-purple-900 block uppercase">Standard Digital License</span>
-              <p className="text-xl font-black text-purple-950">₦4,500 <span className="text-xs font-medium text-purple-700">/ learner</span></p>
-              <p className="text-[11px] text-purple-700">Creator receives ₦3,150 per direct acquisition.</p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-indigo-50 border border-indigo-200/80 space-y-1">
-              <span className="text-xs font-bold text-indigo-900 block uppercase">Institutional School License</span>
-              <p className="text-xl font-black text-indigo-950">₦45,000 <span className="text-xs font-medium text-indigo-700">/ school / yr</span></p>
-              <p className="text-[11px] text-indigo-700">Covers up to 250 learners. Creator receives ₦31,500.</p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200/80 space-y-1">
-              <span className="text-xs font-bold text-emerald-900 block uppercase">Print Companion Codex</span>
-              <p className="text-xl font-black text-emerald-950">₦8,500 <span className="text-xs font-medium text-emerald-700">/ bound book</span></p>
-              <p className="text-[11px] text-emerald-700">Includes QR codex integration with mobile practice sync.</p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-            <h3 className="text-sm font-black text-slate-900">Commercial Architecture Principles</h3>
-            <ul className="text-xs text-slate-600 space-y-2">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>No Hidden Curriculum:</strong> Commercial books enrich learning supply but NEVER overwrite canonical syllabus datasets.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Privacy-Preserving Recommendations:</strong> Learners receiving practice recommendations based on diagnostic bottlenecks do NOT expose their personal identities or marks to external authors.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Creator Isolation:</strong> Authors cannot edit another creator's draft manuscripts or access unrelated classroom audit logs.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <CreatorRoyaltySection
+          activeSession={activeSession}
+          notify={notify}
+        />
       )}
 
       {/* ========================================================================= */}
@@ -1137,50 +1166,151 @@ export const BookpreneurStudio: React.FC<BookpreneurStudioProps> = ({
                 </div>
               </div>
 
-              {/* Status & Review Pipeline Actions */}
-              {(activeSession.role === "TEACHER" || activeSession.role === "ADMIN") && (
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                  {selectedResourceModal.publicationStatus === "DRAFT" && (
+              {/* Acquisition & Commercial Action */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                <div className="text-xs text-slate-500">
+                  Status: <span className="font-bold text-slate-900">{selectedResourceModal.publicationStatus}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {selectedResourceModal.publicationStatus === "PUBLISHED" && selectedResourceModal.price > 0 && (
                     <button
                       type="button"
-                      onClick={() => handleSubmitForReview(selectedResourceModal.id)}
-                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
+                      onClick={() => handlePurchaseResource(selectedResourceModal)}
+                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-emerald-600/20 cursor-pointer"
                     >
-                      Submit for Peer Review
+                      <ShoppingBag className="h-4 w-4" />
+                      <span>Acquire Resource (₦{selectedResourceModal.price.toLocaleString()})</span>
                     </button>
                   )}
 
-                  {selectedResourceModal.publicationStatus === "UNDER_REVIEW" && (
-                    <button
-                      type="button"
-                      onClick={() => handleApprove(selectedResourceModal.id)}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer"
-                    >
-                      Approve Resource
-                    </button>
-                  )}
+                  {/* Status & Review Pipeline Actions */}
+                  {(activeSession.role === "TEACHER" || activeSession.role === "ADMIN") && (
+                    <>
+                      {selectedResourceModal.publicationStatus === "DRAFT" && (
+                        <button
+                          type="button"
+                          onClick={() => handleSubmitForReview(selectedResourceModal.id)}
+                          className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
+                        >
+                          Submit for Peer Review
+                        </button>
+                      )}
 
-                  {selectedResourceModal.publicationStatus === "APPROVED" && (
-                    <button
-                      type="button"
-                      onClick={() => handlePublish(selectedResourceModal.id)}
-                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs cursor-pointer"
-                    >
-                      Publish to Marketplace
-                    </button>
-                  )}
+                      {selectedResourceModal.publicationStatus === "UNDER_REVIEW" && (
+                        <button
+                          type="button"
+                          onClick={() => handleApprove(selectedResourceModal.id)}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer"
+                        >
+                          Approve Resource
+                        </button>
+                      )}
 
-                  {selectedResourceModal.publicationStatus === "PUBLISHED" && (
-                    <button
-                      type="button"
-                      onClick={() => handleSuspend(selectedResourceModal.id)}
-                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs cursor-pointer"
-                    >
-                      Suspend Listing
-                    </button>
+                      {selectedResourceModal.publicationStatus === "APPROVED" && (
+                        <button
+                          type="button"
+                          onClick={() => handlePublish(selectedResourceModal.id)}
+                          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs cursor-pointer"
+                        >
+                          Publish to Marketplace
+                        </button>
+                      )}
+
+                      {selectedResourceModal.publicationStatus === "PUBLISHED" && (
+                        <button
+                          type="button"
+                          onClick={() => handleSuspend(selectedResourceModal.id)}
+                          className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs cursor-pointer"
+                        >
+                          Suspend Listing
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
-              )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PURCHASE RECEIPT & 70/30 SPLIT CONFIRMATION MODAL                         */}
+      {/* ========================================================================= */}
+      {purchaseReceipt && (
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
+                  <Check className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Resource Acquired</h3>
+                  <span className="text-[11px] font-mono text-slate-500">Ref: {purchaseReceipt.txRef}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPurchaseReceipt(null)}
+                className="text-slate-400 hover:text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-[10px] font-bold uppercase text-slate-500">Educational Codex</span>
+              <h4 className="text-sm font-black text-slate-900">{purchaseReceipt.resource.title}</h4>
+              <p className="text-xs text-slate-600">Creator: {purchaseReceipt.resource.creatorName}</p>
+            </div>
+
+            {/* 70/30 Immutable Breakdown Card */}
+            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+              <span className="text-xs font-bold text-emerald-950 uppercase tracking-wide block">
+                70/30 Revenue Split Ledger
+              </span>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between text-slate-700">
+                  <span>Gross Amount Paid:</span>
+                  <span className="font-bold text-slate-900">₦{purchaseReceipt.grossPaid.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-emerald-800 font-bold">
+                  <span>Creator Earnings (70%):</span>
+                  <span>+ ₦{purchaseReceipt.creatorShare.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Platform Retained (30%):</span>
+                  <span>₦{purchaseReceipt.platformShare.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Credited to author's institutional royalty ledger.</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPurchaseReceipt(null);
+                  setMainPillarTab("creator_hub");
+                }}
+                className="text-purple-700 hover:text-purple-900 text-xs font-bold underline"
+              >
+                View in Creator Revenue Hub →
+              </button>
+              <button
+                type="button"
+                onClick={() => setPurchaseReceipt(null)}
+                className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>

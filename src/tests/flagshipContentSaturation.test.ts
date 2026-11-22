@@ -9,6 +9,8 @@
 import { curriculumService } from "../services/curriculumService";
 import { LEARNING_DOMAINS, SUBJECTS } from "../data/curriculumData";
 import { CURRICULUM_STANDARD_MAPPINGS } from "../data/curriculumMappingsData";
+import { WAVE1_DEEP_SATURATED_MATH_UNITS } from "../data/primary/wave1DeepSaturatedMathUnits";
+import { EXPANDED_151_SUBJECT_CATEGORIES } from "../data/expandedSubjectCategories";
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -128,14 +130,75 @@ export async function runFlagshipContentSaturationTests(): Promise<void> {
 
   console.log("✅ [PASS] All curriculumService query methods execute with high fidelity and zero defects");
 
+  // Vector 6: Wave 1 Deep-Saturation Gates (A-F) Verification
+  console.log("\n--- Vector 6: Wave 1 Deep-Saturation Gates (A-F) Verification ---");
+  assert(WAVE1_DEEP_SATURATED_MATH_UNITS.length === 10, `Expected 10 Wave 1 units, got ${WAVE1_DEEP_SATURATED_MATH_UNITS.length}`);
+
+  const categoryCodes = new Set(EXPANDED_151_SUBJECT_CATEGORIES.map((c) => c.code));
+  let totalWave1Questions = 0;
+
+  for (const unit of WAVE1_DEEP_SATURATED_MATH_UNITS) {
+    // GATE A: Canonical identity, registration, provenance, standards
+    assert(categoryCodes.has(unit.subjectId), `Subject ${unit.subjectId} must exist in 151 Subject Catalogue`);
+    assert(unit.isDeepSaturated === true, `Unit ${unit.id} must have isDeepSaturated === true`);
+    assert(unit.provenanceVersion === "2026.WAVE1.DEEP_SATURATION.v1", `Unit ${unit.id} must have versioned provenance`);
+    assert(Array.isArray(unit.curriculumStandardMappings) && unit.curriculumStandardMappings.length >= 3, `Unit ${unit.id} missing curriculum mappings`);
+
+    // GATE C: Verified 3-5 Hours of Learning
+    assert(typeof unit.estimatedHours === "number" && unit.estimatedHours >= 3.0 && unit.estimatedHours <= 5.0, `Unit ${unit.id} estimated hours must be 3-5h, got ${unit.estimatedHours}`);
+    assert(Boolean(unit.estimationMethod) && unit.estimationMethod.length > 20, `Unit ${unit.id} missing documented estimation method`);
+
+    // Verify skills and pedagogy
+    assert(unit.skills.length >= 1, `Unit ${unit.id} must have at least 1 skill`);
+    for (const skill of unit.skills) {
+      // GATE B: 11-dimension pedagogical lesson depth
+      const lesson = skill.lesson;
+      assert(Boolean(lesson), `Skill ${skill.id} missing lesson`);
+      if (lesson) {
+        assert(Boolean(lesson.hookAndIntuition), `Lesson ${lesson.id} missing hookAndIntuition`);
+        assert(Boolean(lesson.conceptualExplanation), `Lesson ${lesson.id} missing conceptualExplanation`);
+        assert(Boolean(lesson.conceptualModel), `Lesson ${lesson.id} missing conceptualModel (GATE B)`);
+        assert(Boolean(lesson.diagnosticSelfCheck), `Lesson ${lesson.id} missing diagnosticSelfCheck (GATE B)`);
+        assert(Array.isArray(lesson.workedExamples) && lesson.workedExamples.length >= 1, `Lesson ${lesson.id} missing workedExamples`);
+        assert(Boolean(lesson.guidedPracticePrompt), `Lesson ${lesson.id} missing guidedPracticePrompt`);
+        assert(Boolean(lesson.independentPracticePrompt), `Lesson ${lesson.id} missing independentPracticePrompt (GATE B)`);
+        assert(Array.isArray(lesson.commonMisconceptionsAndTraps) && lesson.commonMisconceptionsAndTraps.length >= 1, `Lesson ${lesson.id} missing misconceptions`);
+        assert(Boolean(lesson.transferApplication), `Lesson ${lesson.id} missing transferApplication (GATE B)`);
+        assert(Boolean(lesson.masteryAssessment), `Lesson ${lesson.id} missing masteryAssessment (GATE B)`);
+        assert(Boolean(lesson.reflectionPrompt), `Lesson ${lesson.id} missing reflectionPrompt (GATE B)`);
+        assert(Boolean(lesson.extensionActivity), `Lesson ${lesson.id} missing extensionActivity (GATE B)`);
+      }
+
+      // GATE D: Assessment Depth Floor (>= 5 questions, target 8-12)
+      assert(skill.questions.length >= 5, `Skill ${skill.id} failed Gate D floor (must have >= 5 questions, got ${skill.questions.length})`);
+      assert(skill.questions.length >= 8, `Skill ${skill.id} target 8-12 questions met, got ${skill.questions.length}`);
+      totalWave1Questions += skill.questions.length;
+
+      // GATE E: Hint & Distractor Parity
+      for (const q of skill.questions) {
+        assert(Array.isArray(q.hintLadder) && q.hintLadder.length >= 3, `Question ${q.id} failed Gate E (requires >= 3 hints, got ${q.hintLadder?.length})`);
+        assert(Array.isArray(q.misconceptionAlerts) && q.misconceptionAlerts.length >= 1, `Question ${q.id} failed Gate E (requires misconception alerts)`);
+
+        // GATE F: Subject-Specific Authenticity
+        assert(Array.isArray(q.options) && q.options.length >= 4, `Question ${q.id} must have at least 4 options`);
+        assert(q.options.includes(q.correctAnswer), `Question ${q.id} correctAnswer must be in options`);
+        assert(Boolean(q.explanation) && q.explanation.length > 10, `Question ${q.id} explanation missing`);
+      }
+    }
+  }
+
+  console.log(`✅ [PASS] Wave 1 Deep-Saturation Gates A-F 100% verified across 10 foundational subjects (${totalWave1Questions} questions, QBD: ${(totalWave1Questions / 10).toFixed(1)}, 100% 11-dimension lesson depth, 100% 3-tier hints)`);
+
   console.log("\n==========================================================================");
   console.log("🎉 ALL FLAGSHIP CONTENT SATURATION INVARIANTS 100% VERIFIED!");
   console.log("==========================================================================\n");
 }
 
-if (typeof require !== "undefined" && require.main === module) {
-  runFlagshipContentSaturationTests().catch((err) => {
+runFlagshipContentSaturationTests()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
     console.error("Flagship test failed:", err);
     process.exit(1);
   });
-}

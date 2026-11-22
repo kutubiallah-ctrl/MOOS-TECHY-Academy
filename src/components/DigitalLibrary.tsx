@@ -84,7 +84,7 @@ export const DigitalLibrary: React.FC = () => {
           <div className="flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-indigo-400" />
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-              MOOS TECHY ACADEMY Digital Library
+              MOOS Academy Digital Library
             </span>
           </div>
           <h2 className="text-2xl font-bold mt-1">Mathematical Formula Codex & Concept Atlas</h2>

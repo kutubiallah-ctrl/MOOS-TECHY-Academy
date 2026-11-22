@@ -26,8 +26,11 @@ import {
 } from "../types/bookpreneur";
 import { ContentLifecycleStatus } from "../types/agentOrchestrator";
 import { UserSession, UserIdentity, InstitutionalUser } from "../types/identity";
+import { IngestedManuscriptPackage } from "../types/manuscript";
 import { authorizationService } from "./authorizationService";
 import { auditService } from "./auditService";
+import { royaltyService } from "./royaltyService";
+import { manuscriptIngestionService } from "./manuscriptIngestionService";
 
 export const SEEDED_BOOKPRENEUR_PROJECTS: BookpreneurProject[] = [
   {
@@ -36,7 +39,7 @@ export const SEEDED_BOOKPRENEUR_PROJECTS: BookpreneurProject[] = [
     subtitle: "How First-Principles Cognitive Scaffolding and Deliberate Practice Rewire Scientific Intuition",
     workingSubtitle: "Bridging the Gap Between Rote Memorization and Deep Mathematical Intuition",
     authorName: "Dr. O. Adeleke",
-    authorAffiliation: "Director of Cognitive Systems, MOOS TECHY Institute",
+    authorAffiliation: "Director of Cognitive Systems, MOOS ACADEMY Institute",
     category: "education_pedagogy",
     positioning: {
       coreThesis: "Educational underperformance in STEM is primarily an architectural failure of mental schema construction, not a lack of innate student intelligence. By structuring pedagogical scaffolding around Socratic inquiry and deliberate cognitive friction, any learner can achieve first-principles mastery.",
@@ -161,7 +164,7 @@ export const SEEDED_BOOKPRENEUR_PROJECTS: BookpreneurProject[] = [
       bibliographyCompiled: true,
       indexTermsGenerated: false,
       backCoverCopy: "Unlock the scientific architecture behind breakthrough STEM learning. Dr. O. Adeleke presents a transformative roadmap for educators and learners to achieve durable mathematical intuition.",
-      authorBioSummary: "Dr. O. Adeleke is a lead mathematical pedagogue and researcher in cognitive architecture at MOOS TECHY ACADEMY.",
+      authorBioSummary: "Dr. O. Adeleke is a lead mathematical pedagogue and researcher in cognitive architecture at MOOS ACADEMY.",
       isbnAssigned: "978-978-994-201-8"
     },
     lifecycleStatus: "author_review",
@@ -179,7 +182,7 @@ export const SEEDED_MARKETPLACE_RESOURCES: MarketplaceResource[] = [
     description: "The definitive guide for STEM educators and senior secondary students to build deep conceptual intuition in mathematics, physics, and chemistry. Includes 50+ graduated 3-tier Socratic hint ladders and CBT diagnostic frameworks.",
     creatorId: "user-teacher-adeleke",
     creatorName: "Dr. O. Adeleke",
-    creatorAffiliation: "Director of Cognitive Systems, MOOS TECHY Institute",
+    creatorAffiliation: "Director of Cognitive Systems, MOOS ACADEMY Institute",
     creatorRole: "TEACHER",
     category: "education_pedagogy",
     subject: "Mathematics & STEM Pedagogy",
@@ -242,7 +245,7 @@ export const SEEDED_MARKETPLACE_RESOURCES: MarketplaceResource[] = [
     subtitle: "Complete Exam Theory, Step-by-Step Derivations & Diagnostic Traps",
     description: "Comprehensive West African Senior School Certificate Examination (WASSCE) preparation guide featuring 500+ solved exam questions, common examiner traps, marking scheme breakdown, and instant QR links to online practice drills.",
     creatorId: "user-teacher-adeleke",
-    creatorName: "MOOS TECHY Senior Faculty",
+    creatorName: "MOOS ACADEMY Senior Faculty",
     creatorAffiliation: "Department of Mathematical Sciences",
     creatorRole: "TEACHER",
     category: "education_pedagogy",
@@ -422,7 +425,7 @@ class BookpreneurService {
       subtitle: projectData.subtitle || "A Structured Nonfiction Treatise",
       workingSubtitle: projectData.workingSubtitle || "",
       authorName: projectData.authorName || actorDisplayName,
-      authorAffiliation: projectData.authorAffiliation || "MOOS TECHY Author Community",
+      authorAffiliation: projectData.authorAffiliation || "MOOS ACADEMY Author Community",
       category: projectData.category || "education_pedagogy",
       positioning: projectData.positioning || {
         coreThesis: "Core thesis to be developed.",
@@ -693,7 +696,7 @@ class BookpreneurService {
       description: data.description || "Comprehensive educational codex.",
       creatorId: actorId,
       creatorName: data.creatorName || actorDisplayName,
-      creatorAffiliation: data.creatorAffiliation || "MOOS TECHY Author Community",
+      creatorAffiliation: data.creatorAffiliation || "MOOS ACADEMY Author Community",
       creatorRole: (actor.role === "ADMIN" ? "ADMIN" : "TEACHER"),
       category: data.category || "education_pedagogy",
       subject: data.subject || "General STEM",
@@ -945,19 +948,165 @@ class BookpreneurService {
     format: MarketplaceFormat = "digital_textbook"
   ) {
     const grossRevenue = price * quantity;
-    const creatorRoyaltyPercentage = 70;
-    const platformCommissionPercentage = 30;
-
-    const creatorEarnings = (grossRevenue * creatorRoyaltyPercentage) / 100;
-    const platformFee = (grossRevenue * platformCommissionPercentage) / 100;
+    const split = royaltyService.calculateSplit(grossRevenue);
 
     return {
       grossRevenue,
-      creatorEarnings,
-      platformFee,
-      royaltyRate: `${creatorRoyaltyPercentage}%`,
-      platformRate: `${platformCommissionPercentage}%`,
+      creatorEarnings: split.creatorShare,
+      platformFee: split.platformShare,
+      royaltyRate: `${split.creatorPercentage}%`,
+      platformRate: `${split.platformPercentage}%`,
       format
+    };
+  }
+
+  /**
+   * Convert an ingested manuscript package into a draft marketplace educational resource.
+   * Preserves the original manuscript file, extracts chapters, and keeps publicationStatus as DRAFT.
+   */
+  public createResourceFromIngestedManuscript(
+    actor: UserSession | UserIdentity | InstitutionalUser,
+    pkg: IngestedManuscriptPackage,
+    metadataOverrides?: {
+      title?: string;
+      subtitle?: string;
+      authorName?: string;
+      category?: any;
+      subject?: string;
+      educationLevel?: any;
+      format?: MarketplaceFormat;
+      price?: number;
+      currency?: "NGN" | "USD";
+      description?: string;
+    }
+  ): MarketplaceResource {
+    const actorId = "userId" in actor ? actor.userId : actor.id;
+
+    // Enforce creator ownership
+    if (pkg.creatorId && pkg.creatorId !== actorId && actor.role.toUpperCase() !== "ADMIN") {
+      throw new Error(`Unauthorized: You cannot create a resource from a manuscript belonging to '${pkg.creatorId}'.`);
+    }
+
+    const title = metadataOverrides?.title || pkg.metadata.detectedTitle || pkg.originalFile.fileName.replace(/\.[^/.]+$/, "");
+    const authorName = metadataOverrides?.authorName || pkg.metadata.detectedAuthor || actor.displayName || "Educator Author";
+    const resourceId = `mkt-res-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+
+    // Build preview sections from extracted chapters
+    const previewSections = pkg.chapters.slice(0, 3).map((ch) => ({
+      title: `Chapter ${ch.chapterNumber}: ${ch.title}`,
+      contentExcerpt: ch.rawTextExcerpt.substring(0, 350) + "...",
+      pageNumber: ch.pageStart || ch.chapterNumber * 15
+    }));
+
+    const newResource: MarketplaceResource = {
+      id: resourceId,
+      title,
+      subtitle: metadataOverrides?.subtitle || (pkg.chapters.length > 0 ? `${pkg.chapters.length} Comprehensive Pedagogical Chapters` : undefined),
+      description: metadataOverrides?.description || `Authentic educational resource ingested from ${pkg.originalFile.fileName}. Preserves complete chapter architecture and author derivations.`,
+      creatorId: actorId,
+      creatorName: authorName,
+      creatorAffiliation: "MOOS ACADEMY Verified Author / Educator",
+      creatorRole: actor.role.toUpperCase() === "ADMIN" ? "ADMIN" : "CREATOR",
+      category: metadataOverrides?.category || "education_pedagogy",
+      subject: metadataOverrides?.subject || "General Science & Mathematics",
+      educationLevel: metadataOverrides?.educationLevel || "senior_secondary",
+      curriculumAlignment: ["WAEC-WASSCE", "NERDC-COMPLIANT"],
+      format: metadataOverrides?.format || "digital_textbook",
+      price: typeof metadataOverrides?.price === "number" ? metadataOverrides.price : 4500,
+      currency: metadataOverrides?.currency || "NGN",
+      publicationStatus: "DRAFT", // NEVER automatically publish
+      provenance: "CREATOR_AUTHORED",
+      version: "1.0.0",
+      averageRating: 5.0,
+      totalRatingsCount: 0,
+      totalPurchasesCount: 0,
+      reviews: [],
+      previewSections,
+      chaptersCount: pkg.chapters.length,
+      originalManuscriptFile: pkg.originalFile,
+      commercialModel: {
+        creatorRoyaltyPercentage: 70,
+        platformCommissionPercentage: 30,
+        institutionalLicenseAvailable: true,
+        institutionalLicensePrice: (metadataOverrides?.price || 4500) * 10,
+        printCompanionAvailable: false
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    this.marketplaceResources.unshift(newResource);
+
+    auditService.logEvent({
+      eventType: "BOOK_CREATED",
+      actorId,
+      actorRole: actor.role,
+      actorDisplayName: actor.displayName || "Author",
+      resourceType: "marketplace_resource",
+      resourceId,
+      result: "SUCCESS",
+      dataClassification: "CLASSROOM_INSTITUTIONAL",
+      metadata: {
+        title,
+        chaptersCount: pkg.chapters.length,
+        originalFileName: pkg.originalFile.fileName
+      }
+    });
+
+    return newResource;
+  }
+
+  /**
+   * Process a purchase of an educational resource, updating the immutable 70/30 royalty ledger
+   */
+  public purchaseMarketplaceResource(
+    buyer: UserSession | UserIdentity | InstitutionalUser,
+    resourceId: string,
+    quantity = 1
+  ): {
+    success: boolean;
+    resource: MarketplaceResource;
+    royaltyTransactionId: string;
+    grossPaid: number;
+    creatorShare: number;
+    platformShare: number;
+    currency: "NGN" | "USD";
+  } {
+    const resource = this.getMarketplaceResourceById(resourceId);
+    if (!resource) {
+      throw new Error(`Resource '${resourceId}' not found.`);
+    }
+
+    if (resource.publicationStatus !== "PUBLISHED" && buyer.role.toUpperCase() !== "ADMIN") {
+      throw new Error(`Cannot purchase resource '${resource.title}' because it is in '${resource.publicationStatus}' status.`);
+    }
+
+    const buyerId = "userId" in buyer ? buyer.userId : buyer.id;
+    const grossAmount = resource.price * quantity;
+
+    // Record sale in royalty service with 70/30 split
+    const tx = royaltyService.recordSale({
+      creatorId: resource.creatorId,
+      resourceId: resource.id,
+      resourceTitle: resource.title,
+      buyerId,
+      buyerRole: buyer.role,
+      grossAmount,
+      currency: resource.currency,
+      instantSettlement: true
+    });
+
+    resource.totalPurchasesCount = (resource.totalPurchasesCount || 0) + quantity;
+    resource.updatedAt = new Date().toISOString();
+
+    return {
+      success: true,
+      resource,
+      royaltyTransactionId: tx.id,
+      grossPaid: grossAmount,
+      creatorShare: tx.creatorShare,
+      platformShare: tx.platformShare,
+      currency: resource.currency
     };
   }
 }

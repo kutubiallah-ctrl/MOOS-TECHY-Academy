@@ -1,6 +1,7 @@
 import { ExtendedLearnerProfile, LearnerActivity, QuestionAttempt, ExamSubmissionRecord } from "../types/learner";
 import { DiagnosticResult } from "../types/curriculum";
 import { repositories } from "./repositories";
+import { firebaseSyncService } from "./firebaseSyncService";
 
 export interface ILearnerStorageService {
   getProfile(): Promise<ExtendedLearnerProfile>;
@@ -20,7 +21,12 @@ class DelegatingLearnerStorageService implements ILearnerStorageService {
   }
 
   public async saveProfile(profile: ExtendedLearnerProfile): Promise<ExtendedLearnerProfile> {
-    return repositories.learner.saveProfile(profile);
+    const saved = await repositories.learner.saveProfile(profile);
+    // Background fire-and-forget sync to Firestore if user is authenticated
+    firebaseSyncService.syncLearnerProfileToCloud(saved).catch((e) => {
+      console.warn("Background Firestore sync skipped/failed:", e);
+    });
+    return saved;
   }
 
   public async recordActivity(activityData: Omit<LearnerActivity, "id" | "timestamp">): Promise<ExtendedLearnerProfile> {

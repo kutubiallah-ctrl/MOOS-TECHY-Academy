@@ -7,6 +7,7 @@
  */
 
 import { ContentLifecycleStatus, ClaimClassification, SourceVerificationStatus } from "./agentOrchestrator";
+import { PreservedOriginalFile } from "./manuscript";
 
 export type BookpreneurCategory =
   | "education_pedagogy"
@@ -152,7 +153,12 @@ export type MarketplaceFormat =
   | "stem_codex"
   | "teacher_resource"
   | "print_companion"
-  | "revision_manual";
+  | "revision_manual"
+  | "video_course"
+  | "video_lesson"
+  | "video_collection"
+  | "creator_video_package"
+  | "video_workbook_package";
 
 export type MarketplaceEducationLevel =
   | "PRIMARY"
@@ -219,6 +225,9 @@ export interface MarketplaceResource {
     printCompanionAvailable: boolean;
     printCompanionPrice?: number;
   };
+  originalManuscriptFile?: PreservedOriginalFile;
+  chaptersCount?: number;
+  totalPurchasesCount?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -139,7 +139,7 @@ export const QRCompanionHub: React.FC<QRCompanionHubProps> = ({
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-full">
                 <QrCode className="h-3.5 w-3.5" />
-                MOOS TECHY QR Textbook Ecosystem
+                MOOS Academy QR Textbook Ecosystem
               </span>
               <span className="text-xs text-slate-300 font-medium">
                 • Multi-Volume STEM & Humanities Catalog
@@ -149,7 +149,7 @@ export const QRCompanionHub: React.FC<QRCompanionHubProps> = ({
               Physical Textbook Companion & Worked Solutions
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Scan or enter any chapter QR code from official MOOS TECHY publications to access interactive derivations, digital models, and step-by-step Socratic assistance.
+              Scan or enter any chapter QR code from official MOOS Academy publications to access interactive derivations, digital models, and step-by-step Socratic assistance.
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export const QRCompanionHub: React.FC<QRCompanionHubProps> = ({
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Library className="h-5 w-5 text-indigo-600" />
-              Registered MOOS TECHY Textbook Volumes
+              Registered MOOS Academy Textbook Volumes
             </h2>
             <span className="text-xs text-slate-500 font-medium">
               National STEM & Senior Secondary Curriculum Standards

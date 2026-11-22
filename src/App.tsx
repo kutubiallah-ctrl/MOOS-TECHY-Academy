@@ -17,11 +17,21 @@ import { BookpreneurStudio } from "./components/BookpreneurStudio";
 import { AgentIntelligenceHub } from "./components/AgentIntelligenceHub";
 import { InstitutionalArchitectureMap } from "./components/InstitutionalArchitectureMap";
 import { LessonViewer } from "./components/LessonViewer";
+import { ContentSaturationExplorer } from "./components/ContentSaturationExplorer";
+import { VideoGeneratorStudio } from "./components/VideoGeneratorStudio";
+import { LiveVoiceConversation } from "./components/LiveVoiceConversation";
+import { AudioTranscriber } from "./components/AudioTranscriber";
+import { DevelopmentGuardianDashboard } from "./components/DevelopmentGuardianDashboard";
+import { GlobalOnboardingModal } from "./components/GlobalOnboardingModal";
+import { ClubsModal } from "./components/ClubsModal";
 import { ALL_CURRICULUM_UNITS } from "./data/extendedCurriculumUnits";
 import { Skill, Unit, PracticeQuestion, EducationalLevel, DiagnosticResult } from "./types/curriculum";
+import { EmailEntryGate } from "./components/gate/EmailEntryGate";
+import { emailAllowlistService } from "./services/emailAllowlistService";
+import { WhatsAppAdminChatButton } from "./components/WhatsAppAdminChatButton";
 
 function MainAppContent() {
-  const { profile, activeUnit, activeSkill, setActiveSkillAndUnit, recordDiagnosticResult } = useLearner();
+  const { profile, activeUnit, activeSkill, setActiveSkillAndUnit, recordDiagnosticResult, switchAcademicContext, updateProfileInfo } = useLearner();
 
   const [activeView, setActiveView] = useState<ActiveView>("dashboard");
   const [currentLevel, setCurrentLevel] = useState<EducationalLevel | "all">(profile.targetLevel || "senior_secondary");
@@ -29,6 +39,10 @@ function MainAppContent() {
   const [selectedPlayActivityId, setSelectedPlayActivityId] = useState<string | undefined>(undefined);
   const [selectedQRResourceCode, setSelectedQRResourceCode] = useState<string | undefined>(undefined);
   const [activeAssignmentId, setActiveAssignmentId] = useState<string | undefined>(undefined);
+
+  // Global Onboarding and Clubs modal states
+  const [isGlobalOnboardingOpen, setIsGlobalOnboardingOpen] = useState(false);
+  const [isClubsModalOpen, setIsClubsModalOpen] = useState(false);
 
   // Socratic AI Tutor Drawer state
   const [isAITutorOpen, setIsAITutorOpen] = useState(false);
@@ -95,7 +109,7 @@ function MainAppContent() {
   };
 
   return (
-    <div id="moos-techy-academy-app" className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col font-sans antialiased">
+    <div id="moos-academy-app" className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col font-sans antialiased">
       {/* Top Navbar */}
       <Navbar
         activeView={activeView}
@@ -106,6 +120,8 @@ function MainAppContent() {
           setIsAITutorOpen(true);
         }}
         onQuickDiagnostic={() => setActiveView("diagnostic")}
+        onOpenGlobalSettings={() => setIsGlobalOnboardingOpen(true)}
+        onOpenClubs={() => setIsClubsModalOpen(true)}
       />
 
       {/* Main Content View Switcher */}
@@ -126,6 +142,10 @@ function MainAppContent() {
               setStakeholderTab("parent");
               setActiveView("stakeholders");
             }}
+            onOpenSaturationStudio={() => setActiveView("saturation_studio")}
+            onOpenVideoStudio={() => setActiveView("video_studio")}
+            onOpenLiveVoice={() => setActiveView("live_voice")}
+            onOpenTranscribe={() => setActiveView("transcribe")}
           />
         )}
 
@@ -136,6 +156,7 @@ function MainAppContent() {
             masteryRecords={profile?.masteryRecords || {}}
             currentLevel={currentLevel}
             onLevelChange={setCurrentLevel}
+            countryCode={profile?.academicContext?.country || "NG"}
           />
         )}
 
@@ -237,6 +258,10 @@ function MainAppContent() {
           <InstitutionalArchitectureMap onNavigate={setActiveView} />
         )}
 
+        {activeView === "saturation_studio" && (
+          <ContentSaturationExplorer onSelectSkillId={handleLaunchSkillById} />
+        )}
+
         {activeView === "stakeholders" && (
           <StakeholderPortals
             activeTab={stakeholderTab}
@@ -245,6 +270,30 @@ function MainAppContent() {
         )}
 
         {activeView === "library" && <DigitalLibrary />}
+
+        {activeView === "video_studio" && (
+          <VideoGeneratorStudio onClose={() => setActiveView("dashboard")} />
+        )}
+
+        {activeView === "live_voice" && (
+          <LiveVoiceConversation onClose={() => setActiveView("dashboard")} />
+        )}
+
+        {activeView === "transcribe" && (
+          <AudioTranscriber
+            onClose={() => setActiveView("dashboard")}
+            onInsertTranscript={(text) => {
+              handleOpenAITutorWithCustomContext(
+                "Voice Input Analysis",
+                `Here is a transcript of my thoughts/notes: "${text}". Could you review this and provide Socratic guidance?`
+              );
+            }}
+          />
+        )}
+
+        {activeView === "development_guardian" && (
+          <DevelopmentGuardianDashboard />
+        )}
       </main>
 
       {/* Persistent Socratic AI Tutor Modal / Drawer */}
@@ -257,11 +306,29 @@ function MainAppContent() {
         isFloating={true}
       />
 
+      {/* Global Regional & Language Standards Onboarding */}
+      <GlobalOnboardingModal
+        isOpen={isGlobalOnboardingOpen}
+        onClose={() => setIsGlobalOnboardingOpen(false)}
+        profile={profile}
+        onSaveProfile={async (updatedProfile) => {
+          await updateProfileInfo(updatedProfile);
+          setIsGlobalOnboardingOpen(false);
+        }}
+      />
+
+      {/* 9-Stage Active Co-Curricular & Skills Life Cycle */}
+      <ClubsModal
+        isOpen={isClubsModalOpen}
+        onClose={() => setIsClubsModalOpen(false)}
+        learnerId={profile.id}
+      />
+
       {/* Global Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-900">MOOS TECHY ACADEMY</span>
+            <span className="font-bold text-slate-900">MOOS Academy</span>
             <span>— Mastery-based Multidisciplinary Learning Architecture</span>
           </div>
           <div className="flex items-center gap-4 text-slate-400">
@@ -278,9 +345,24 @@ function MainAppContent() {
 }
 
 export default function App() {
+  const [hasGateAccess, setHasGateAccess] = useState<boolean>(() => emailAllowlistService.hasGateAccess());
+
+  const handleAccessGranted = (email: string, token: string) => {
+    setHasGateAccess(true);
+  };
+
   return (
-    <LearnerProvider>
-      <MainAppContent />
-    </LearnerProvider>
+    <>
+      {!hasGateAccess ? (
+        <EmailEntryGate onAccessGranted={handleAccessGranted} />
+      ) : (
+        <LearnerProvider>
+          <MainAppContent />
+        </LearnerProvider>
+      )}
+
+      {/* Floating Official WhatsApp Business Support Button — Always visible across public landing & main academy */}
+      <WhatsAppAdminChatButton />
+    </>
   );
 }

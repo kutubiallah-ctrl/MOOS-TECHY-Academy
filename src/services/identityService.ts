@@ -1,5 +1,5 @@
 /**
- * MOOS TECHY ACADEMY — LOCAL IDENTITY & SESSION SERVICE
+ * MOOS ACADEMY — LOCAL IDENTITY & SESSION SERVICE
  * 
  * Manages deterministic local user identities, pre-seeded institutional accounts,
  * active local session contexts, and safe role-isolated user switching.
@@ -15,6 +15,7 @@ import {
   UserSession
 } from "../types/identity";
 import { auditService } from "./auditService";
+import { mfaService } from "./mfaService";
 
 const IDENTITIES_STORAGE_KEY = "moos_academy_local_identities_v1";
 const SESSION_STORAGE_KEY = "moos_academy_active_session_v1";
@@ -25,8 +26,8 @@ const SESSION_STORAGE_KEY = "moos_academy_active_session_v1";
 export const SEEDED_LEARNER_USER: LearnerUserIdentity = {
   id: "usr_lrn_ada_lovelace",
   role: "LEARNER",
-  displayName: "Ada Lovelace (Musa Techy)",
-  email: "ada.lovelace@academy.moostechy.org",
+  displayName: "Ada Lovelace",
+  email: "ada.lovelace@moos.academy",
   createdAt: "2026-01-15T08:00:00.000Z",
   updatedAt: "2026-08-28T10:00:00.000Z",
   status: "ACTIVE",
@@ -43,11 +44,11 @@ export const SEEDED_TEACHER_USER: TeacherUserIdentity = {
   id: "usr_tch_babatunde_ojo",
   role: "TEACHER",
   displayName: "Mr. Babatunde Ojo",
-  email: "babatunde.ojo@academy.moostechy.org",
+  email: "babatunde.ojo@moos.academy",
   createdAt: "2026-01-10T08:00:00.000Z",
   updatedAt: "2026-08-28T10:00:00.000Z",
   status: "ACTIVE",
-  schoolOrOrgName: "Moos Techy Academy — Senior STEM Faculty",
+  schoolOrOrgName: "MOOS Academy — Senior STEM Faculty",
   department: "Department of Pure & Applied Mathematics",
   assignedClassroomIds: ["cls-ss2-sci-a", "cls-ss2-sci-b", "cls-ss1-gen-c", "class-sss3-math-a", "class-sss3-math-b", "class-jamb-cbt-prep"],
   assignedStudentIds: ["usr_lrn_ada_lovelace", "student_001", "student_002", "student_003"]
@@ -57,11 +58,11 @@ export const SEEDED_ADMIN_USER: AdminUserIdentity = {
   id: "usr_adm_amina_bello",
   role: "ADMIN",
   displayName: "Dr. Amina Bello",
-  email: "amina.bello@governance.moostechy.org",
+  email: "amina.bello@governance.moos.academy",
   createdAt: "2026-01-01T08:00:00.000Z",
   updatedAt: "2026-08-28T10:00:00.000Z",
   status: "ACTIVE",
-  institutionName: "Moos Techy Academy Governing Board",
+  institutionName: "MOOS Academy Governing Board",
   administrativeDomain: "Institutional Academic Oversight & Governance",
   isSuperAdmin: true
 };
@@ -200,6 +201,10 @@ export class IdentityService {
     const sessionId = `sess_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 7)}`;
     const now = new Date().toISOString();
 
+    // Check independent AAL2 MFA assurance status (never trust client-set flags)
+    const hasMfa = mfaService.hasActiveAssurance(user.id);
+    const mfaAssuranceLevel = hasMfa ? "AAL2" : "AAL1";
+
     const session: UserSession = {
       sessionId,
       userId: user.id,
@@ -208,6 +213,7 @@ export class IdentityService {
       activeClassroomId: activeClassroomId || (user.role === "TEACHER" ? (user as TeacherUserIdentity).assignedClassroomIds[0] : undefined),
       createdAt: now,
       lastActivityAt: now,
+      mfaAssuranceLevel,
       deviceContext: {
         isLocalDevice: true,
         clientVersion: "1.0.0-institutional",
@@ -234,7 +240,7 @@ export class IdentityService {
       resourceId: sessionId,
       classroomId: session.activeClassroomId,
       result: "SUCCESS",
-      reason: `Local session context established for ${user.displayName} (${user.role})`
+      reason: `Local session context established for ${user.displayName} (${user.role}), MFA assurance: ${mfaAssuranceLevel}`
     });
 
     return session;
@@ -242,14 +248,39 @@ export class IdentityService {
 
   /**
    * Switch active user context on the shared local device.
+   * Privileged roles (ADMIN) require verified second-factor MFA assurance (AAL2).
    */
-  public switchUser(targetUserId: string): UserSession {
+  public switchUser(
+    targetUserId: string,
+    options: { skipMfaCheck?: boolean; verificationCode?: string } = {}
+  ): UserSession {
     const targetUser = this.getIdentityById(targetUserId);
     if (!targetUser) {
       throw new Error(`Cannot switch user: Identity '${targetUserId}' does not exist.`);
     }
 
     const previousSession = this.activeSession;
+
+    // Zero-Trust Privileged Operation Gate: ADMIN role elevation requires verified MFA assurance
+    const isAdminTarget = targetUser.role === "ADMIN" || ("isSuperAdmin" in targetUser && Boolean((targetUser as any).isSuperAdmin));
+    if (!options.skipMfaCheck && isAdminTarget) {
+      const hasMfaAssurance = mfaService.hasActiveAssurance(targetUser.id, "ADMIN_ROLE_SWITCH");
+      if (!hasMfaAssurance) {
+        auditService.recordDenial({
+          actorId: previousSession?.userId || targetUser.id,
+          actorRole: previousSession?.role || "LEARNER",
+          actorDisplayName: previousSession?.displayName,
+          resourceType: "identity_session",
+          resourceId: targetUser.id,
+          denialCode: "MFA_VERIFICATION_REQUIRED",
+          reason: `Privileged role switch to '${targetUser.role}' (${targetUser.displayName}) blocked: Second-factor MFA assurance (AAL2) required.`
+        });
+        throw new Error(
+          `[MFA_VERIFICATION_REQUIRED] Role elevation to '${targetUser.role}' requires verified second-factor MFA assurance. Please complete TOTP verification.`
+        );
+      }
+    }
+
     const newSession = this.createSession(targetUser);
 
     // Record user switch audit event
@@ -265,11 +296,43 @@ export class IdentityService {
       reason: `Context switched from [${previousSession?.userId || "none"}] to [${targetUser.id}] (${targetUser.role})`,
       metadata: {
         previousUserId: previousSession?.userId,
-        previousRole: previousSession?.role
+        previousRole: previousSession?.role,
+        mfaAssuranceLevel: newSession.mfaAssuranceLevel
       }
     });
 
     return newSession;
+  }
+
+  /**
+   * Elevates session to Admin role with verified MFA assurance.
+   */
+  public elevateSessionToAdminWithMfa(
+    targetUserId: string,
+    verificationCode: string,
+    useRecoveryCode: boolean = false
+  ): UserSession {
+    const targetUser = this.getIdentityById(targetUserId);
+    if (!targetUser) {
+      throw new Error(`Target user '${targetUserId}' not found.`);
+    }
+
+    if (useRecoveryCode) {
+      // Synchronously check recovery code verification
+      throw new Error("Recovery code verification must be performed through async mfaService.verifyAndConsumeRecoveryCode");
+    }
+
+    // Mathematical verification of TOTP candidate code
+    const verification = mfaService.verifyCandidateCode(targetUserId, verificationCode);
+    if (!verification.isValid) {
+      throw new Error(`[MFA_VERIFICATION_FAILED] ${verification.reason || "Invalid TOTP verification code."}`);
+    }
+
+    // Issue AAL2 assurance ticket
+    mfaService.issueAssuranceTicket(targetUserId, "totp");
+
+    // Perform the safe switch
+    return this.switchUser(targetUserId);
   }
 
   /**
@@ -298,6 +361,7 @@ export class IdentityService {
   public terminateSession(): UserSession {
     const current = this.activeSession;
     if (current) {
+      mfaService.revokeAssurance(current.userId);
       auditService.recordEvent({
         eventType: "SESSION_TERMINATED",
         actorId: current.userId,

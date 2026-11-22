@@ -25,7 +25,9 @@ export type EducationalMaterialType =
   | "answer_key"
   | "marking_scheme"
   | "exit_ticket"
-  | "study_guide";
+  | "study_guide"
+  | "video_lesson_script"
+  | "video_explanation_package";
 
 export type MaterialProvenance =
   | "CANONICAL_CURRICULUM"
@@ -165,12 +167,20 @@ export interface TeacherEducationalMaterial {
   reviewedBy?: string;
   reviewedAt?: string;
   reviewerNotes?: string;
+  teacherNotes?: string;
   authorSignature?: string;
   linkedQRCompanionCode?: string;
   derivedFromMaterialId?: string;
   sourcePrompt?: string;
   createdAt: string;
   updatedAt: string;
+  // Compatibility & convenience aliases
+  body?: string;
+  type?: EducationalMaterialType;
+  status?: MaterialLifecycleStatus;
+  approvedBy?: string;
+  authorName?: string;
+  targetAudience?: string;
 }
 
 export interface TeacherCopilotDefaults {
@@ -193,4 +203,5 @@ export interface PreparedLessonPackage {
   lessonNote: TeacherEducationalMaterial;
   worksheet: TeacherEducationalMaterial;
   exitTicket: TeacherEducationalMaterial;
+  materials?: TeacherEducationalMaterial[];
 }

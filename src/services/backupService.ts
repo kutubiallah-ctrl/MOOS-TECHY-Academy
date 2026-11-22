@@ -163,7 +163,7 @@ export class BackupService {
       backupId,
       exportedAt,
       scope,
-      appName: "MOOS TECHY ACADEMY",
+      appName: "MOOS ACADEMY",
       appVersion: "2.5.0",
       sourceEnvironment: "browser_local_storage",
       entityCounts
@@ -871,7 +871,7 @@ export class BackupService {
         ? "moos-learner-backup"
         : envelope.metadata.scope === "teacher_only"
         ? "moos-teacher-backup"
-        : "moos-techy-academy-backup";
+        : "moos-academy-backup";
 
     const filename = `${prefix}-${today}.json`;
     const jsonString = this.serializeBackup(envelope);

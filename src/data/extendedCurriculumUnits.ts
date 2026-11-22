@@ -275,6 +275,44 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-simultaneous-eq",
             difficulty: "medium"
+          },
+          {
+            id: "q-sim-2",
+            type: "multiple_choice",
+            questionText: "Use the method of elimination to find the value of y in the following system:",
+            mathExpression: "\\begin{cases} 3x + 2y = 16 \\\\ 3x - 4y = -2 \\end{cases}",
+            options: ["y = 3", "y = 2", "y = 4", "y = -1"],
+            correctAnswer: "y = 3",
+            explanation: "Subtract equation 2 from equation 1 to eliminate 3x: (3x - 3x) + (2y - (-4y)) = 16 - (-2) => 6y = 18 => y = 3.",
+            hintLadder: [
+              "Notice the coefficients of x are both 3. Subtracting the two equations eliminates x directly.",
+              "Carefully compute: 2y - (-4y) = 2y + 4y = 6y, and 16 - (-2) = 18.",
+              "6y = 18 => y = 3."
+            ],
+            misconceptionAlerts: [
+              { trigger: "y = 2", note: "Did you make a sign error when subtracting: 16 - (-2) is 18, not 14!" }
+            ],
+            skillId: "skill-simultaneous-eq",
+            difficulty: "easy"
+          },
+          {
+            id: "q-sim-3",
+            type: "multiple_choice",
+            questionText: "Two books and three pens cost ₦1,200. Three books and two pens cost ₦1,550. What is the cost of ONE book?",
+            mathExpression: "\\begin{cases} 2b + 3p = 1200 \\\\ 3b + 2p = 1550 \\end{cases}",
+            options: ["₦450", "₦350", "₦500", "₦400"],
+            correctAnswer: "₦450",
+            explanation: "Multiply eq 1 by 2: 4b + 6p = 2400. Multiply eq 2 by 3: 9b + 6p = 4650. Subtract: 5b = 2250 => b = ₦450.",
+            hintLadder: [
+              "Set up the system: 2b + 3p = 1200 and 3b + 2p = 1550.",
+              "Equate coefficients of p: multiply first eq by 2 (4b + 6p = 2400) and second eq by 3 (9b + 6p = 4650).",
+              "Subtract to eliminate p: 9b - 4b = 4650 - 2400 => 5b = 2250 => b = 450."
+            ],
+            misconceptionAlerts: [
+              { trigger: "₦350", note: "₦350 is the price of the pen: p = (1200 - 2(450))/3 = 100, wait, check the solution!" }
+            ],
+            skillId: "skill-simultaneous-eq",
+            difficulty: "hard"
           }
         ]
       }
@@ -1558,6 +1596,48 @@ export const BUSINESS_FINANCE_UNITS: Unit[] = [
             ],
             skillId: "skill-fin-compound-interest",
             difficulty: "easy"
+          },
+          {
+            id: "q-fin-2",
+            type: "multiple_choice",
+            questionText: "A small business starts with Assets of ₦2,400,000 and Liabilities of ₦900,000. Applying the fundamental accounting equation, what is the Owner's Equity?",
+            mathExpression: "\\text{Assets} = \\text{Liabilities} + \\text{Owner's Equity}",
+            options: ["₦1,500,000", "₦3,300,000", "₦2,400,000", "₦900,000"],
+            correctAnswer: "₦1,500,000",
+            explanation: "Owner's Equity = Assets - Liabilities = ₦2,400,000 - ₦900,000 = ₦1,500,000.",
+            hintLadder: [
+              "Recall: Assets = Liabilities + Equity.",
+              "Rearrange for Equity: Equity = Assets - Liabilities.",
+              "2,400,000 - 900,000 = ₦1,500,000."
+            ],
+            misconceptionAlerts: [
+              { trigger: "₦3,300,000", note: "Did you add Assets and Liabilities? Equity is the net difference: Assets - Liabilities." }
+            ],
+            skillId: "skill-fin-compound-interest",
+            difficulty: "easy"
+          },
+          {
+            id: "q-fin-3",
+            type: "multiple_choice",
+            questionText: "Which of the following business expenditures is categorized as a CAPITAL EXPENDITURE (CapEx) rather than an Operating Expense (OpEx)?",
+            options: [
+              "Purchasing a commercial bread-baking industrial oven expected to operate for 8 years",
+              "Paying monthly electricity and utility bills for the bakery",
+              "Purchasing weekly flour, sugar, and yeast raw materials",
+              "Paying monthly salaries to the bakery staff"
+            ],
+            correctAnswer: "Purchasing a commercial bread-baking industrial oven expected to operate for 8 years",
+            explanation: "Capital expenditure acquires or upgrades long-term fixed physical assets yielding multi-year utility (such as industrial machinery), which are capitalized on the balance sheet and depreciated over time.",
+            hintLadder: [
+              "Distinguish operational ongoing costs (OpEx) from long-term asset investments (CapEx).",
+              "Operating expenses are fully expensed within the current accounting period (salaries, utilities, consumables).",
+              "Capital expenditure provides economic benefit across multiple years."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Purchasing weekly flour, sugar, and yeast raw materials", note: "Flour and yeast are raw materials expensed as Cost of Goods Sold (OpEx), not capital investments." }
+            ],
+            skillId: "skill-fin-compound-interest",
+            difficulty: "medium"
           }
         ]
       }
@@ -1568,21 +1648,47 @@ export const BUSINESS_FINANCE_UNITS: Unit[] = [
 import { SCIENCE_PHYSICS_UNITS as FLAGSHIP_PHYSICS, SCIENCE_CHEMISTRY_UNITS as FLAGSHIP_CHEMISTRY, SCIENCE_BIOLOGY_UNITS as FLAGSHIP_BIOLOGY } from "./scienceCurriculumUnits";
 import { COMPUTING_UNITS as FLAGSHIP_COMPUTING } from "./computingCurriculumUnits";
 import { LANGUAGE_ENGLISH_UNITS as FLAGSHIP_ENGLISH } from "./englishCurriculumUnits";
+import { ESL_CURRICULUM_UNITS } from "./eslCurriculumUnits";
 import { ALL_LEVELS_CURRICULUM_UNITS } from "./allLevelsCurriculumUnits";
+import { PRIMARY_CURRICULUM_UNITS } from "./primaryCurriculumUnits";
+import { ECONOMICS_CURRICULUM_UNITS } from "./economicsCurriculumUnits";
+import { FINANCIAL_LITERACY_CURRICULUM_UNITS } from "./financialLiteracyCurriculumUnits";
+import { UNIVERSITY_TERTIARY_CURRICULUM_UNITS } from "./universityTertiaryCurriculumUnits";
 
 export { FLAGSHIP_PHYSICS as SCIENCE_PHYSICS_UNITS, FLAGSHIP_CHEMISTRY as SCIENCE_CHEMISTRY_UNITS, FLAGSHIP_BIOLOGY as SCIENCE_BIOLOGY_UNITS };
 export { FLAGSHIP_COMPUTING as COMPUTING_UNITS };
-export { FLAGSHIP_ENGLISH as LANGUAGE_ENGLISH_UNITS, FLAGSHIP_ENGLISH as LANGUAGE_UNITS };
-export { ALL_LEVELS_CURRICULUM_UNITS };
+export { FLAGSHIP_ENGLISH as LANGUAGE_ENGLISH_UNITS, FLAGSHIP_ENGLISH as LANGUAGE_UNITS, ESL_CURRICULUM_UNITS };
+export { ALL_LEVELS_CURRICULUM_UNITS, PRIMARY_CURRICULUM_UNITS };
+export { ECONOMICS_CURRICULUM_UNITS, FINANCIAL_LITERACY_CURRICULUM_UNITS, UNIVERSITY_TERTIARY_CURRICULUM_UNITS };
 
-export const ALL_CURRICULUM_UNITS: Unit[] = [
+import { ALL_CURRICULUM_LESSONS } from "./lessons/index";
+
+export function enrichUnitWithLessons(unit: Unit): Unit {
+  return {
+    ...unit,
+    skills: unit.skills.map((s) => ({
+      ...s,
+      lesson: s.lesson || ALL_CURRICULUM_LESSONS[s.id]
+    }))
+  };
+}
+
+const RAW_ALL_CURRICULUM_UNITS: Unit[] = [
   ...ALL_LEVELS_CURRICULUM_UNITS,
+  ...PRIMARY_CURRICULUM_UNITS,
   ...ENRICHED_MATHEMATICS_UNITS,
   ...FLAGSHIP_PHYSICS,
   ...FLAGSHIP_CHEMISTRY,
   ...FLAGSHIP_BIOLOGY,
   ...FLAGSHIP_COMPUTING,
   ...FLAGSHIP_ENGLISH,
-  ...BUSINESS_FINANCE_UNITS
+  ...ESL_CURRICULUM_UNITS,
+  ...BUSINESS_FINANCE_UNITS,
+  ...ECONOMICS_CURRICULUM_UNITS,
+  ...FINANCIAL_LITERACY_CURRICULUM_UNITS,
+  ...UNIVERSITY_TERTIARY_CURRICULUM_UNITS
 ];
+
+export const ALL_CURRICULUM_UNITS: Unit[] = RAW_ALL_CURRICULUM_UNITS.map(enrichUnitWithLessons);
+
 

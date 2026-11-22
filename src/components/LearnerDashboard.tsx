@@ -25,14 +25,30 @@ import {
   QrCode,
   ShieldCheck,
   ClipboardList,
-  Heart
+  Heart,
+  Video,
+  ExternalLink,
+  Check,
+  CheckCheck,
+  FileCheck,
+  Radio,
+  Mic
 } from "lucide-react";
 import { useLearner } from "../context/LearnerContext";
 import { Skill, Unit } from "../types/curriculum";
 import { SAMPLE_BADGES } from "../data/curriculumData";
 import { curriculumService } from "../services/curriculumService";
+import { videoLearningService } from "../services/videoLearningService";
 import { teacherStudioService } from "../services/teacherStudioService";
+import { readinessService } from "../services/readinessService";
+import { achievementService } from "../services/achievementService";
+import { ReadinessPathway } from "../types/readiness";
+import { ControlledCertificate } from "../types/achievement";
+import { ReadinessPathwayModal } from "./readiness/ReadinessPathwayModal";
+import { CertificateModal } from "./certificates/CertificateModal";
 import { LearnerProfileModal } from "./LearnerProfileModal";
+import { MasteryHeatmap } from "./MasteryHeatmap";
+import { AchievementCenter } from "./AchievementCenter";
 
 interface LearnerDashboardProps {
   onLaunchSkill: (skill: Skill, unit: Unit, assignmentId?: string) => void;
@@ -43,6 +59,11 @@ interface LearnerDashboardProps {
   onOpenPlayArena?: () => void;
   onOpenQRHub?: () => void;
   onOpenParentPortal?: () => void;
+  onOpenSaturationStudio?: () => void;
+  onNavigateToCurriculum?: () => void;
+  onOpenVideoStudio?: () => void;
+  onOpenLiveVoice?: () => void;
+  onOpenTranscribe?: () => void;
 }
 
 export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
@@ -53,10 +74,23 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
   onOpenAITutor,
   onOpenPlayArena,
   onOpenQRHub,
-  onOpenParentPortal
+  onOpenParentPortal,
+  onOpenSaturationStudio,
+  onNavigateToCurriculum,
+  onOpenVideoStudio,
+  onOpenLiveVoice,
+  onOpenTranscribe
 }) => {
   const { profile, metrics, activeUnit } = useLearner();
+  const [activeTab, setActiveTab] = useState<"overview" | "achievements">("overview");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedPathway, setSelectedPathway] = useState<ReadinessPathway | null>(null);
+  const [isReadinessModalOpen, setIsReadinessModalOpen] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<ControlledCertificate | null>(null);
+  const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+
+  const readinessPathways = readinessService.getAllPathways();
+  const certificates = achievementService.getUserCertificates(profile?.id || "usr_lrn_chidi_okonkwo");
 
   const classroomAssignments = (teacherStudioService.getAssignments() || []).filter(
     (a) =>
@@ -101,7 +135,7 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
             <div className="flex items-center gap-2">
               <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-                MOOS TECHY ACADEMY • Personalized Learning State
+                MOOS Academy • Personalized Learning State
               </span>
               <span className="text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full">
                 Level {profile.level || 1} Scholar
@@ -139,7 +173,12 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
           {/* Quick Stats Pills */}
           <div className="flex items-center gap-3 flex-wrap">
             {/* Daily Streak */}
-            <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 px-4 py-2.5 backdrop-blur-xs border border-white/10">
+            <button
+              type="button"
+              onClick={() => setActiveTab("achievements")}
+              className="flex items-center gap-2.5 rounded-2xl bg-white/10 hover:bg-white/20 px-4 py-2.5 backdrop-blur-xs border border-white/10 hover:border-amber-400/50 transition cursor-pointer text-left"
+              title="Open Streak & Consistency Center"
+            >
               <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
                 <Flame className="h-5 w-5 fill-amber-400" />
               </div>
@@ -147,10 +186,15 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
                 <div className="text-[10px] uppercase text-indigo-200 font-semibold">Daily Streak</div>
                 <div className="text-base font-bold text-white">{profile.streak?.count || 1} Days</div>
               </div>
-            </div>
+            </button>
 
             {/* Total Mastery Points */}
-            <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 px-4 py-2.5 backdrop-blur-xs border border-white/10">
+            <button
+              type="button"
+              onClick={() => setActiveTab("achievements")}
+              className="flex items-center gap-2.5 rounded-2xl bg-white/10 hover:bg-white/20 px-4 py-2.5 backdrop-blur-xs border border-white/10 hover:border-amber-400/50 transition cursor-pointer text-left"
+              title="Open Badges & Mastery Achievements"
+            >
               <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300">
                 <Trophy className="h-5 w-5 text-amber-300" />
               </div>
@@ -158,14 +202,14 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
                 <div className="text-[10px] uppercase text-indigo-200 font-semibold">Mastery Points</div>
                 <div className="text-base font-bold text-white">{profile.masteryPoints || 0} pts</div>
               </div>
-            </div>
+            </button>
 
             {/* Socratic AI Tutor Quick Connect */}
             <button
               id="dash-open-tutor-btn"
               type="button"
               onClick={onOpenAITutor}
-              className="flex items-center gap-2 rounded-2xl bg-amber-400 px-4 py-3 text-xs font-bold text-indigo-950 shadow-md hover:bg-amber-300 transition"
+              className="flex items-center gap-2 rounded-2xl bg-amber-400 px-4 py-3 text-xs font-bold text-indigo-950 shadow-md hover:bg-amber-300 transition cursor-pointer"
             >
               <Sparkles className="h-4 w-4 fill-indigo-950" />
               <span>Talk with Tutor Moos</span>
@@ -177,24 +221,182 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
                 id="dash-open-parent-portal-btn"
                 type="button"
                 onClick={onOpenParentPortal}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-rose-300 hover:text-rose-200 transition border border-white/10"
+                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-rose-300 hover:text-rose-200 transition border border-white/10 cursor-pointer"
                 title="Parent Learning Oversight & Transparency"
               >
                 <Heart className="h-5 w-5" />
               </button>
             )}
 
+            {/* Achievement Center Direct Shortcut */}
+            <button
+              id="dash-open-achievements-btn"
+              type="button"
+              onClick={() => setActiveTab("achievements")}
+              className={`p-3 rounded-2xl transition border cursor-pointer ${
+                activeTab === "achievements"
+                  ? "bg-amber-400 text-slate-950 border-amber-300 shadow-md"
+                  : "bg-white/10 hover:bg-white/20 text-amber-300 border-white/10"
+              }`}
+              title="Achievement Center: Badges, Streaks & Milestones"
+            >
+              <Trophy className="h-5 w-5" />
+            </button>
+
             {/* Profile Settings */}
             <button
               id="dash-open-settings-btn"
               type="button"
               onClick={() => setIsProfileModalOpen(true)}
-              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition border border-white/10"
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition border border-white/10 cursor-pointer"
               title="Academic Settings & Targets"
             >
               <Settings className="h-5 w-5" />
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Dashboard Main View Navigation Tabs */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div className="flex items-center gap-2">
+          <button
+            id="tab-btn-overview"
+            type="button"
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 transition cursor-pointer ${
+              activeTab === "overview"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+            }`}
+          >
+            <Compass className="h-4 w-4" />
+            <span>Learning Roadmap & Overview</span>
+          </button>
+
+          <button
+            id="tab-btn-achievements"
+            type="button"
+            onClick={() => setActiveTab("achievements")}
+            className={`px-4 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 transition cursor-pointer ${
+              activeTab === "achievements"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+            }`}
+          >
+            <Trophy className="h-4 w-4 text-amber-400" />
+            <span>Achievement Center</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                activeTab === "achievements"
+                  ? "bg-white/20 text-white"
+                  : "bg-amber-100 text-amber-900 border border-amber-200"
+              }`}
+            >
+              {profile.unlockedBadges?.length || 2} Badges • {profile.streak?.count || 1}d Streak
+            </span>
+          </button>
+        </div>
+
+        {activeTab === "overview" ? (
+          <button
+            type="button"
+            onClick={() => setActiveTab("achievements")}
+            className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer self-end sm:self-auto"
+          >
+            <span>Explore Badges & Milestones</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setActiveTab("overview")}
+            className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-800 transition cursor-pointer self-end sm:self-auto"
+          >
+            <span>← Back to Learning Overview</span>
+          </button>
+        )}
+      </div>
+
+      {activeTab === "achievements" ? (
+        <AchievementCenter
+          onInspectCertificate={(cert) => {
+            setSelectedCertificate(cert);
+            setIsCertificateModalOpen(true);
+          }}
+          onLaunchSkill={onLaunchSkill}
+          onOpenPlayArena={onOpenPlayArena}
+          onOpenExamHall={onOpenExamHall}
+        />
+      ) : (
+        <>
+
+      {/* Prioritized Single Next Useful Action Banner */}
+      <div className="rounded-3xl border-2 border-indigo-500/30 bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 shadow-lg relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div className="space-y-1.5 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider flex items-center gap-1">
+              <Zap className="h-3 w-3 fill-current" /> Priority Next Step
+            </span>
+            <span className="text-xs font-semibold text-indigo-200">
+              {classroomAssignments.length > 0 ? "Classroom Submission Due" : "Recommended Syllabus Advancement"}
+            </span>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-black text-white">
+            {classroomAssignments.length > 0
+              ? `Complete Assignment: ${classroomAssignments[0].title}`
+              : `Target Mastery: ${metrics.recommendedSkill?.title || "Algebraic Foundations"}`}
+          </h2>
+
+          <p className="text-xs sm:text-sm text-indigo-100/90 leading-relaxed">
+            {classroomAssignments.length > 0
+              ? `Teacher-assigned task. Due ${classroomAssignments[0].dueDate}. Est. 15 mins.`
+              : "Address identified prerequisite links to unlock advanced multi-step WAEC/WASSCE & JAMB problem solving."}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 flex-wrap">
+          <button
+            type="button"
+            onClick={() => {
+              const defaultPathway = readinessPathways[0];
+              if (defaultPathway) {
+                setSelectedPathway(defaultPathway);
+                setIsReadinessModalOpen(true);
+              }
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span>Check Course Readiness</span>
+          </button>
+
+          {classroomAssignments.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                const asg = classroomAssignments[0];
+                const allUnits = curriculumService.getAllUnits();
+                const unit = (asg.unitId ? curriculumService.getUnitById(asg.unitId) : undefined) || allUnits[0];
+                const skill = (asg.skillId ? unit?.skills.find((s) => s.id === asg.skillId) : undefined) || unit?.skills[0];
+                onLaunchSkill(skill, unit, asg.id);
+              }}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center gap-2 transition cursor-pointer active:scale-95"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              <span>Resume Assignment</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onLaunchSkill(metrics.recommendedSkill, metrics.recommendedUnit)}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center gap-2 transition cursor-pointer active:scale-95"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              <span>Start Recommended Skill</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -321,7 +523,26 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {(() => {
+            const recVideo =
+              videoLearningService.getVideoByUnitId(metrics.recommendedUnit.id) ||
+              videoLearningService.getVideoBySkillId(metrics.recommendedSkill.id);
+            if (!recVideo || !onStudyLesson) return null;
+            return (
+              <button
+                id="watch-recommended-video-btn"
+                type="button"
+                onClick={() => onStudyLesson(metrics.recommendedSkill, metrics.recommendedUnit)}
+                className="flex items-center gap-1.5 rounded-xl border border-sky-300 bg-sky-50 px-4 py-3 text-sm font-bold text-sky-800 hover:bg-sky-100 transition cursor-pointer shadow-2xs"
+                title={`Watch visual explanation masterclass (${recVideo.durationFormatted})`}
+              >
+                <Video className="h-4 w-4 text-sky-600" />
+                <span>Watch Video ({recVideo.durationFormatted})</span>
+              </button>
+            );
+          })()}
+
           {onStudyLesson && (
             <button
               id="study-recommended-lesson-btn"
@@ -344,6 +565,14 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Mastery Heatmap — Visualizing Learner Progression across All Curriculum Units */}
+      <MasteryHeatmap
+        onLaunchSkill={onLaunchSkill}
+        onStudyLesson={onStudyLesson}
+        targetLevel={profile.targetLevel || "all"}
+        onOpenSaturationStudio={onOpenSaturationStudio}
+      />
 
       {/* Institutional Classroom Assignments (If Any) */}
       {classroomAssignments.length > 0 && (
@@ -534,7 +763,7 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
                 id="dash-open-play-arena-btn"
                 type="button"
                 onClick={onOpenPlayArena}
-                className="flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2 shadow-xs transition"
+                className="flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2 shadow-xs transition cursor-pointer"
               >
                 <span>Launch Challenges</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -568,7 +797,7 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
                 id="dash-open-qr-hub-btn"
                 type="button"
                 onClick={onOpenQRHub}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 shadow-xs transition"
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 shadow-xs transition cursor-pointer"
               >
                 <span>Open Digital Hub</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -578,78 +807,116 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
         </div>
       </div>
 
-      {/* Mastery Progress Heatmap & Achievements Section */}
-      <div className="grid lg:grid-cols-12 gap-6">
-        {/* Mastery Heatmap / Progress Bar */}
-        <div className="lg:col-span-7 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Layers className="h-5 w-5 text-indigo-600" />
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                Curriculum Mastery Breakdown
-              </h3>
+      {/* Advanced Multimodal AI Studios: Veo 3 Video, Live Voice & Audio Transcription */}
+      <div className="grid md:grid-cols-3 gap-5">
+        {/* Veo 3 Video Studio */}
+        <div className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/30 p-5 shadow-xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-md">
+                <Video className="h-3.5 w-3.5 text-indigo-600" />
+                Veo 3 Video
+              </span>
+              <span className="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-black">
+                16:9 / 9:16
+              </span>
             </div>
-            <span className="text-xs text-slate-500 font-medium">
-              {metrics.masteryDistribution.mastered} of {metrics.masteryDistribution.total} Skills Mastered
-            </span>
+            <h3 className="text-sm font-extrabold text-slate-900">
+              Educational Video Generator
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Generate pedagogical concept animations and science simulations using Google's veo-3.1-fast-generate-preview.
+            </p>
           </div>
 
-          {/* Mastery status legend */}
-          <div className="grid grid-cols-4 gap-2 text-center text-xs">
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-2.5">
-              <div className="font-bold text-slate-700">{metrics.masteryDistribution.unstarted}</div>
-              <div className="text-[11px] text-slate-400">Unstarted</div>
-            </div>
-            <div className="rounded-xl border border-amber-100 bg-amber-50 p-2.5">
-              <div className="font-bold text-amber-700">{metrics.masteryDistribution.familiar}</div>
-              <div className="text-[11px] text-amber-600">Familiar</div>
-            </div>
-            <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-2.5">
-              <div className="font-bold text-indigo-700">{metrics.masteryDistribution.proficient}</div>
-              <div className="text-[11px] text-indigo-600">Proficient</div>
-            </div>
-            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-2.5">
-              <div className="font-bold text-emerald-700">{metrics.masteryDistribution.mastered}</div>
-              <div className="text-[11px] text-emerald-600">Mastered</div>
-            </div>
-          </div>
-
-          {/* Skill Mastery Sliders */}
-          <div className="space-y-3.5 pt-1 max-h-[380px] overflow-y-auto pr-1">
-            {curriculumService.getAllUnits().flatMap((u) => u.skills).map((skill) => {
-              const record = (profile?.masteryRecords || {})[skill.id];
-              const points = record?.points || 0;
-              const status = record?.status || "unstarted";
-
-              let barColor = "bg-slate-200";
-              if (status === "mastered") barColor = "bg-emerald-500";
-              else if (status === "proficient") barColor = "bg-indigo-600";
-              else if (status === "familiar") barColor = "bg-amber-500";
-
-              return (
-                <div key={skill.id} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-800 truncate max-w-[70%]">
-                      {skill.title}
-                    </span>
-                    <span className="font-bold text-slate-600">{points} / 100 pts</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-                      style={{ width: `${points}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="pt-2 border-t border-indigo-100">
+            {onOpenVideoStudio && (
+              <button
+                type="button"
+                onClick={onOpenVideoStudio}
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 shadow-xs transition cursor-pointer"
+              >
+                <Video className="h-3.5 w-3.5" />
+                <span>Open Video Studio</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Badges & Exam Hall Quick Launch */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Exam Simulation Hall Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+        {/* Gemini 3.8 Live Voice */}
+        <div className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50/70 via-white to-amber-50/30 p-5 shadow-xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                <Radio className="h-3.5 w-3.5 text-amber-600" />
+                Live API Voice
+              </span>
+              <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-black">
+                gemini-3.8-live
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900">
+              Real-Time Voice Call
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Low-latency, natural bidirectional oral dialogues with Tutor Moos using live WebSockets audio streaming.
+            </p>
+          </div>
+
+          <div className="pt-2 border-t border-amber-100">
+            {onOpenLiveVoice && (
+              <button
+                type="button"
+                onClick={onOpenLiveVoice}
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs py-2 shadow-xs transition cursor-pointer"
+              >
+                <Radio className="h-3.5 w-3.5" />
+                <span>Start Live Voice Call</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Audio Speech Transcriber */}
+        <div className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30 p-5 shadow-xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
+                <Mic className="h-3.5 w-3.5 text-emerald-600" />
+                Transcribe Audio
+              </span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-black">
+                gemini-3.5-transcribe
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900">
+              Audio Speech-to-Text
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Record classroom lectures, study notes, or questions with instant high-accuracy speech transcription.
+            </p>
+          </div>
+
+          <div className="pt-2 border-t border-emerald-100">
+            {onOpenTranscribe && (
+              <button
+                type="button"
+                onClick={onOpenTranscribe}
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 shadow-xs transition cursor-pointer"
+              >
+                <Mic className="h-3.5 w-3.5" />
+                <span>Open Transcriber</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Examination Simulation & Achievements Grid */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Exam Simulation Hall Card */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4 flex flex-col justify-between">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-amber-500" />
@@ -663,65 +930,287 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
             <p className="text-xs text-slate-500 leading-relaxed">
               Test your speed, stamina, and accuracy under real WAEC / JAMB UTME / Common Entrance exam conditions.
             </p>
-
-            <button
-              id="dash-launch-exam-btn"
-              type="button"
-              onClick={onOpenExamHall}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition shadow-xs"
-            >
-              <span>Enter Exam Simulation Arena</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
           </div>
 
-          {/* Badges & Achievements Showcase */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-500" />
-                <h3 className="font-bold text-slate-900 text-sm">Earned Achievements</h3>
-              </div>
-              <span className="text-xs text-slate-400 font-medium">
-                {profile.unlockedBadges?.length || 2} Unlocked
-              </span>
-            </div>
+          <button
+            id="dash-launch-exam-btn"
+            type="button"
+            onClick={onOpenExamHall}
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition shadow-xs cursor-pointer"
+          >
+            <span>Enter Exam Simulation Arena</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {SAMPLE_BADGES.map((badge) => {
-                const isUnlocked = profile.unlockedBadges?.includes(badge.id);
-                return (
-                  <div
-                    key={badge.id}
-                    className={`rounded-xl border p-3 text-left transition ${
-                      isUnlocked
-                        ? "border-amber-200 bg-amber-50/40 text-slate-900 shadow-2xs"
-                        : "border-slate-100 bg-slate-50 text-slate-400 opacity-60"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Star
-                        className={`h-4 w-4 ${
-                          isUnlocked ? "text-amber-500 fill-amber-400" : "text-slate-300"
-                        }`}
-                      />
-                      <span className="font-bold text-xs line-clamp-1">{badge.title}</span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
-                      {badge.description}
-                    </p>
+        {/* Badges & Achievements Showcase */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-amber-500" />
+              <h3 className="font-bold text-slate-900 text-sm">Earned Achievements</h3>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">
+              {profile.unlockedBadges?.length || 2} Unlocked
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {SAMPLE_BADGES.map((badge) => {
+              const isUnlocked = profile.unlockedBadges?.includes(badge.id);
+              return (
+                <div
+                  key={badge.id}
+                  className={`rounded-xl border p-3 text-left transition ${
+                    isUnlocked
+                      ? "border-amber-200 bg-amber-50/40 text-slate-900 shadow-2xs"
+                      : "border-slate-100 bg-slate-50 text-slate-400 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Star
+                      className={`h-4 w-4 ${
+                        isUnlocked ? "text-amber-500 fill-amber-400" : "text-slate-300"
+                      }`}
+                    />
+                    <span className="font-bold text-xs line-clamp-1">{badge.title}</span>
                   </div>
-                );
-              })}
-            </div>
+                  <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
+                    {badge.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("achievements")}
+            className="w-full py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer border border-indigo-200/60"
+          >
+            <Trophy className="h-3.5 w-3.5 text-amber-500" />
+            <span>Open Achievement Center</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
+
+      {/* Course Readiness Pathways ("Get Ready" Architecture) */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <ShieldCheck className="h-3.5 w-3.5" /> Prerequisite Diagnostics
+              </span>
+              <span className="text-xs text-slate-500 font-semibold">
+                Pedagogical Readiness Framework
+              </span>
+            </div>
+            <h3 className="text-lg font-black text-slate-900 mt-1">
+              Course Readiness Pathways ("Get Ready" Bridge)
+            </h3>
+            <p className="text-xs text-slate-500 max-w-2xl">
+              Target course preparation: identify prerequisite knowledge gaps, study focused foundational lessons, and verify conceptual fluency before entering new academic levels.
+            </p>
+          </div>
+
+          {onNavigateToCurriculum && (
+            <button
+              type="button"
+              onClick={onNavigateToCurriculum}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer self-start sm:self-auto"
+            >
+              <span>Explore Course Catalog</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          {readinessPathways.map((pathway) => {
+            const isCertified = pathway.status === "readiness_certified" || pathway.status === "exempt_mastered";
+            const isDiagnosticPending = pathway.status === "not_started" || pathway.status === "evaluating";
+            const gapCount = pathway.identifiedGaps?.length || 0;
+
+            return (
+              <div
+                key={pathway.id}
+                className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                        isCertified
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                          : isDiagnosticPending
+                          ? "bg-amber-100 text-amber-800 border-amber-200"
+                          : "bg-rose-100 text-rose-800 border-rose-200"
+                      }`}
+                    >
+                      {pathway.status.replace("_", " ").toUpperCase()}
+                    </span>
+
+                    <span className="text-[11px] font-bold text-slate-500">
+                      {pathway.prerequisiteSkills?.length || 0} Prerequisites
+                    </span>
+                  </div>
+
+                  <h4 className="text-base font-black text-slate-900 leading-snug">
+                    {pathway.title}
+                  </h4>
+                  <p className="text-xs text-slate-600 line-clamp-2">
+                    {pathway.description}
+                  </p>
+
+                  <div className="pt-2 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                    <span className="px-2 py-0.5 rounded bg-white border border-slate-200 font-medium">
+                      Target: {pathway.targetCourseOrLevel}
+                    </span>
+                    {gapCount > 0 ? (
+                      <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold">
+                        {gapCount} Gaps Identified
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                        Gaps Cleared
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200/70 flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    {pathway.prerequisiteDiagnosticQuestions?.length || 0} Diagnostic Items
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPathway(pathway);
+                      setIsReadinessModalOpen(true);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+                  >
+                    <span>{isCertified ? "Review Pathway" : "Launch Diagnostic"}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Official Verified Certificates & Credential Registry */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                <Award className="h-3.5 w-3.5 text-amber-700" /> Evidence-Anchored Credentials
+              </span>
+              <span className="text-xs text-slate-500 font-semibold">
+                Controlled Academic Recognition
+              </span>
+            </div>
+            <h3 className="text-lg font-black text-slate-900 mt-1">
+              Official Certificates & Competency Verifications ({certificates.length})
+            </h3>
+            <p className="text-xs text-slate-500 max-w-2xl">
+              Authentic credentials earned through verified mastery milestones and examination achievements. Each certificate includes an immutable verification seal.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          {certificates.map((cert) => (
+            <div
+              key={cert.id}
+              className="p-5 rounded-2xl bg-gradient-to-br from-amber-50/30 via-white to-slate-50 border border-amber-200/80 hover:border-amber-300 transition flex flex-col justify-between space-y-4 shadow-2xs"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] font-black text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200">
+                    {cert.verificationCode}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {cert.status}
+                  </span>
+                </div>
+
+                <h4 className="text-base font-black text-slate-900 leading-snug">
+                  {cert.title}
+                </h4>
+
+                <p className="text-xs text-slate-600">
+                  {cert.evidenceSummary.criterion}
+                </p>
+
+                <div className="p-2.5 rounded-xl bg-amber-100/40 border border-amber-200/60 text-xs text-slate-700 space-y-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-slate-600">Attained Metric:</span>
+                    <span className="font-black text-amber-900">{cert.evidenceSummary.scoreOrPercentage}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-slate-600">Issued On:</span>
+                    <span className="text-slate-700">{new Date(cert.issuedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-amber-100 flex items-center justify-between">
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {cert.issuer}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCertificate(cert);
+                    setIsCertificateModalOpen(true);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+                >
+                  <Award className="h-3.5 w-3.5" />
+                  <span>Inspect Certificate</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      </>
+      )}
 
       {/* Learner Profile & Academic Target Settings Modal */}
       <LearnerProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+      />
+
+      {/* Readiness Pathway Modal */}
+      <ReadinessPathwayModal
+        pathway={selectedPathway}
+        isOpen={isReadinessModalOpen}
+        onClose={() => setIsReadinessModalOpen(false)}
+        onStudyFoundationalLesson={(unitId, skillId) => {
+          setIsReadinessModalOpen(false);
+          const allUnits = curriculumService.getAllUnits();
+          const u = curriculumService.getUnitById(unitId) || allUnits[0];
+          const s = u?.skills.find((sk) => sk.id === skillId) || u?.skills[0];
+          if (s && u && onStudyLesson) {
+            onStudyLesson(s, u);
+          }
+        }}
+      />
+
+      {/* Official Certificate Verification Modal */}
+      <CertificateModal
+        certificate={selectedCertificate}
+        isOpen={isCertificateModalOpen}
+        onClose={() => setIsCertificateModalOpen(false)}
       />
     </div>
   );

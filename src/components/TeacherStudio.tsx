@@ -40,7 +40,9 @@ import {
   Database,
   ShieldAlert,
   FileText,
-  Lock
+  Lock,
+  Video,
+  Film
 } from "lucide-react";
 import {
   teacherStudioService,
@@ -75,6 +77,9 @@ import { useLearner } from "../context/LearnerContext";
 import { EducationalLevel } from "../types/curriculum";
 import { BackupRestoreModal } from "./BackupRestoreModal";
 import { TeacherCopilotStudio } from "./TeacherCopilotStudio";
+import { VideoCoverageMatrixModal } from "./video/VideoCoverageMatrixModal";
+import { VideoCreatorStudioModal } from "./video/VideoCreatorStudioModal";
+import { TeacherProductivityWorkbench } from "./teacher/TeacherProductivityWorkbench";
 
 interface TeacherStudioProps {
   onNavigateToTextbookStudio: () => void;
@@ -86,7 +91,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
   onNavigateToQRHub
 }) => {
   const { profile } = useLearner();
-  const [activeTab, setActiveTab] = useState<"cockpit" | "copilot" | "classrooms" | "assignments" | "interventions" | "lessons" | "analytics" | "governance">("cockpit");
+  const [activeTab, setActiveTab] = useState<"cockpit" | "workbench" | "copilot" | "classrooms" | "assignments" | "interventions" | "lessons" | "analytics" | "governance">("workbench");
 
   // State
   const [classrooms, setClassrooms] = useState<TeacherClassroom[]>(teacherStudioService.getClassrooms());
@@ -120,6 +125,8 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
   const [showNewClassModal, setShowNewClassModal] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showVideoMatrixModal, setShowVideoMatrixModal] = useState(false);
+  const [showVideoCreatorModal, setShowVideoCreatorModal] = useState(false);
   const [isGeneratingLesson, setIsGeneratingLesson] = useState(false);
   const [generationObjective, setGenerationObjective] = useState("");
   const [generationSubject, setGenerationSubject] = useState("Mathematics");
@@ -490,7 +497,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
               <GraduationCap className="h-3.5 w-3.5" />
-              MOOS TECHY TEACHER STUDIO • INSTITUTIONAL COHORT INTELLIGENCE
+              MOOS TEACHER STUDIO • INSTITUTIONAL COHORT INTELLIGENCE
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Teacher Decision Support & Institutional Classroom Intelligence
@@ -533,6 +540,17 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
             >
               <BookOpen className="h-4 w-4 text-indigo-400" />
               <span>Textbook Studio</span>
+            </button>
+
+            <button
+              id="btn-open-video-studio"
+              type="button"
+              onClick={() => setShowVideoCreatorModal(true)}
+              className="px-4 py-2.5 rounded-2xl bg-sky-900/60 hover:bg-sky-800/80 text-sky-200 border border-sky-600/40 font-bold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer shadow-sm"
+              title="Open Video Creator Studio for agentic video authoring"
+            >
+              <Video className="h-4 w-4 text-sky-400" />
+              <span>Video Creator Studio</span>
             </button>
 
             <button
@@ -603,6 +621,20 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
           >
             <Activity className="h-4 w-4 text-emerald-400" />
             <span>Decision Cockpit ({nextBestActions.length})</span>
+          </button>
+
+          <button
+            id="tab-btn-teacher-workbench"
+            type="button"
+            onClick={() => setActiveTab("workbench")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition whitespace-nowrap cursor-pointer ${
+              activeTab === "workbench"
+                ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-black shadow-md shadow-indigo-500/25"
+                : "text-indigo-300 hover:text-indigo-200 hover:bg-slate-800/60 font-bold"
+            }`}
+          >
+            <Sliders className="h-4 w-4 text-indigo-400" />
+            <span>Productivity Workbench (Plan • Create • Assess)</span>
           </button>
 
           <button
@@ -703,6 +735,22 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
         </div>
       </div>
 
+      {/* TAB: TEACHER PRODUCTIVITY WORKBENCH */}
+      {activeTab === "workbench" && (
+        <TeacherProductivityWorkbench
+          classrooms={classrooms}
+          selectedClassId={selectedClassId}
+          onSelectClassId={setSelectedClassId}
+          onDispatchAssignment={(material) => {
+            handleOpenAssignmentModalWithParams({
+              title: material.title,
+              description: (material.body || material.sections?.[0]?.content || material.title).slice(0, 150)
+            });
+          }}
+          onNavigateToQRHub={onNavigateToQRHub}
+        />
+      )}
+
       {/* TAB: AI TEACHER COPILOT & EDUCATIONAL MATERIALS */}
       {activeTab === "copilot" && (
         <TeacherCopilotStudio
@@ -755,7 +803,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
                         Priority #{idx + 1} • Score: {action.priorityScore}
                       </span>
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">
-                        {action.category.replace(/_/g, " ")}
+                        {action.category ? action.category.replace(/_/g, " ") : "Action"}
                       </span>
                       <span className="text-xs font-bold text-slate-600">
                         Target: {action.targetNames.join(", ")}
@@ -1098,7 +1146,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-                        {grp.category.replace(/_/g, " ")}
+                        {grp.category ? grp.category.replace(/_/g, " ") : "Group"}
                       </span>
                       <span className="text-xs font-bold text-slate-500">{grp.learnerIds.length} Students</span>
                     </div>
@@ -1208,7 +1256,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
                     <div className="space-y-2 max-w-xl">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
-                          {asg.assignmentType.replace("_", " ")}
+                          {asg.assignmentType ? asg.assignmentType.replace("_", " ") : "Assignment"}
                         </span>
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
                           {asg.status.toUpperCase()}
@@ -1300,7 +1348,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
                       {rec.priority} Priority
                     </span>
                     <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-                      {rec.type.replace(/_/g, " ")}
+                      {rec.type ? rec.type.replace(/_/g, " ") : "Recommendation"}
                     </span>
                     <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-800">
                       STATUS: {rec.status.toUpperCase()}
@@ -1404,7 +1452,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
                   }`}
                 >
                   <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
-                    {lp.durationMinutes} Mins • {lp.targetLevel.replace("_", " ")}
+                    {lp.durationMinutes} Mins • {lp.targetLevel ? lp.targetLevel.replace("_", " ") : "All Levels"}
                   </span>
                   <h4 className="text-sm font-bold text-slate-900 mt-1.5">{lp.title}</h4>
                   {lp.linkedQRCompanionCode && (
@@ -1862,7 +1910,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="space-y-1">
                 <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800">
-                  {inspectingAssignment.assignmentType.replace("_", " ")}
+                  {inspectingAssignment.assignmentType ? inspectingAssignment.assignmentType.replace("_", " ") : "Assignment"}
                 </span>
                 <h3 className="text-lg font-black text-slate-900">{inspectingAssignment.title}</h3>
                 <p className="text-xs text-slate-500">{inspectingAssignment.description}</p>
@@ -1908,7 +1956,7 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
                                 : "bg-slate-100 text-slate-700"
                             }`}
                           >
-                            {prog.status.replace("_", " ")}
+                            {prog.status ? prog.status.replace("_", " ") : "Assigned"}
                           </span>
                         </td>
                         <td className="py-3 px-2 font-semibold text-slate-700">
@@ -2331,6 +2379,22 @@ export const TeacherStudio: React.FC<TeacherStudioProps> = ({
         isOpen={showBackupModal}
         onClose={() => setShowBackupModal(false)}
         defaultScope="full_academy"
+      />
+
+      {/* Video Coverage Matrix Modal */}
+      <VideoCoverageMatrixModal
+        isOpen={showVideoMatrixModal}
+        onClose={() => setShowVideoMatrixModal(false)}
+        onOpenCreatorStudio={() => {
+          setShowVideoMatrixModal(false);
+          setShowVideoCreatorModal(true);
+        }}
+      />
+
+      {/* Video Creator Studio Modal */}
+      <VideoCreatorStudioModal
+        isOpen={showVideoCreatorModal}
+        onClose={() => setShowVideoCreatorModal(false)}
       />
     </div>
   );

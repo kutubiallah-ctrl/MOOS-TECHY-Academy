@@ -116,6 +116,7 @@ export interface UserSession {
   activeClassroomId?: string;
   createdAt: string;
   lastActivityAt: string;
+  mfaAssuranceLevel?: "AAL1" | "AAL2";
   deviceContext: {
     isLocalDevice: true;
     clientVersion: string;
@@ -150,5 +151,6 @@ export interface AuthorizationDecision {
     | "AI_AUTONOMOUS_MUTATION_FORBIDDEN"
     | "MARKETPLACE_APPROVAL_REQUIRED"
     | "CREATOR_ACCESS_VIOLATION"
-    | "SESSION_INVALID_OR_EXPIRED";
+    | "SESSION_INVALID_OR_EXPIRED"
+    | "MFA_VERIFICATION_REQUIRED";
 }

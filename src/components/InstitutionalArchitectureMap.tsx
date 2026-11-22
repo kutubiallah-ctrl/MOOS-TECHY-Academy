@@ -124,7 +124,7 @@ export const InstitutionalArchitectureMap: React.FC<InstitutionalArchitectureMap
               SYSTEM ARCHITECTURE & GOVERNANCE BLUEPRINT
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              MOOS TECHY ACADEMY
+              MOOS Academy
             </h1>
             <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
               Unified institutional blueprint establishing the foundation of multi-role governance, tri-pillar educational ecosystems (Learn, Teach, Bookpreneur), governed AI teacher layers, and sovereign human authority.
@@ -177,7 +177,7 @@ export const InstitutionalArchitectureMap: React.FC<InstitutionalArchitectureMap
               }`}
             >
               <div className="text-[10px] font-bold uppercase tracking-widest text-amber-300">Apex System Anchor</div>
-              <h3 className="text-base font-black tracking-wide">MOOS TECHY ACADEMY</h3>
+              <h3 className="text-base font-black tracking-wide">MOOS Academy</h3>
               <p className="text-xs text-slate-300 mt-1">Global Multidisciplinary Learning Ecosystem</p>
             </div>
 
@@ -510,7 +510,7 @@ export const InstitutionalArchitectureMap: React.FC<InstitutionalArchitectureMap
             {/* APEX */}
             {selectedNode === "apex" && (
               <div className="space-y-4">
-                <h3 className="text-xl font-black text-slate-900">MOOS TECHY ACADEMY</h3>
+                <h3 className="text-xl font-black text-slate-900">MOOS Academy</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   The overarching multidisciplinary learning enterprise serving primary through university STEM scholars across Nigeria and international curricula (WAEC, JAMB UTME, NERDC, Cambridge IGCSE).
                 </p>

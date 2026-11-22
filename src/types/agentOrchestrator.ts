@@ -11,6 +11,7 @@
  */
 
 export type AgentRole =
+  // Core Pedagogical & Governance Swarm
   | "tutor_agent"
   | "diagnostic_agent"
   | "curriculum_agent"
@@ -22,7 +23,40 @@ export type AgentRole =
   | "bookpreneur_agent"
   | "research_assistant_agent"
   | "content_quality_agent"
-  | "publishing_assistant_agent";
+  | "publishing_assistant_agent"
+  // Governed 23-Specialist Content Saturation Suite
+  | "curriculum_planner_agent"
+  | "content_gap_agent"
+  | "lesson_designer_agent"
+  | "assessment_author_agent"
+  | "worked_example_agent"
+  | "flashcard_agent"
+  | "visualization_agent"
+  | "activity_design_agent"
+  | "differentiation_specialist_agent"
+  | "remediation_agent"
+  | "extension_agent"
+  | "exam_preparation_agent"
+  | "tertiary_preparation_agent"
+  | "economics_agent"
+  | "financial_literacy_agent"
+  | "language_arts_agent"
+  | "stem_interactive_agent"
+  | "quality_assurance_agent"
+  | "pedagogy_critic_agent"
+  | "governance_auditor_agent"
+  | "parent_communicator_agent"
+  | "school_resource_agent"
+  // Governed Video Learning Production Swarm
+  | "curriculum_video_planner_agent"
+  | "subject_specialist_agent"
+  | "instructional_script_agent"
+  | "visual_storyboard_agent"
+  | "assessment_checkpoint_agent"
+  | "video_qa_agent"
+  | "content_safety_accuracy_agent"
+  | "accessibility_agent"
+  | "video_publishing_agent";
 
 export type AgentPermissionLevel =
   | "read_only"

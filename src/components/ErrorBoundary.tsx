@@ -24,7 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("MOOS TECHY ACADEMY — Uncaught UI Error in ErrorBoundary:", error, errorInfo);
+    console.error("MOOS Academy — Uncaught UI Error in ErrorBoundary:", error, errorInfo);
     this.setState({ errorInfo });
   }
 
@@ -57,7 +57,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white tracking-tight">
-                  MOOS TECHY ACADEMY
+                  MOOS Academy
                 </h1>
                 <p className="text-xs text-slate-400 font-mono">System Recovery & Resilience Engine</p>
               </div>

@@ -1,15 +1,20 @@
 import express, { Request, Response } from "express";
+import http from "http";
 import path from "path";
 import dotenv from "dotenv";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, GenerateVideosOperation, Modality } from "@google/genai";
+import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
+import { openAiArchitectAdapter } from "./src/services/openAiArchitectAdapter";
+import { emailAllowlistService } from "./src/services/emailAllowlistService";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Initialize Gemini SDK with User-Agent as per guidelines
 const apiKey = process.env.GEMINI_API_KEY;
@@ -30,10 +35,242 @@ if (apiKey) {
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",
-    platform: "MOOS TECHY ACADEMY",
+    platform: "MOOS Academy",
     geminiConfigured: !!apiKey,
     timestamp: new Date().toISOString(),
   });
+});
+
+// =========================================================================
+// EMAIL-ENTRY GATE & OWNER ALLOWLIST ENDPOINTS
+// =========================================================================
+
+// Verify candidate email against allowlist (generates cryptographic HMAC token)
+app.post("/api/allowlist/verify", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ isAllowed: false, status: "INVALID_EMAIL", message: "Email is required." });
+    }
+    const result = await emailAllowlistService.verifyEmail(email);
+    return res.json({
+      isAllowed: result.isAllowed,
+      status: result.status,
+      email: result.email,
+      message: result.message,
+      token: result.serverVerificationToken,
+      entry: result.entry
+    });
+  } catch (err: any) {
+    return res.status(500).json({ isAllowed: false, message: err.message });
+  }
+});
+
+// List allowlist entries (Owner only)
+app.get("/api/allowlist/list", (req: Request, res: Response) => {
+  const callerEmail = (req.headers["x-caller-email"] || req.query.callerEmail) as string;
+  if (!emailAllowlistService.isOwner(callerEmail)) {
+    return res.status(403).json({ error: "Access denied: Owner privileges required." });
+  }
+  const entries = emailAllowlistService.listEntries();
+  return res.json({ entries });
+});
+
+// Insert email into allowlist (Owner only)
+app.post("/api/allowlist/insert", (req: Request, res: Response) => {
+  const { callerEmail, targetEmail, role, notes } = req.body;
+  const result = emailAllowlistService.insertEmail(callerEmail, targetEmail, role, notes);
+  if (!result.success) {
+    return res.status(403).json(result);
+  }
+  return res.json(result);
+});
+
+// Set allowlist entry status (Owner only)
+app.post("/api/allowlist/status", (req: Request, res: Response) => {
+  const { callerEmail, targetEmail, status } = req.body;
+  const result = emailAllowlistService.setStatus(callerEmail, targetEmail, status);
+  if (!result.success) {
+    return res.status(403).json(result);
+  }
+  return res.json(result);
+});
+
+// Remove email from allowlist (Owner only)
+app.delete("/api/allowlist/remove", (req: Request, res: Response) => {
+  const { callerEmail, targetEmail } = req.body;
+  const result = emailAllowlistService.removeEmail(callerEmail, targetEmail);
+  if (!result.success) {
+    return res.status(403).json(result);
+  }
+  return res.json(result);
+});
+
+// Validate token endpoint (Cryptographic server-side verification)
+app.post("/api/allowlist/validate-token", (req: Request, res: Response) => {
+  const { token, email } = req.body;
+  const isValid = emailAllowlistService.validateVerificationToken(token, email);
+  return res.json({ isValid });
+});
+
+// Public User Sign-Up Endpoint
+app.post("/api/auth/signup", async (req: Request, res: Response) => {
+  try {
+    const { fullName, email, password, role, targetLevel, notes } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+    const result = await emailAllowlistService.signUpUser({
+      fullName: fullName || "Academy Scholar",
+      email,
+      password,
+      role: role || "learner",
+      targetLevel,
+      notes
+    });
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Public User Sign-In Endpoint (with Owner Auto-Elevation)
+app.post("/api/auth/signin", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email) {
+      return res.status(400).json({ isAllowed: false, message: "Email is required." });
+    }
+    const result = await emailAllowlistService.signInUser({ email, password });
+    if (!result.isAllowed) {
+      return res.status(401).json(result);
+    }
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ isAllowed: false, message: err.message });
+  }
+});
+
+// Autonomous Development Bridge: Status & Audit Endpoint
+app.get("/api/development-bridge/status", (_req: Request, res: Response) => {
+  const cred = openAiArchitectAdapter.getCredentialStatus();
+  res.json({
+    status: "OPERATIONAL",
+    chatgptBridgeStatus: cred.hasKey ? "AUTHENTICATED_BUT_UNVERIFIED" : "NOT_CONNECTED",
+    credentialStatus: cred.status,
+    chatgptReason: cred.hasKey
+      ? "OPENAI_API_KEY detected in server environment; live authenticated calls enabled."
+      : "No external OpenAI API key configured; connection strictly marked NOT_CONNECTED as per Phase 6.5E mandate",
+    antigravityAudit: {
+      modelIdentifier: "antigravity-preview-09-2026",
+      environmentType: "sandboxed_linux_remote",
+      status: "CONFIGURED_VIA_INTERACTIONS_API",
+      requiresPaidKey: true
+    },
+    notificationChannels: {
+      whatsapp: "SPECIFICATION_ONLY",
+      email: "ACTIVE",
+      internalLedger: "ACTIVE"
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Autonomous Development Bridge: OpenAI Architect Reasoning Endpoint
+app.post("/api/development-bridge/chatgpt/reason", async (req: Request, res: Response) => {
+  try {
+    const { envelope, simulationMode } = req.body;
+    if (!envelope || !envelope.taskId) {
+      return res.status(400).json({ error: "Missing or invalid DevelopmentFeedbackEnvelope: taskId is required" });
+    }
+
+    if (simulationMode) {
+      const scenario =
+        simulationMode === "HIGH_RISK"
+          ? "HIGH_RISK_PROPOSAL"
+          : simulationMode === "PROMPT_INJECTION"
+          ? "PROMPT_INJECTION_ATTEMPT"
+          : "NORMAL_REMEDIATION";
+      const result = openAiArchitectAdapter.executeSimulatedReasoning(envelope, scenario);
+      return res.json(result);
+    }
+
+    const result = await openAiArchitectAdapter.dispatchArchitecturalReasoning(envelope);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Autonomous Development Bridge: Ingest Feedback Envelope
+app.post("/api/development-bridge/envelope", (req: Request, res: Response) => {
+  const envelope = req.body;
+  if (!envelope || !envelope.taskId) {
+    return res.status(400).json({ error: "Invalid feedback envelope: taskId is required" });
+  }
+  return res.json({
+    received: true,
+    taskId: envelope.taskId,
+    evidenceOrigin: envelope.evidenceOrigin || "AUTOMATED_EVIDENCE",
+    acknowledgedAt: new Date().toISOString()
+  });
+});
+
+// Interactive Subject Engine: Simulation & Recalculation Endpoint
+app.post("/api/interactive-engine/simulate", (req: Request, res: Response) => {
+  try {
+    const { domain, parameters } = req.body;
+    if (!domain) {
+      return res.status(400).json({ error: "Subject domain is required" });
+    }
+
+    if (domain === "mathematics") {
+      const a = Number(parameters?.a ?? 1);
+      const b = Number(parameters?.b ?? 0);
+      const c = Number(parameters?.c ?? 0);
+      const discriminant = b * b - 4 * a * c;
+      const vertexX = -b / (2 * a);
+      const vertexY = a * vertexX * vertexX + b * vertexX + c;
+      return res.json({
+        domain: "mathematics",
+        state: {
+          a, b, c,
+          discriminant,
+          vertex: { x: vertexX, y: vertexY },
+          concavity: a > 0 ? "UPWARD" : "DOWNWARD"
+        }
+      });
+    } else if (domain === "physics") {
+      const v0 = Number(parameters?.initialVelocity ?? 20);
+      const angle = Math.max(0, Math.min(90, Number(parameters?.launchAngleDegrees ?? 45)));
+      const rad = (angle * Math.PI) / 180;
+      const g = 9.8;
+      const initialVx = v0 * Math.cos(rad);
+      const initialVy = v0 * Math.sin(rad);
+      const timeOfFlight = (2 * initialVy) / g;
+      const maxHeight = (initialVy * initialVy) / (2 * g);
+      const range = initialVx * timeOfFlight;
+      return res.json({
+        domain: "physics",
+        state: {
+          initialVelocity: v0,
+          launchAngleDegrees: angle,
+          initialVx: Number(initialVx.toFixed(2)),
+          initialVy: Number(initialVy.toFixed(2)),
+          timeOfFlight: Number(timeOfFlight.toFixed(2)),
+          maximumHeight: Number(maxHeight.toFixed(2)),
+          horizontalRange: Number(range.toFixed(2))
+        }
+      });
+    }
+
+    return res.json({ domain, status: "SIMULATED", parameters });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 // Socratic AI Tutor Chat Endpoint
@@ -60,14 +297,21 @@ app.post("/api/tutor/chat", async (req: Request, res: Response) => {
       });
     }
 
-    const systemInstruction = `You are "Tutor Moos", the world-class Socratic AI Mathematics & Multidisciplinary Tutor for MOOS TECHY ACADEMY.
+    const systemInstruction = `You are "Tutor Moos", the authoritative, empathetic Socratic AI Multidisciplinary Tutor for MOOS Academy.
 Your fundamental pedagogical mandate:
-1. NEVER simply give the final answer away. Guide the learner using the Socratic method, step-by-step prompts, and gentle probing questions.
-2. If the student made a mistake, identify the underlying misconception (e.g., forgetting order of operations PEMDAS, sign errors, confusing cross-multiplication with reciprocal multiplication) and ask a question that helps them spot it themselves.
-3. Keep responses structured, concise, supportive, and encouraging.
-4. Format mathematical expressions with clear typography (e.g. x^2 + 5x + 6 = 0, (a + b)^2, fractions like 3/4).
-5. Adapt your language to the learner's level (${context?.level || "Junior/Senior Secondary"}).
-6. Conclude with 1 clear guiding question or mini-step for the student to attempt next.`;
+1. STRICT SOCRATIC METHOD: NEVER simply give the final answer away. Guide the learner using structured Socratic probing, cognitive scaffolding, and gentle, curiosity-sparking questions.
+2. TECHNICAL & MATHEMATICAL NOTATION:
+   - Mathematics: Format all formulas clearly using LaTeX/KaTeX (e.g. $ax^2 + bx + c = 0$, $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$, $\\int x^n dx$). For exponents, use superscripts or standard syntax ($x^2, 10^5$).
+   - Physics: Always mandate SI units ($m/s^2$, $N$, $kg$, $J$), state vector vs scalar nature, and break forces into components.
+   - Chemistry: Write balanced chemical equations with state symbols ($2H_2(g) + O_2(g) \\rightarrow 2H_2O(l)$) and orbital notations ($1s^2 2s^2 2p^6$).
+   - Computing: Use formatted code blocks with invariants, complexity bounds ($O(n \\log n)$), and trace tables.
+   - English: Clearly identify grammatical subjects, predicates, tense agreements, clauses, and rhetorical structures.
+3. ADAPTIVE INQUIRY HANDLING:
+   - If the learner asks "What is the answer?" or "Just tell me": Empathize with their urgency, but decline gently: "At MOOS Academy, our mission is your genuine mastery. Let's conquer this together." Then ask a guiding question that unlocks the first step.
+   - If the learner says "Explain simpler": Use a vivid, relatable real-world physical or intuitive analogy, then connect it back to the formal notation.
+   - If the learner asks "Check my working": Validate what they did correctly first, then pinpoint the exact point of divergence and ask them what happened at that transition.
+   - If the learner asks "Why does this work?": Guide them through the conceptual intuition or underlying proof without rote memorization.
+4. Conclude EVERY response with exactly ONE clear, bite-sized guiding question or mini-step for the student to attempt next.`;
 
     const contextPrompt = context
       ? `Current Topic: ${context.subject || "Mathematics"} - ${context.unit || "General"}
@@ -85,7 +329,7 @@ Student's Message: "${message}"
 Please respond as Tutor Moos using Socratic pedagogical guidance.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.7-flash",
+      model: "gemini-3.8-flash",
       contents: userPrompt,
       config: {
         systemInstruction,
@@ -125,7 +369,7 @@ app.post("/api/tutor/diagnostic-analysis", async (req: Request, res: Response) =
       return res.json(localAnalysis);
     }
 
-    const systemInstruction = `You are the Lead Pedagogical Assessment Officer for MOOS TECHY ACADEMY.
+    const systemInstruction = `You are the Lead Pedagogical Assessment Officer for MOOS Academy.
 Analyze the diagnostic test results of a learner and produce a structured, encouraging diagnostic summary with:
 1. Overall readiness score & mastery tier
 2. Core strengths
@@ -148,7 +392,7 @@ Generate a detailed analysis in JSON format with keys:
 "encouragement": string`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.7-flash",
+      model: "gemini-3.8-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -181,7 +425,7 @@ app.post("/api/tutor/generate-practice", async (req: Request, res: Response) => 
       return res.json(generateLocalPracticeQuestion(validatedSkillName, validatedDifficulty, skillId, unitId));
     }
 
-    const systemInstruction = `You are the Practice Scaffolding Agent for MOOS TECHY ACADEMY. Generate 1 high-quality, pedagogically rigorous multiple-choice practice question for the specified canonical curriculum skill.
+    const systemInstruction = `You are the Practice Scaffolding Agent for MOOS Academy. Generate 1 high-quality, pedagogically rigorous multiple-choice practice question for the specified canonical curriculum skill.
 You must adhere strictly to the target skill, difficulty, and educational level.
 Never invent arbitrary curriculum IDs.
 Include 4 distinct options, accurate LaTeX math notation where relevant, a 3-tier progressive hint ladder, and common cognitive misconception traps.`;
@@ -207,7 +451,7 @@ Return strict JSON:
 }`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.7-flash",
+      model: "gemini-3.8-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -240,56 +484,301 @@ Return strict JSON:
   }
 });
 
-// Fallback logic for offline / no-key resilience
+// --------------------------------------------------------------------------
+// VEO 3 VIDEO GENERATION (veo-3.1-fast-generate-preview)
+// --------------------------------------------------------------------------
+
+// 1. Start Video Generation Operation
+app.post("/api/video/generate", async (req: Request, res: Response) => {
+  try {
+    const { prompt, aspectRatio = "16:9" } = req.body;
+
+    if (!prompt || typeof prompt !== "string") {
+      return res.status(400).json({ error: "Prompt is required for video generation" });
+    }
+
+    const validAspectRatio: "16:9" | "9:16" = aspectRatio === "9:16" ? "9:16" : "16:9";
+
+    if (!ai) {
+      return res.status(503).json({
+        error: "Gemini API key is not configured. Please ensure GEMINI_API_KEY is available."
+      });
+    }
+
+    // Call Veo model: veo-3.1-fast-generate-preview with specified aspect ratio
+    const operation = await ai.models.generateVideos({
+      model: "veo-3.1-fast-generate-preview",
+      prompt,
+      config: {
+        numberOfVideos: 1,
+        resolution: "720p",
+        aspectRatio: validAspectRatio
+      }
+    });
+
+    return res.json({
+      operationName: operation.name,
+      model: "veo-3.1-fast-generate-preview",
+      aspectRatio: validAspectRatio,
+      status: "queued"
+    });
+  } catch (error: any) {
+    console.error("Veo video generation initiation error:", error);
+    return res.status(500).json({
+      error: error.message || "Failed to initiate video generation"
+    });
+  }
+});
+
+// 2. Poll Video Generation Status
+app.post("/api/video/status", async (req: Request, res: Response) => {
+  try {
+    const { operationName } = req.body;
+
+    if (!operationName || typeof operationName !== "string") {
+      return res.status(400).json({ error: "operationName is required" });
+    }
+
+    if (!ai) {
+      return res.status(503).json({ error: "Gemini API key is not configured" });
+    }
+
+    const op = new GenerateVideosOperation();
+    op.name = operationName;
+    const updated = await ai.operations.getVideosOperation({ operation: op });
+
+    return res.json({
+      done: !!updated.done,
+      error: updated.error || null
+    });
+  } catch (error: any) {
+    console.error("Veo status check error:", error);
+    return res.status(500).json({
+      error: error.message || "Failed to check video generation status"
+    });
+  }
+});
+
+// 3. Download/Stream Video Result
+app.post("/api/video/download", async (req: Request, res: Response) => {
+  try {
+    const { operationName } = req.body;
+
+    if (!operationName || typeof operationName !== "string") {
+      return res.status(400).json({ error: "operationName is required" });
+    }
+
+    if (!ai || !apiKey) {
+      return res.status(503).json({ error: "Gemini API key is not configured" });
+    }
+
+    const op = new GenerateVideosOperation();
+    op.name = operationName;
+    const updated = await ai.operations.getVideosOperation({ operation: op });
+
+    if (!updated.done) {
+      return res.status(400).json({ error: "Video generation is not yet complete" });
+    }
+
+    const uri = updated.response?.generatedVideos?.[0]?.video?.uri;
+    if (!uri) {
+      return res.status(404).json({ error: "Video URI not found in completed operation" });
+    }
+
+    const videoRes = await fetch(uri, {
+      headers: { "x-goog-api-key": apiKey }
+    });
+
+    if (!videoRes.ok) {
+      return res.status(videoRes.status).json({
+        error: `Failed to download video from Google service: ${videoRes.statusText}`
+      });
+    }
+
+    res.setHeader("Content-Type", "video/mp4");
+    res.setHeader("Content-Disposition", `inline; filename="academy-simulation-${Date.now()}.mp4"`);
+
+    if (videoRes.body) {
+      await videoRes.body.pipeTo(
+        new WritableStream({
+          write(chunk) {
+            res.write(chunk);
+          },
+          close() {
+            res.end();
+          },
+          abort(err) {
+            console.error("Video pipe error:", err);
+            res.end();
+          }
+        })
+      );
+    } else {
+      res.end();
+    }
+  } catch (error: any) {
+    console.error("Veo video download error:", error);
+    return res.status(500).json({
+      error: error.message || "Failed to download video"
+    });
+  }
+});
+
+// --------------------------------------------------------------------------
+// AUDIO TRANSCRIPTION (gemini-3.5-transcribe)
+// --------------------------------------------------------------------------
+app.post("/api/audio/transcribe", async (req: Request, res: Response) => {
+  try {
+    const { audioData, mimeType = "audio/webm", prompt = "Transcribe this audio recording accurately with proper technical terminology." } = req.body;
+
+    if (!audioData || typeof audioData !== "string") {
+      return res.status(400).json({ error: "audioData (base64) is required" });
+    }
+
+    if (!ai) {
+      return res.status(503).json({ error: "Gemini API key is not configured" });
+    }
+
+    // Strip base64 metadata header if present
+    const base64Clean = audioData.includes("base64,")
+      ? audioData.split("base64,")[1]
+      : audioData;
+
+    const audioPart = {
+      inlineData: {
+        mimeType: mimeType || "audio/webm",
+        data: base64Clean
+      }
+    };
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-transcribe",
+      contents: {
+        parts: [
+          audioPart,
+          { text: prompt || "Transcribe this spoken educational audio accurately." }
+        ]
+      }
+    });
+
+    const transcript = response.text || "";
+
+    return res.json({
+      transcript,
+      model: "gemini-3.5-transcribe",
+      timestamp: new Date().toISOString()
+    });
+  } catch (error: any) {
+    console.error("Audio transcription error:", error);
+    return res.status(500).json({
+      error: error.message || "Failed to transcribe audio"
+    });
+  }
+});
+
+// Fallback logic for offline / no-key resilience with rich multidisciplinary notation
 function generateLocalSocraticResponse(userMsg: string, context: any): string {
   const msg = (userMsg || "").toLowerCase();
   const subject = (context?.subject || "").toLowerCase();
-  const topic = context?.skill || "this concept";
+  const topic = context?.skill || "this core concept";
 
+  // Intent: Asking for direct answers
   if (msg.includes("what is the answer") || msg.includes("just tell me") || msg.includes("give me the answer")) {
-    return `At MOOS TECHY ACADEMY, our goal is true mastery! Let's build your analytical thinking muscle. Look at the problem: what specific evidence or parameters are given, and what core rule connects them?`;
-  }
-  if (msg.includes("hint") || msg.includes("help") || msg.includes("stuck")) {
-    return `Let's break it down into manageable parts! First, identify the core principle in **${topic}**. What is the very first step or rule that applies here? Give it a try and tell me what you observe.`;
+    return `At MOOS Academy, our primary goal is building genuine intellectual mastery! Let's scaffold this step together. Look at the problem setup: what parameters or given values do you know, and what target variable are we solving for?`;
   }
 
-  // English & Language domain
-  if (subject.includes("english") || subject.includes("language") || msg.includes("grammar") || msg.includes("concord") || msg.includes("tense") || msg.includes("essay")) {
-    return `In English syntax and composition, structure dictates clarity. What is the grammatical subject here, and does the verb agree with it in number and tense?`;
+  // Intent: Explain simpler / intuitive analogy
+  if (msg.includes("simpler") || msg.includes("easy") || msg.includes("confused") || msg.includes("explain like")) {
+    return `Let's strip away the formal jargon and think about this intuitively! Imagine **${topic}** as a balance scale: whatever operation we perform on one side must balance the other. In your own words, what is happening in this scenario before we introduce any symbols?`;
+  }
+
+  // Intent: Checking learner's working
+  if (msg.includes("check") || msg.includes("is this right") || msg.includes("my answer") || msg.includes("working")) {
+    return `Let's audit your working step by step! Take your very first line of substitution: Did you ensure all units are consistent (e.g. converting cm to meters or minutes to seconds), and did you maintain sign conventions when moving terms across the equals sign? What does your second line look like?`;
+  }
+
+  // Intent: Help / Hints / Stuck
+  if (msg.includes("hint") || msg.includes("help") || msg.includes("stuck") || msg.includes("first step")) {
+    return `Let's break it down into a bite-sized first step! In **${topic}**, what is the foundational governing equation or rule that connects your known inputs? Write that down first, and tell me what value you plug in for the first term.`;
+  }
+
+  // Mathematics domain & technical notation
+  if (subject.includes("math") || subject.includes("algebra") || msg.includes("equation") || msg.includes("solve")) {
+    if (msg.includes("quadratic") || msg.includes("factor")) {
+      return `For quadratic expressions of the canonical form $ax^2 + bx + c = 0$, we can factorise by finding two numbers whose product is $(a \\times c)$ and whose sum is $(b)$, or apply the quadratic formula:
+$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+What are the specific values of $a$, $b$, and $c$ in your current equation?`;
+    }
+    if (msg.includes("index") || msg.includes("indices") || msg.includes("exponent") || msg.includes("power")) {
+      return `Let's apply the fundamental Laws of Indices:
+1. $a^m \\times a^n = a^{m+n}$
+2. $\\frac{a^m}{a^n} = a^{m-n}$
+3. $(a^m)^n = a^{m \\times n}$
+4. $a^{-n} = \\frac{1}{a^n}$
+Do your terms share the exact same base, or do we need to express them as powers of a common prime base (like $2$, $3$, or $5$) first?`;
+    }
+    if (msg.includes("fraction") || msg.includes("divide")) {
+      return `Remember the reciprocal multiplication principle: dividing by a fraction $\\frac{a}{b}$ is equivalent to multiplying by its reciprocal:
+$$\\frac{x}{y} \\div \\frac{a}{b} = \\frac{x}{y} \\times \\frac{b}{a}$$
+What does your expression look like once you invert the second fraction?`;
+    }
+    if (msg.includes("trig") || msg.includes("angle") || msg.includes("triangle")) {
+      return `For right-angled triangle trigonometry, recall our primary ratios:
+$$\\sin(\\theta) = \\frac{\\text{Opposite}}{\\text{Hypotenuse}}, \\quad \\cos(\\theta) = \\frac{\\text{Adjacent}}{\\text{Hypotenuse}}, \\quad \\tan(\\theta) = \\frac{\\text{Opposite}}{\\text{Adjacent}}$$
+Relative to angle $\\theta$, which two sides do you already have values for?`;
+    }
+    if (msg.includes("log") || msg.includes("logarithm")) {
+      return `Recall the core bridge between exponential and logarithmic forms:
+$$b^y = x \\iff \\log_b(x) = y$$
+And the product law: $\\log_b(MN) = \\log_b(M) + \\log_b(N)$. Can we combine your log terms into a single compact logarithm first?`;
+    }
   }
 
   // Science / Physics
   if (subject.includes("physics") || msg.includes("kinematics") || msg.includes("velocity") || msg.includes("force") || msg.includes("energy")) {
-    return `In physics problem solving, always start with first principles: What quantities are known (with their SI units), and what fundamental equation links them to the target variable?`;
+    return `In physics problem solving, we ground our reasoning in physical laws and SI units:
+- Kinematics: $v = u + at$, $s = ut + \\frac{1}{2}at^2$, $v^2 = u^2 + 2as$
+- Dynamics: $\\Sigma F = ma$, $W = F \\cdot d$
+What are your listed givens (with their units), and which equation contains only your target unknown?`;
   }
 
   // Science / Chemistry
-  if (subject.includes("chemistry") || msg.includes("mole") || msg.includes("stoichiometry") || msg.includes("electron") || msg.includes("reaction")) {
-    return `In chemical analysis, consider the conservation of mass and stoichiometry: Are the moles, chemical species, or electron configurations balanced? Where should we begin?`;
+  if (subject.includes("chemistry") || msg.includes("mole") || msg.includes("stoichiometry") || msg.includes("reaction")) {
+    return `In chemical calculations, the mole bridges macroscopic mass and atomic quantities:
+$$n = \\frac{\\text{mass } (m)}{\\text{molar mass } (M)}, \\quad c = \\frac{n}{V}$$
+Is your chemical reaction equation balanced with proper stoichiometric coefficients before calculating molar ratios?`;
   }
 
   // Science / Biology
-  if (subject.includes("biology") || msg.includes("cell") || msg.includes("genetics") || msg.includes("gene") || msg.includes("allele")) {
-    return `In biological systems, structure correlates directly with function. What organelle or genetic mechanism is responsible for this process?`;
+  if (subject.includes("biology") || msg.includes("cell") || msg.includes("genetics") || msg.includes("dna")) {
+    return `In biological systems, structure dictates function. If you are examining genetics, identify whether the trait is dominant ($A$) or recessive ($a$), and map out the parental genotypes in a Punnett square. What alleles does each gamete carry?`;
   }
 
-  // Computing & ICT
-  if (subject.includes("comp") || subject.includes("ict") || msg.includes("algorithm") || msg.includes("binary") || msg.includes("complexity") || msg.includes("loop")) {
-    return `In computational thinking, trace the execution step by step: What is the input, what does each iteration do to the state, and what is the expected invariant?`;
+  // Computer Science & ICT
+  if (subject.includes("comp") || subject.includes("ict") || msg.includes("algorithm") || msg.includes("code") || msg.includes("loop")) {
+    return `In computational problem solving, let's trace state invariants and complexity:
+- Time Complexity: $O(1) \\subset O(\\log n) \\subset O(n) \\subset O(n \\log n)$
+What is the state of your variables before entering the loop, and what terminates the loop condition?`;
   }
 
-  // Mathematics domain
-  if (msg.includes("quadratic") || msg.includes("factor")) {
-    return `For quadratic expressions of the form ax² + bx + c = 0, think about two numbers that multiply to give (a × c) and add up to give (b). What pairs of factors come to mind?`;
-  }
-  if (msg.includes("fraction") || msg.includes("divide")) {
-    return `Remember the key fraction rule: when dividing by a fraction, we multiply by its reciprocal (flip the numerator and denominator). Would you like to write down the flipped version first?`;
-  }
-  if (msg.includes("trig") || msg.includes("angle") || msg.includes("triangle")) {
-    return `For right-angled triangles, recall SOH-CAH-TOA. Which sides do you know relative to your target angle (Opposite, Adjacent, or Hypotenuse)?`;
+  // Economics & Social Sciences
+  if (subject.includes("econ") || msg.includes("demand") || msg.includes("supply") || msg.includes("elasticity")) {
+    return `In economic analysis, examine the market equilibrium where $Q_d = Q_s$. For Price Elasticity of Demand:
+$$PED = \\frac{\\% \\Delta Q_d}{\\% \\Delta P}$$
+Is the resulting coefficient $|PED| > 1$ (elastic) or $< 1$ (inelastic)? What does that imply about consumer responsiveness?`;
   }
 
-  return `Great question! In **${topic}**, every step follows logical principles. What do you think would happen if we start by examining the known values? Give it a try or let me know where you'd like to begin!`;
+  // Agricultural Science
+  if (subject.includes("agric") || msg.includes("soil") || msg.includes("crop") || msg.includes("livestock")) {
+    return `In agricultural science, soil fertility and crop yield depend on soil texture and macronutrients ($N$, $P$, $K$). Which specific physical property or agronomic practice is under review here?`;
+  }
+
+  // English & Language Arts
+  if (subject.includes("english") || subject.includes("grammar") || msg.includes("tense") || msg.includes("clause")) {
+    return `In English syntax and composition, structure dictates communicative clarity. Identify the grammatical subject and predicate: Does the verb agree in number and tense with the true subject, or is there an intervening prepositional phrase causing confusion?`;
+  }
+
+  return `Excellent inquiry! In **${topic}**, every conclusion stems from logical first principles. What is the very first premise or rule you can state with total confidence? Tell me that, and we'll take the next step together!`;
 }
 
 function generateLocalDiagnosticAnalysis(results: any, targetLevel: string) {
@@ -539,8 +1028,115 @@ function generateLocalPracticeQuestion(skillName?: string, difficulty?: string, 
   };
 }
 
-// Vite middleware and Server listener
+// Vite middleware and Server listener with Live API WebSocket bridge
 async function startServer() {
+  const server = http.createServer(app);
+
+  // WebSocket Server for Live Voice Conversation (gemini-3.8-live)
+  const wss = new WebSocketServer({ server, path: "/live" });
+
+  wss.on("connection", async (clientWs: WebSocket) => {
+    console.log("[Live API] Client connected to /live");
+
+    if (!ai) {
+      clientWs.send(JSON.stringify({
+        error: "Gemini API key is not configured for Live voice session."
+      }));
+      clientWs.close();
+      return;
+    }
+
+    let session: any = null;
+
+    try {
+      session = await ai.live.connect({
+        model: "gemini-3.8-live",
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Zephyr" }
+            }
+          },
+          systemInstruction: "You are Tutor Moos, the real-time voice Socratic multidisciplinary coach for MOOS Academy. Speak warmly, clearly, concisely, and ask guiding questions."
+        },
+        callbacks: {
+          onmessage: (message: any) => {
+            try {
+              const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+              if (audio && clientWs.readyState === WebSocket.OPEN) {
+                clientWs.send(JSON.stringify({ audio }));
+              }
+              if (message.serverContent?.interrupted && clientWs.readyState === WebSocket.OPEN) {
+                clientWs.send(JSON.stringify({ interrupted: true }));
+              }
+              // Transcripts if available
+              const text = message.serverContent?.modelTurn?.parts?.[0]?.text;
+              if (text && clientWs.readyState === WebSocket.OPEN) {
+                clientWs.send(JSON.stringify({ text }));
+              }
+            } catch (err) {
+              console.error("[Live API] onmessage dispatch error:", err);
+            }
+          },
+          onclose: () => {
+            console.log("[Live API] Gemini session closed");
+            if (clientWs.readyState === WebSocket.OPEN) {
+              clientWs.send(JSON.stringify({ sessionClosed: true }));
+            }
+          },
+          onerror: (err: any) => {
+            console.error("[Live API] Gemini session error:", err);
+            if (clientWs.readyState === WebSocket.OPEN) {
+              clientWs.send(JSON.stringify({ error: err.message || "Live API session encountered an error" }));
+            }
+          }
+        }
+      });
+
+      clientWs.on("message", (data: any) => {
+        try {
+          const parsed = JSON.parse(data.toString());
+          if (parsed.audio && session) {
+            session.sendRealtimeInput({
+              audio: { data: parsed.audio, mimeType: "audio/pcm;rate=16000" }
+            });
+          } else if (parsed.text && session) {
+            session.sendRealtimeInput({
+              text: parsed.text
+            });
+          }
+        } catch (err) {
+          console.error("[Live API] clientWs message parse error:", err);
+        }
+      });
+
+      clientWs.on("close", () => {
+        console.log("[Live API] Client disconnected from /live");
+        if (session) {
+          try {
+            session.close();
+          } catch {
+            // Safe cleanup
+          }
+        }
+      });
+
+      clientWs.on("error", (err) => {
+        console.error("[Live API] Client socket error:", err);
+      });
+
+    } catch (connErr: any) {
+      console.error("[Live API] Failed to connect to Gemini Live:", connErr);
+      if (clientWs.readyState === WebSocket.OPEN) {
+        clientWs.send(JSON.stringify({
+          error: connErr.message || "Failed to establish Live voice connection"
+        }));
+        clientWs.close();
+      }
+    }
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -555,8 +1151,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Moos Techy Academy server running on http://localhost:${PORT}`);
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`MOOS Academy server running on http://localhost:${PORT}`);
   });
 }
 

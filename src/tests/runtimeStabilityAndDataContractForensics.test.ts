@@ -265,7 +265,11 @@ async function runRuntimeStabilityForensics() {
   console.log("==========================================================================\n");
 }
 
-runRuntimeStabilityForensics().catch((err) => {
-  console.error("❌ Forensic Suite Failed with Exception:", err);
-  process.exit(1);
-});
+runRuntimeStabilityForensics()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("❌ Forensic Suite Failed with Exception:", err);
+    process.exit(1);
+  });

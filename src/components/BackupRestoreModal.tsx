@@ -380,7 +380,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
                         <span>Backup Verified & Valid (Schema v{validationResult.schemaVersion})</span>
                       </div>
                       <p className="text-emerald-700 text-[11px]">
-                        Scope: <strong>{validationResult.scope?.replace("_", " ")}</strong> • Application: MOOS TECHY ACADEMY
+                        Scope: <strong>{validationResult.scope?.replace("_", " ")}</strong> • Application: MOOS Academy
                       </p>
                     </div>
                   )}
@@ -471,7 +471,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
                   Pre-Restore Rollback Protection
                 </span>
                 <p className="text-slate-600 leading-relaxed">
-                  Before applying any destructive restore operation, MOOS TECHY ACADEMY creates a safety snapshot in local storage. If a restore was applied accidentally or contains erroneous records, you can roll back instantly.
+                  Before applying any destructive restore operation, MOOS Academy creates a safety snapshot in local storage. If a restore was applied accidentally or contains erroneous records, you can roll back instantly.
                 </p>
               </div>
 
@@ -525,7 +525,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
 
         {/* Modal Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-400">
-          <span>MOOS Techy Academy • Local-First Architecture</span>
+          <span>MOOS Academy • Local-First Architecture</span>
           <button
             type="button"
             onClick={onClose}

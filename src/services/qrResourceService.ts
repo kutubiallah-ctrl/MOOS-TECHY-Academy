@@ -35,7 +35,7 @@ export class QRResourceService {
       return {
         isValid: false,
         resolvedAt: now,
-        error: "Please enter or scan a valid MOOS TECHY resource code."
+        error: "Please enter or scan a valid MOOS Academy resource code."
       };
     }
 
@@ -77,7 +77,7 @@ export class QRResourceService {
     return {
       isValid: false,
       resolvedAt: now,
-      error: `Resource code "${identifier}" was not found in the MOOS TECHY ACADEMY registry. Please verify the code printed in your textbook.`
+      error: `Resource code "${identifier}" was not found in the MOOS Academy registry. Please verify the code printed in your textbook.`
     };
   }
 

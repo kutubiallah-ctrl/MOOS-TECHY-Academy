@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User account matching Firebase Auth UID with roles and profile metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "User ID matching Firebase Auth UID" },
+        "email": { "type": "string", "maxLength": 255, "description": "User's email address" },
+        "displayName": { "type": "string", "maxLength": 100, "description": "User's full name" },
+        "role": { "type": "string", "enum": ["learner", "teacher", "admin"], "description": "Role: learner, teacher, admin" },
+        "photoURL": { "type": "string", "maxLength": 1024, "description": "Profile picture URL" },
+        "currentLevel": { "type": "string", "maxLength": 64, "description": "Active educational level" },
+        "countryCode": { "type": "string", "maxLength": 8, "description": "Selected country curriculum" },
+        "createdAt": { "type": "string", "maxLength": 64, "description": "Account creation timestamp" },
+        "lastActiveAt": { "type": "string", "maxLength": 64, "description": "Last active timestamp" }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "LearnerProfile": {
+      "title": "LearnerProfile",
+      "description": "Extended learner progress, mastery, streaks, and gamification metrics",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Linked user Auth UID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Learner name" },
+        "targetLevel": { "type": "string", "maxLength": 64, "description": "Target educational level" },
+        "countryCode": { "type": "string", "maxLength": 8, "description": "Country code" },
+        "streakDays": { "type": "number", "description": "Study streak in days" },
+        "totalMinutesStudied": { "type": "number", "description": "Total study duration" },
+        "xp": { "type": "number", "description": "Experience points" },
+        "masteryPoints": { "type": "number", "description": "Total mastery points" },
+        "completedSkills": { "type": "array", "description": "List of completed skill IDs" },
+        "unlockedBadges": { "type": "array", "description": "List of badge IDs" },
+        "lastActiveDate": { "type": "string", "maxLength": 64, "description": "Last active ISO date" },
+        "updatedAt": { "type": "string", "maxLength": 64, "description": "Last update ISO timestamp" }
+      },
+      "required": ["userId"]
+    },
+    "TeacherMaterial": {
+      "title": "TeacherMaterial",
+      "description": "Curriculum lesson plans, worksheets, and instructional materials with provenance and approval state machine",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Material unique ID" },
+        "teacherId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Author teacher UID" },
+        "title": { "type": "string", "maxLength": 200, "description": "Material title" },
+        "subject": { "type": "string", "maxLength": 100, "description": "Subject name" },
+        "domainId": { "type": "string", "maxLength": 64, "description": "Domain ID" },
+        "level": { "type": "string", "maxLength": 64, "description": "Target educational level" },
+        "materialType": { "type": "string", "maxLength": 64, "description": "Material type (lesson_plan, worksheet, etc.)" },
+        "lifecycleStatus": { "type": "string", "enum": ["draft", "awaiting_human_approval", "approved", "published"], "description": "Lifecycle state" },
+        "provenance": { "type": "string", "enum": ["AI_GENERATED_DRAFT", "TEACHER_EDITED_DRAFT", "TEACHER_APPROVED"], "description": "AI and human provenance" },
+        "content": { "type": "string", "maxLength": 100000, "description": "Markdown or JSON content" },
+        "createdAt": { "type": "string", "maxLength": 64, "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "maxLength": 64, "description": "Last updated timestamp" }
+      },
+      "required": ["id", "teacherId", "title", "lifecycleStatus", "provenance"]
+    },
+    "GeneratedVideo": {
+      "title": "GeneratedVideo",
+      "description": "Veo 3 video generation job metadata and asset references",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Video generation job ID" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Requesting user UID" },
+        "prompt": { "type": "string", "maxLength": 2000, "description": "Prompt used for Veo generation" },
+        "aspectRatio": { "type": "string", "enum": ["16:9", "9:16"], "description": "16:9 or 9:16" },
+        "model": { "type": "string", "maxLength": 64, "description": "veo-3.1-fast-generate-preview" },
+        "status": { "type": "string", "enum": ["queued", "processing", "ready", "failed"], "description": "Job status" },
+        "operationName": { "type": "string", "maxLength": 512, "description": "Veo long-running operation name" },
+        "videoUrl": { "type": "string", "maxLength": 2048, "description": "Video playback URL" },
+        "createdAt": { "type": "string", "maxLength": 64, "description": "Creation timestamp" }
+      },
+      "required": ["id", "userId", "prompt", "status"]
+    },
+    "AudioTranscription": {
+      "title": "AudioTranscription",
+      "description": "Speech-to-text transcription records from gemini-3.5-transcribe",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Transcription ID" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Requesting user UID" },
+        "transcript": { "type": "string", "maxLength": 50000, "description": "Transcribed text result" },
+        "model": { "type": "string", "maxLength": 64, "description": "gemini-3.5-transcribe" },
+        "durationSeconds": { "type": "number", "description": "Recorded audio duration in seconds" },
+        "createdAt": { "type": "string", "maxLength": 64, "description": "Timestamp" }
+      },
+      "required": ["id", "userId", "transcript"]
+    },
+    "StorageArtifact": {
+      "title": "StorageArtifact",
+      "description": "Metadata for files stored in Cloud Storage with ownership, role access and integrity hash",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Unique storage artifact ID" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Owner user UID" },
+        "role": { "type": "string", "enum": ["learner", "teacher", "admin"], "description": "Role of the owner" },
+        "filename": { "type": "string", "maxLength": 255, "description": "Original filename" },
+        "mimeType": { "type": "string", "maxLength": 128, "description": "MIME type of the artifact" },
+        "sizeBytes": { "type": "number", "description": "Size in bytes" },
+        "storagePath": { "type": "string", "maxLength": 512, "description": "Cloud Storage bucket path" },
+        "downloadUrl": { "type": "string", "maxLength": 2048, "description": "Public or signed download URL" },
+        "sha256Hash": { "type": "string", "maxLength": 64, "description": "SHA-256 integrity hash" },
+        "category": { "type": "string", "enum": ["avatar", "teacher_material", "manuscript", "audio", "backup", "student_submission"], "description": "Category of artifact" },
+        "createdAt": { "type": "string", "maxLength": 64, "description": "Creation timestamp" }
+      },
+      "required": ["id", "userId", "filename", "storagePath", "sizeBytes", "createdAt"]
+    },
+    "SecurityAuditLog": {
+      "title": "SecurityAuditLog",
+      "description": "Immutable security and governance event record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Audit event ID" },
+        "actorUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$", "description": "Actor user UID" },
+        "actorRole": { "type": "string", "enum": ["learner", "teacher", "admin", "system"], "description": "Actor role" },
+        "action": { "type": "string", "maxLength": 100, "description": "Action performed" },
+        "resourceType": { "type": "string", "maxLength": 100, "description": "Target resource type" },
+        "resourceId": { "type": "string", "maxLength": 128, "description": "Target resource ID" },
+        "status": { "type": "string", "enum": ["SUCCESS", "DENIED", "FAILED"], "description": "Outcome status" },
+        "timestamp": { "type": "string", "maxLength": 64, "description": "ISO timestamp" }
+      },
+      "required": ["id", "actorUid", "action", "status", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles with strict identity isolation and PII protection"
+    },
+    "/learnerProfiles/{userId}": {
+      "schema": "LearnerProfile",
+      "description": "Learner academic profile and progress, accessible only by owner and admin"
+    },
+    "/teacherMaterials/{materialId}": {
+      "schema": "TeacherMaterial",
+      "description": "Instructional materials governed by teacher ownership and approval state machine"
+    },
+    "/generatedVideos/{videoId}": {
+      "schema": "GeneratedVideo",
+      "description": "Veo 3 video generations isolated to requesting user"
+    },
+    "/audioTranscriptions/{transcriptionId}": {
+      "schema": "AudioTranscription",
+      "description": "Speech-to-text transcriptions isolated to requesting user"
+    },
+    "/storageArtifacts/{artifactId}": {
+      "schema": "StorageArtifact",
+      "description": "Cloud file storage metadata governed by owner and admin access"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "SecurityAuditLog",
+      "description": "Immutable append-only governance and security audit records"
+    }
+  }
+}

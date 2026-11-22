@@ -18,6 +18,22 @@ import {
   LearnerUserIdentity
 } from "../types/identity";
 import { auditService } from "./auditService";
+import { mfaService } from "./mfaService";
+
+/**
+ * Privileged actions that strictly require verified second-factor MFA assurance (AAL2).
+ */
+export const PRIVILEGED_MFA_PERMISSIONS: ReadonlySet<UserPermission> = new Set<UserPermission>([
+  "MANAGE_USERS",
+  "MANAGE_SYSTEM_SETTINGS",
+  "EXPORT_CLASSROOM_DATA",
+  "RESTORE_CLASSROOM_DATA",
+  "APPROVE_BOOK_RESOURCE",
+  "PUBLISH_MARKETPLACE_RESOURCE",
+  "SUSPEND_MARKETPLACE_RESOURCE",
+  "MANAGE_MARKETPLACE_CATALOG",
+  "VIEW_AUDIT_LOG"
+]);
 
 /**
  * Role Permission Baseline Matrix
@@ -130,7 +146,7 @@ export class AuthorizationService {
     actor: UserIdentity | UserSession | InstitutionalUser,
     permission: UserPermission,
     resource?: ResourceAuthorizationContext,
-    options: { suppressTelemetry?: boolean } = {}
+    options: { suppressTelemetry?: boolean; requireMfaAssurance?: boolean } = {}
   ): AuthorizationDecision {
     const { id: actorId, role: actorRole, displayName, assignedClassrooms } = this.extractActor(actor);
 
@@ -157,6 +173,33 @@ export class AuthorizationService {
         });
       }
       return decision;
+    }
+
+    // 1.5. Zero-Trust Second-Factor Assurance Enforcement (AAL2)
+    // Privileged operations must require verified second-factor assurance bound to the authenticated user.
+    // Client-set flags (like mfaVerified: true in localStorage) are completely ignored.
+    if (options.requireMfaAssurance || (PRIVILEGED_MFA_PERMISSIONS.has(permission) && (actor as any)._enforceMfa)) {
+      if (!mfaService.hasActiveAssurance(actorId, permission)) {
+        const decision: AuthorizationDecision = {
+          granted: false,
+          permission,
+          reason: `Privileged operation '${permission}' requires verified second-factor MFA assurance (AAL2).`,
+          denialCode: "MFA_VERIFICATION_REQUIRED"
+        };
+        if (!options.suppressTelemetry) {
+          auditService.recordDenial({
+            actorId,
+            actorRole,
+            actorDisplayName: displayName,
+            resourceType: resource?.resourceType || "privileged_operation",
+            resourceId: resource?.resourceId,
+            classroomId: resource?.classroomId,
+            denialCode: decision.denialCode!,
+            reason: decision.reason!
+          });
+        }
+        return decision;
+      }
     }
 
     // 2. Canonical Curriculum Immutability Check
@@ -386,12 +429,24 @@ export class AuthorizationService {
   public assertAuthorized(
     actor: UserIdentity | UserSession | InstitutionalUser,
     permission: UserPermission,
-    resource?: ResourceAuthorizationContext
+    resource?: ResourceAuthorizationContext,
+    options: { requireMfaAssurance?: boolean } = {}
   ): void {
-    const decision = this.can(actor, permission, resource);
+    const decision = this.can(actor, permission, resource, options);
     if (!decision.granted) {
       throw new Error(`[AUTHORIZATION_DENIED] ${decision.reason || "Unauthorized action"}`);
     }
+  }
+
+  /**
+   * Asserts that an actor is authorized AND possesses verified second-factor MFA assurance (AAL2).
+   */
+  public assertPrivilegedAuthorized(
+    actor: UserIdentity | UserSession | InstitutionalUser,
+    permission: UserPermission,
+    resource?: ResourceAuthorizationContext
+  ): void {
+    this.assertAuthorized(actor, permission, resource, { requireMfaAssurance: true });
   }
 }
 

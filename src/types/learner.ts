@@ -17,6 +17,10 @@ export interface AcademicContext {
   gradeOrYear: string;
   targetExamPathway?: string;
   jurisdiction?: string;
+  interfaceLanguage?: string;
+  learningLanguage?: string;
+  localHeritageLanguage?: string;
+  onboardingCompleted?: boolean;
 }
 
 export interface QuestionAttempt {

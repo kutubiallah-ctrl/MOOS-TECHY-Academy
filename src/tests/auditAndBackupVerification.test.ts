@@ -365,7 +365,11 @@ async function runVerification() {
   console.log("==========================================================================");
 }
 
-runVerification().catch(err => {
-  console.error("Verification suite failed:", err);
-  process.exit(1);
-});
+runVerification()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error("Verification suite failed:", err);
+    process.exit(1);
+  });

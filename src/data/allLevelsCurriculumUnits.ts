@@ -458,6 +458,243 @@ export const PRIMARY_FOUNDATIONS_UNITS: Unit[] = [
         ]
       }
     ]
+  },
+
+  // --- Mathematics: Primary Foundations (Addition & Regrouping) ---
+  {
+    id: "unit-pri-found-math-regrouping",
+    subjectId: "math_core",
+    level: "primary_foundations",
+    title: "Two-Digit Addition, Regrouping & Word Problem Scenarios",
+    code: "MTH-PF-02",
+    description: "Develop fluency in multi-digit vertical column addition, place-value regrouping (carrying over tens), and solving everyday story problems.",
+    order: 2,
+    category: "core",
+    skills: [
+      {
+        id: "skill-pf-addition-regrouping",
+        unitId: "unit-pri-found-math-regrouping",
+        title: "Column Addition with Regrouping & Tens Carry-Over",
+        code: "SKL-PF-ADD",
+        summary: "Align numbers vertically by place value, sum the units column, regroup sums greater than 9 into tens, and calculate total sums.",
+        objectives: [
+          "Align two-digit numbers correctly in Tens and Units columns",
+          "Regroup when the sum of units exceeds 9 (e.g. 14 units = 1 ten and 4 units)",
+          "Solve two-step commercial and real-world addition story problems accurately"
+        ],
+        difficulty: "foundational",
+        masteryPointsRequired: 100,
+        lesson: {
+          id: "les-pf-addition-regrouping",
+          title: "The Carry-Over Secret: Adding Double Digits with Regrouping",
+          hookAndIntuition: "If you have 17 marbles and your friend gives you 25 more, you cannot fit two digits into the single units place. Where does the extra ten go?",
+          conceptualExplanation: "In column addition, always add from right to left, starting with the Units. If the units add up to 10 or more, you 'regroup': the ones stay in the units column, and the ten hops over to the Tens column as a carry-over.",
+          keyTermsAndFormulas: [
+            { termOrSymbol: "Regrouping (Carrying)", definition: "Trading 10 units for 1 ten and placing it into the tens column.", practicalExample: "7 + 5 = 12 (Write 2, carry 1 ten)" },
+            { termOrSymbol: "Column Alignment", definition: "Arranging numbers so Tens sit over Tens and Units sit over Units.", practicalExample: "28 + 15 lined up vertically" }
+          ],
+          workedExamples: [
+            {
+              title: "Solving 28 + 15",
+              problemStatement: "Calculate 28 + 15 using column addition.",
+              mathExpression: "28 + 15 = 43",
+              steps: [
+                { stepNumber: 1, instruction: "Add the units column", reasoning: "8 + 5 = 13. Since 13 has 1 ten and 3 units, write 3 in the units column and carry 1 ten to the tens column." },
+                { stepNumber: 2, instruction: "Add the tens column with carry-over", reasoning: "1 (carried) + 2 + 1 = 4 tens. Write 4 in the tens column." },
+                { stepNumber: 3, instruction: "Combine results", reasoning: "The total sum is 43." }
+              ],
+              takeawayRule: "Always add the carried ten to the tens column; never forget to include it."
+            }
+          ],
+          commonMisconceptionsAndTraps: [
+            { misconception: "Writing the full number 13 in the units column to get '213'.", whyItIsWrong: "Each column can only hold one digit (0–9).", correctCorrection: "Write 3 units and carry the 1 ten above the next column." }
+          ],
+          guidedPracticePrompt: "Add 36 + 19. Start with 6 + 9 = 15. What digit stays and what digit carries?",
+          summaryRecap: "Start at the units; if the sum is 10 or greater, carry the ten to the next column."
+        },
+        questions: [
+          {
+            id: "q-pf-add-1",
+            type: "multiple_choice",
+            questionText: "Calculate the exact sum: 27 + 35",
+            mathExpression: "27 + 35",
+            options: ["62", "52", "512", "61"],
+            correctAnswer: "62",
+            explanation: "Units: 7 + 5 = 12 (write 2, carry 1). Tens: 1 (carry) + 2 + 3 = 6. Total = 62.",
+            hintLadder: [
+              "Step 1: Add the units digits (7 + 5). What do you get?",
+              "7 + 5 = 12, so write 2 in units and carry 1 ten.",
+              "Step 2: Add 1 + 2 + 3 in the tens column."
+            ],
+            misconceptionAlerts: [
+              { trigger: "52", note: "Did you forget to add the carried 1 ten to 2 + 3?" },
+              { trigger: "512", note: "Remember, you cannot write 12 in the single units column! You must carry the 1 ten." }
+            ],
+            skillId: "skill-pf-addition-regrouping",
+            difficulty: "easy"
+          },
+          {
+            id: "q-pf-add-2",
+            type: "multiple_choice",
+            questionText: "A primary school library has 48 mathematics books and 36 storybooks. How many books are there in total?",
+            mathExpression: "48 + 36",
+            options: ["84 books", "74 books", "82 books", "714 books"],
+            correctAnswer: "84 books",
+            explanation: "8 + 6 = 14 (write 4, carry 1). Tens: 1 + 4 + 3 = 8. Total = 84 books.",
+            hintLadder: [
+              "Align the numbers: 48 on top of 36.",
+              "Add 8 + 6 = 14. Keep 4, carry 1 ten.",
+              "Add 1 + 4 + 3 = 8 tens."
+            ],
+            misconceptionAlerts: [
+              { trigger: "74 books", note: "Check your carry-over: 1 + 4 + 3 = 8, not 7." },
+              { trigger: "714 books", note: "Never write the entire 14 in the units column!" }
+            ],
+            skillId: "skill-pf-addition-regrouping",
+            difficulty: "easy"
+          },
+          {
+            id: "q-pf-add-3",
+            type: "multiple_choice",
+            questionText: "Which statement explains why 59 + 24 equals 83?",
+            options: [
+              "9 units + 4 units = 13 units (3 units, carry 1 ten); 1 ten + 5 tens + 2 tens = 8 tens (83)",
+              "5 + 2 = 7 and 9 + 4 = 13, so the answer is 713",
+              "You only add the tens and ignore the units",
+              "9 + 4 = 12, so the answer is 82"
+            ],
+            correctAnswer: "9 units + 4 units = 13 units (3 units, carry 1 ten); 1 ten + 5 tens + 2 tens = 8 tens (83)",
+            explanation: "9 + 4 = 13 units, regrouped as 1 ten and 3 units. Adding the tens: 1 + 5 + 2 = 8 tens, giving 83.",
+            hintLadder: [
+              "Look for the explanation that correctly tracks both the units sum and the carried ten."
+            ],
+            misconceptionAlerts: [
+              { trigger: "5 + 2 = 7 and 9 + 4 = 13, so the answer is 713", note: "Placing 13 directly after 7 ignores base-ten regrouping." }
+            ],
+            skillId: "skill-pf-addition-regrouping",
+            difficulty: "medium"
+          }
+        ]
+      }
+    ]
+  },
+
+  // --- STEM: Primary Foundations (Forces, Matter & Motion) ---
+  {
+    id: "unit-pri-found-stem-forces",
+    subjectId: "sci_physics",
+    level: "primary_foundations",
+    title: "Pushes, Pulls, Magnets & Motion Around Us",
+    code: "SCI-PF-02",
+    description: "Discover how forces make objects move, stop, or change direction; explore gravity, surface friction, and magnetic attraction.",
+    order: 2,
+    category: "core",
+    skills: [
+      {
+        id: "skill-pf-forces-motion",
+        unitId: "unit-pri-found-stem-forces",
+        title: "Understanding Forces: Pushes, Pulls, Gravity & Friction",
+        code: "SKL-PF-FRC",
+        summary: "Identify pushes and pulls in daily activities, explain why dropped objects fall to the ground, and observe magnetic poles.",
+        objectives: [
+          "Differentiate between pushing forces (moving away) and pulling forces (moving closer)",
+          "Explain that gravity pulls objects downward toward the Earth",
+          "Observe that magnets attract magnetic materials (like iron and steel) and have North and South poles"
+        ],
+        difficulty: "foundational",
+        masteryPointsRequired: 100,
+        lesson: {
+          id: "les-pf-forces",
+          title: "The Invisible Hand of Forces: Pushes, Pulls and Magnets",
+          hookAndIntuition: "When you kick a football, open a heavy door, or drop a pencil, what makes things move or fall?",
+          conceptualExplanation: "A force is simply a push or a pull. Pushing moves something away from you. Pulling moves something toward you. Gravity is an invisible force from Earth pulling everything down. Magnets have special poles (North and South) that attract magnetic metals like iron.",
+          keyTermsAndFormulas: [
+            { termOrSymbol: "Push", definition: "A force directed away from your body.", practicalExample: "Kicking a ball or pushing a door shut." },
+            { termOrSymbol: "Pull", definition: "A force directed toward your body.", practicalExample: "Opening a desk drawer or pulling a wagon." },
+            { termOrSymbol: "Gravity", definition: "The force that pulls all objects toward the center of the Earth." },
+            { termOrSymbol: "Magnet", definition: "An object that attracts iron, steel, and other magnetic metals." }
+          ],
+          workedExamples: [
+            {
+              title: "Classifying Forces on a School Bag",
+              problemStatement: "When you lift your school bag off the floor onto your desk, what force are you applying?",
+              steps: [
+                { stepNumber: 1, instruction: "Determine the direction of movement", reasoning: "You are pulling the bag upward toward your hands against gravity." },
+                { stepNumber: 2, instruction: "Classify", reasoning: "Lifting an object upward toward you is a pulling force." }
+              ],
+              takeawayRule: "Lifting against gravity is an upward pull."
+            }
+          ],
+          commonMisconceptionsAndTraps: [
+            { misconception: "Thinking heavy objects fall much faster than light objects in everyday conditions.", whyItIsWrong: "Gravity pulls all objects with the same acceleration; differences in air resistance cause feathers to drift slowly.", correctCorrection: "Gravity acts equally on all matter." }
+          ],
+          guidedPracticePrompt: "Is closing a drawer a push or a pull? What about opening it?",
+          summaryRecap: "Forces are pushes or pulls that make objects start moving, speed up, slow down, or change direction."
+        },
+        questions: [
+          {
+            id: "q-pf-frc-1",
+            type: "multiple_choice",
+            questionText: "Which action is an example of a PULLING force?",
+            options: [
+              "Opening a sliding desk drawer toward you",
+              "Kicking a soccer ball forward into the net",
+              "Pressing a doorbell with your thumb",
+              "Rolling a bowling ball down an alley"
+            ],
+            correctAnswer: "Opening a sliding desk drawer toward you",
+            explanation: "Pulling moves an object closer to you, such as opening a drawer. Kicking, pressing, and rolling apply pushes away from you.",
+            hintLadder: [
+              "Think about the direction: does the object move toward you or away from you?",
+              "Opening a drawer brings it closer to your body (a pull)."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Kicking a soccer ball forward into the net", note: "Kicking applies a push that sends the ball away from your foot." }
+            ],
+            skillId: "skill-pf-forces-motion",
+            difficulty: "easy"
+          },
+          {
+            id: "q-pf-frc-2",
+            type: "multiple_choice",
+            questionText: "What invisible force causes a ripe mango to fall straight down from a tree to the ground?",
+            options: ["Gravity", "Magnetism", "Wind electricity", "Friction"],
+            correctAnswer: "Gravity",
+            explanation: "Gravity is the attractive force exerted by Earth that pulls all objects downward toward its center.",
+            hintLadder: [
+              "Think about what pulls objects down when you let go of them."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Magnetism", note: "Mangos are organic fruit, not magnetic metals; magnetism does not pull fruit." }
+            ],
+            skillId: "skill-pf-forces-motion",
+            difficulty: "easy"
+          },
+          {
+            id: "q-pf-frc-3",
+            type: "multiple_choice",
+            questionText: "Which of the following items will be strongly ATTRACTED by a bar magnet?",
+            options: [
+              "An iron nail",
+              "A plastic water bottle",
+              "A wooden pencil",
+              "A cotton shirt"
+            ],
+            correctAnswer: "An iron nail",
+            explanation: "Magnets attract ferromagnetic metals such as iron, nickel, and steel. Plastic, wood, and cotton are non-magnetic.",
+            hintLadder: [
+              "Magnets only attract certain metals like iron and steel.",
+              "Which of these choices is made of iron metal?"
+            ],
+            misconceptionAlerts: [
+              { trigger: "A plastic water bottle", note: "Magnets never attract plastic materials." }
+            ],
+            skillId: "skill-pf-forces-motion",
+            difficulty: "easy"
+          }
+        ]
+      }
+    ]
   }
 ];
 
@@ -793,6 +1030,244 @@ export const JUNIOR_SECONDARY_STEM_ICT_UNITS: Unit[] = [
         ]
       }
     ]
+  },
+
+  // --- Basic Technology: Junior Secondary ---
+  {
+    id: "unit-jss-basic-tech-materials",
+    subjectId: "tech_compsci",
+    level: "junior_secondary",
+    title: "Workshop Safety, Materials Technology & Tool Mechanics",
+    code: "TEC-JS-01",
+    description: "Master workshop safety protocols, personal protective equipment (PPE), classification of woods (hardwood/softwood), metals (ferrous/non-ferrous), plastics, and basic hand tools.",
+    order: 2,
+    category: "core",
+    skills: [
+      {
+        id: "skill-jss-materials-safety",
+        unitId: "unit-jss-basic-tech-materials",
+        title: "Materials Classification, Workshop Safety & PPE Regulations",
+        code: "SKL-JS-MAT",
+        summary: "Classify technological materials (metals, woods, plastics, ceramics), identify causes of workshop accidents, and select appropriate safety equipment.",
+        objectives: [
+          "Differentiate between ferrous metals (contain iron, magnetic) and non-ferrous metals (no iron, corrosion-resistant)",
+          "Distinguish hardwoods (broad-leaved deciduous, e.g. Iroko, Mahogany) from softwoods (coniferous needle-leaved, e.g. Pine, Cedar)",
+          "Identify common workshop hazards and enforce PPE rules (goggles, safety boots, aprons)"
+        ],
+        difficulty: "intermediate",
+        masteryPointsRequired: 100,
+        lesson: {
+          id: "les-jss-materials-safety",
+          title: "Building the Physical World: Materials Science and Workshop Protocols",
+          hookAndIntuition: "Why do airplane bodies use aluminum instead of heavy steel? Why are cooking pot handles made of thermosetting plastic rather than metal?",
+          conceptualExplanation: "Engineering design starts with choosing the right material. Metals are split into Ferrous (contain iron, prone to rust, attracted to magnets) and Non-Ferrous (copper, aluminum, brass, which do not rust). Woods are divided into Hardwoods (dense trees with broad leaves like Teak and Mahogany) and Softwoods (evergreen needle trees like Pine). Safety in the workshop requires PPE (Personal Protective Equipment) and strict adherence to tool protocols.",
+          keyTermsAndFormulas: [
+            { termOrSymbol: "Ferrous Metals", definition: "Metals containing iron as their main constituent; generally magnetic and prone to rust.", practicalExample: "Mild steel, cast iron, wrought iron" },
+            { termOrSymbol: "Non-Ferrous Metals", definition: "Metals that do not contain iron; non-magnetic and highly resistant to corrosion.", practicalExample: "Aluminum, copper, zinc, brass" },
+            { termOrSymbol: "Hardwood", definition: "Dense timber derived from broad-leaved deciduous angiosperm trees.", practicalExample: "Iroko, Mahogany, Obeche, Oak" },
+            { termOrSymbol: "PPE", definition: "Personal Protective Equipment used to prevent workshop injuries.", practicalExample: "Goggles, ear defenders, steel-toe boots" }
+          ],
+          workedExamples: [
+            {
+              title: "Selecting Materials for an Outdoor Gate",
+              problemStatement: "An architect needs a metal for a coastal estate gate that resists ocean saltwater corrosion. Should they choose mild steel or aluminum?",
+              steps: [
+                { stepNumber: 1, instruction: "Identify corrosion mechanisms", reasoning: "Mild steel contains iron, which rapidly oxidizes into rust (hydrated iron oxide) in moist, salty air." },
+                { stepNumber: 2, instruction: "Examine non-ferrous properties", reasoning: "Aluminum forms an impervious oxide layer that naturally seals against saltwater corrosion." },
+                { stepNumber: 3, instruction: "Conclude", reasoning: "Aluminum (or galvanized/stainless alloy) is the superior engineering choice." }
+              ],
+              takeawayRule: "Non-ferrous metals are selected whenever atmospheric corrosion resistance is paramount."
+            }
+          ],
+          commonMisconceptionsAndTraps: [
+            { misconception: "Assuming 'hardwoods' are always physically harder than 'softwoods'.", whyItIsWrong: "Hardwood/softwood is a botanical distinction based on seed structure and foliage, not density (Balsa wood is botanically a hardwood yet extremely soft!).", correctCorrection: "Hardwoods come from broad-leaved flowering trees; softwoods come from cone-bearing gymnosperms." }
+          ],
+          guidedPracticePrompt: "Which metal would you select to conduct electricity in household wiring: copper or cast iron?",
+          summaryRecap: "Material properties determine engineering suitability; workshop safety protocols prevent preventable industrial injuries."
+        },
+        questions: [
+          {
+            id: "q-jss-mat-1",
+            type: "multiple_choice",
+            questionText: "Which of the following metals is classified as a NON-FERROUS metal?",
+            options: ["Copper", "Cast iron", "Mild steel", "Wrought iron"],
+            correctAnswer: "Copper",
+            explanation: "Copper contains no iron and is therefore a non-ferrous metal. Cast iron, mild steel, and wrought iron all contain iron as their primary constituent.",
+            hintLadder: [
+              "Remember that 'ferrous' comes from the Latin 'ferrum', meaning iron.",
+              "Look for the metal that does NOT contain iron."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Mild steel", note: "Mild steel is an alloy composed mostly of iron and a small percentage of carbon; it is a ferrous metal." }
+            ],
+            skillId: "skill-jss-materials-safety",
+            difficulty: "easy"
+          },
+          {
+            id: "q-jss-mat-2",
+            type: "multiple_choice",
+            questionText: "Which indigenous West African tree species produces dense, highly durable HARDWOOD used extensively in structural building and fine furniture?",
+            options: ["Iroko (Chlorophora excelsa)", "Pine (Pinus)", "Fir (Abies)", "Spruce (Picea)"],
+            correctAnswer: "Iroko (Chlorophora excelsa)",
+            explanation: "Iroko is a renowned indigenous African deciduous hardwood tree prized for termite resistance and structural strength. Pine, fir, and spruce are temperate softwoods.",
+            hintLadder: [
+              "Think about native tropical broad-leaved trees known for timber durability in Nigeria and West Africa.",
+              "Pine, fir, and spruce are coniferous needle-leaved softwoods."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Pine (Pinus)", note: "Pine is a softwood with needle leaves and cones, commonly imported from temperate climates." }
+            ],
+            skillId: "skill-jss-materials-safety",
+            difficulty: "medium"
+          },
+          {
+            id: "q-jss-mat-3",
+            type: "multiple_choice",
+            questionText: "When operating a bench grinding machine or power drill in a school workshop, what is the most critical item of PPE required to protect the eyes from flying metal swarf?",
+            options: [
+              "Industrial safety goggles / face shield",
+              "Leather apron",
+              "Rubber gloves",
+              "Woolen scarf"
+            ],
+            correctAnswer: "Industrial safety goggles / face shield",
+            explanation: "Safety goggles and polycarbonate face shields prevent high-velocity metal chips (swarf) and abrasive sparks from causing permanent eye injuries.",
+            hintLadder: [
+              "The question asks specifically about protecting the EYES from high-speed debris."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Leather apron", note: "An apron protects the chest and clothing, but goggles protect the eyes." }
+            ],
+            skillId: "skill-jss-materials-safety",
+            difficulty: "easy"
+          }
+        ]
+      }
+    ]
+  },
+
+  // --- Basic Science: Junior Secondary ---
+  {
+    id: "unit-jss-basic-science-cells",
+    subjectId: "sci_biology",
+    level: "junior_secondary",
+    title: "Cell Organization, Living Microorganisms & Disease Vectors",
+    code: "SCI-JS-02",
+    description: "Explore the structural hierarchy of living organisms from cells to tissues, organs, and systems; compare plant vs animal cells, and investigate microscopic pathogens and sanitation.",
+    order: 2,
+    category: "core",
+    skills: [
+      {
+        id: "skill-jss-cell-organization",
+        unitId: "unit-jss-basic-science-cells",
+        title: "Cellular Structure, Organelle Functions & Microbial Vectors",
+        code: "SKL-JS-CEL",
+        summary: "Identify cell organelles (nucleus, cell wall, cell membrane, cytoplasm, chloroplasts, vacuoles), compare plant and animal structures, and track disease transmission vectors.",
+        objectives: [
+          "Define the cell as the fundamental structural and functional unit of all living organisms",
+          "Identify three organelles found exclusively in plant cells (cellulose cell wall, chloroplasts, large central vacuole)",
+          "Describe how microbial disease vectors (e.g. female Anopheles mosquito for malaria, houseflies for cholera) spread pathogens"
+        ],
+        difficulty: "intermediate",
+        masteryPointsRequired: 100,
+        lesson: {
+          id: "les-jss-cell-organization",
+          title: "The Architecture of Life: Inside the Living Cell and Microbial World",
+          hookAndIntuition: "If you zoom in on a leaf or your own skin under a powerful light microscope, what tiny building blocks do you see? Why does a plant stand upright without bones?",
+          conceptualExplanation: "All living things are composed of microscopic units called cells. Both plant and animal cells contain a Nucleus (control center with DNA), Cytoplasm (gel where chemical reactions occur), Mitochondria (powerhouses creating energy), and a Cell Membrane (selectively permeable barrier). Plant cells have three unique additions: a rigid Cellulose Cell Wall for structural support, Chloroplasts for photosynthesis, and a large Central Vacuole for maintaining turgor pressure.",
+          keyTermsAndFormulas: [
+            { termOrSymbol: "Cell Membrane", definition: "A flexible outer boundary controlling which substances enter and exit the cell." },
+            { termOrSymbol: "Cell Wall", definition: "A tough outer layer made of cellulose found only in plant cells and algae." },
+            { termOrSymbol: "Chloroplast", definition: "An organelle containing green chlorophyll pigments that harness sunlight for photosynthesis." },
+            { termOrSymbol: "Vector", definition: "An organism (like a mosquito or fly) that carries and transmits an infectious pathogen into another living organism." }
+          ],
+          workedExamples: [
+            {
+              title: "Comparing Plant and Animal Cells",
+              problemStatement: "A student observes a mystery cell under a microscope and spots green disc-shaped organelles and a rigid outer box. Is this an animal cell or a plant cell?",
+              steps: [
+                { stepNumber: 1, instruction: "Analyze visible features", reasoning: "Green disc-shaped organelles indicate chloroplasts containing chlorophyll." },
+                { stepNumber: 2, instruction: "Examine outer boundary", reasoning: "A rigid rectangular outer layer indicates a cellulose cell wall." },
+                { stepNumber: 3, instruction: "Conclude", reasoning: "Animal cells never possess chloroplasts or cellulose cell walls; therefore, this is definitively a plant cell." }
+              ],
+              takeawayRule: "Chloroplasts and cellulose cell walls are diagnostic markers of plant cells."
+            }
+          ],
+          commonMisconceptionsAndTraps: [
+            { misconception: "Believing that mosquitoes themselves 'cause' malaria.", whyItIsWrong: "The female Anopheles mosquito is merely the vector (carrier); the actual cause is the Plasmodium protozoan parasite injected through its saliva.", correctCorrection: "The pathogen causes the disease; the vector transmits it." }
+          ],
+          guidedPracticePrompt: "What is the function of the nucleus in a living cell? Is it for respiration or controlling cell activities?",
+          summaryRecap: "Cells are the foundational building blocks of life; plant cells possess walls and chloroplasts, and sanitation halts microbial transmission."
+        },
+        questions: [
+          {
+            id: "q-jss-cel-1",
+            type: "multiple_choice",
+            questionText: "Which of the following structures is found in a PLANT cell but NEVER in a human cheek cell?",
+            options: [
+              "Cellulose cell wall",
+              "Cell membrane",
+              "Cytoplasm",
+              "Nucleus"
+            ],
+            correctAnswer: "Cellulose cell wall",
+            explanation: "Cellulose cell walls (along with chloroplasts and large permanent vacuoles) are present in plant cells, while animal cells only have a flexible cell membrane.",
+            hintLadder: [
+              "Both plant and animal cells have a nucleus, cytoplasm, and cell membrane.",
+              "Think about the rigid structure that plants need because they lack skeletal bones."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Cell membrane", note: "Both plant and animal cells possess cell membranes." }
+            ],
+            skillId: "skill-jss-cell-organization",
+            difficulty: "easy"
+          },
+          {
+            id: "q-jss-cel-2",
+            type: "multiple_choice",
+            questionText: "What is the biological function of the CHLOROPLAST inside green plant leaves?",
+            options: [
+              "Trapping sunlight energy to synthesize glucose via photosynthesis",
+              "Pumping blood and oxygen throughout the stem",
+              "Breaking down waste products through fermentation",
+              "Storing genetic code for reproduction"
+            ],
+            correctAnswer: "Trapping sunlight energy to synthesize glucose via photosynthesis",
+            explanation: "Chloroplasts contain chlorophyll pigments that absorb solar radiation to drive the chemical conversion of water and carbon dioxide into glucose and oxygen.",
+            hintLadder: [
+              "Recall why leaves are green and what leaves produce using sunlight."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Storing genetic code for reproduction", note: "The nucleus stores the genetic DNA code, not the chloroplast." }
+            ],
+            skillId: "skill-jss-cell-organization",
+            difficulty: "easy"
+          },
+          {
+            id: "q-jss-cel-3",
+            type: "multiple_choice",
+            questionText: "In public health and community sanitation, what organism serves as the biological vector responsible for transmitting the Plasmodium parasite that causes malaria?",
+            options: [
+              "Female Anopheles mosquito",
+              "Housefly (Musca domestica)",
+              "Tsetse fly (Glossina)",
+              "Blackfly (Simulium)"
+            ],
+            correctAnswer: "Female Anopheles mosquito",
+            explanation: "The female Anopheles mosquito requires a blood meal to develop eggs and in the process inoculates Plasmodium sporozoites into human capillaries.",
+            hintLadder: [
+              "Tsetse flies transmit sleeping sickness (trypanosomiasis); houseflies carry cholera bacteria on their feet.",
+              "Malaria is specifically transmitted by a female mosquito species."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Tsetse fly (Glossina)", note: "Tsetse flies transmit African trypanosomiasis (sleeping sickness), not malaria." }
+            ],
+            skillId: "skill-jss-cell-organization",
+            difficulty: "medium"
+          }
+        ]
+      }
+    ]
   }
 ];
 
@@ -847,6 +1322,52 @@ export const UNIVERSITY_PREP_ADVANCED_UNITS: Unit[] = [
             ],
             skillId: "skill-uni-rhetoric-synthesis",
             difficulty: "hard"
+          },
+          {
+            id: "q-uni-syn-2",
+            type: "multiple_choice",
+            questionText: "In empirical dialectical synthesis, when two landmark studies yield contradictory findings on learner retention, which scholarly methodology is most rigorous?",
+            options: [
+              "Conduct a systematic meta-analysis evaluating sample variance, effect sizes, and moderating variables across both studies.",
+              "Accept the older study's conclusions as foundational and dismiss the newer study as an anomaly.",
+              "Average the numerical percentages between both studies and report the arithmetic midpoint as ground truth.",
+              "Discard both studies entirely and rely exclusively on anecdotal classroom teacher impressions."
+            ],
+            correctAnswer: "Conduct a systematic meta-analysis evaluating sample variance, effect sizes, and moderating variables across both studies.",
+            explanation: "Scholarly synthesis demands reconciling apparent divergence by scrutinizing methodology, statistical power, cohort demographics, and confounding variables through structured meta-analytic synthesis.",
+            hintLadder: [
+              "Consider how academic researchers resolve conflicting empirical literature.",
+              "Divergence usually stems from differences in methodology, dosage, or sample population.",
+              "Systematic meta-analysis with effect size evaluation is the gold standard for dialectical synthesis."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Average the numerical percentages between both studies and report the arithmetic midpoint as ground truth.", note: "Averaging incompatible datasets without weighting by sample size and variance is mathematically invalid." }
+            ],
+            skillId: "skill-uni-rhetoric-synthesis",
+            difficulty: "hard"
+          },
+          {
+            id: "q-uni-syn-3",
+            type: "multiple_choice",
+            questionText: "Which bibliographic citation pattern conforms strictly to APA 7th edition guidelines for an authored academic journal article with a DOI?",
+            options: [
+              "Author, A. A. (2023). Title of article. Title of Periodical, 34(2), 112–125. https://doi.org/10.xxxx/xxxx",
+              "Author, A. A. 'Title of article.' Title of Periodical (2023): pp. 112-125, Web.",
+              "Author, A. A., 2023, Title of article, in: Title of Periodical, Vol 34, No 2, 112-125.",
+              "(2023) Author, A. A. Title of Periodical: Title of Article. DOI: 10.xxxx/xxxx."
+            ],
+            correctAnswer: "Author, A. A. (2023). Title of article. Title of Periodical, 34(2), 112–125. https://doi.org/10.xxxx/xxxx",
+            explanation: "APA 7th requires: Author, A. A. (Year). Article title with sentence-case. Journal Title in Italics, Volume(Issue in parens), page range. https://doi.org/...",
+            hintLadder: [
+              "Note the placement of the publication year in parentheses immediately following author surname.",
+              "Journal title and volume number are italicized, followed by issue in parentheses.",
+              "DOIs must be formatted as active https://doi.org/... hyperlinks."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Author, A. A. 'Title of article.' Title of Periodical (2023): pp. 112-125, Web.", note: "This format resembles MLA 7th/8th edition style with quotation marks and 'Web', not APA 7th." }
+            ],
+            skillId: "skill-uni-rhetoric-synthesis",
+            difficulty: "medium"
           }
         ]
       }
@@ -894,6 +1415,47 @@ export const UNIVERSITY_PREP_ADVANCED_UNITS: Unit[] = [
             ],
             skillId: "skill-uni-dsa-complexity",
             difficulty: "hard"
+          },
+          {
+            id: "q-uni-dsa-2",
+            type: "multiple_choice",
+            questionText: "What is the worst-case time complexity of searching for a key in an UNBALANCED Binary Search Tree (BST) containing n keys?",
+            options: ["O(n)", "O(log n)", "O(1)", "O(n log n)"],
+            correctAnswer: "O(n)",
+            explanation: "When keys are inserted in sorted order, an unbalanced BST degenerates into a linked list of height n, yielding an O(n) linear search complexity.",
+            hintLadder: [
+              "Consider what happens when you insert numbers 1, 2, 3, 4, 5 in that exact order into an un-rotated BST.",
+              "Every node will only have a right child, forming a single chain.",
+              "Traversing a single chain of n elements takes O(n) operations."
+            ],
+            misconceptionAlerts: [
+              { trigger: "O(log n)", note: "O(log n) applies strictly to BALANCED search trees (like AVL or Red-Black trees), not degenerate unbalanced BSTs." }
+            ],
+            skillId: "skill-uni-dsa-complexity",
+            difficulty: "medium"
+          },
+          {
+            id: "q-uni-dsa-3",
+            type: "multiple_choice",
+            questionText: "Which hash collision resolution strategy guarantees that all elements are stored directly inside the hash table array without allocating external linked lists?",
+            options: [
+              "Open Addressing (Linear Probing, Quadratic Probing, Double Hashing)",
+              "Separate Chaining",
+              "Bucket Chaining with Red-Black Trees",
+              "External B-Tree Indexing"
+            ],
+            correctAnswer: "Open Addressing (Linear Probing, Quadratic Probing, Double Hashing)",
+            explanation: "Open Addressing stores all keys directly within the table slots by probing successive alternate positions when a collision occurs, maintaining zero external pointer overhead.",
+            hintLadder: [
+              "Separate chaining allocates linked list nodes outside the primary array.",
+              "In contrast, open addressing probes alternate slots WITHIN the array itself.",
+              "Select 'Open Addressing'."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Separate Chaining", note: "Separate chaining resolves collisions by allocating linked list nodes outside the primary array table." }
+            ],
+            skillId: "skill-uni-dsa-complexity",
+            difficulty: "medium"
           }
         ]
       }
@@ -1014,6 +1576,42 @@ export const EXAM_PREP_UNITS: Unit[] = [
             ],
             skillId: "skill-ep-eng-concord-lexis",
             difficulty: "medium"
+          },
+          {
+            id: "q-ep-eng-2",
+            type: "multiple_choice",
+            questionText: "Choose the option that is most nearly OPPOSITE IN MEANING (antonym) to the underlined word: 'The senator made an ASTUTE observation during the heated budgetary debate.'",
+            options: ["foolish", "shrewd", "perspicacious", "insightful"],
+            correctAnswer: "foolish",
+            explanation: "'Astute' means showing sharp powers of judgment and clever discernment. The antonym is 'foolish' or 'naive'. ('Shrewd' and 'perspicacious' are synonyms).",
+            hintLadder: [
+              "Determine the meaning of 'astute': sharp, mentally keen, perceptive.",
+              "The question asks for the OPPOSITE in meaning, not the synonym.",
+              "The direct opposite of sharp/clever is foolish."
+            ],
+            misconceptionAlerts: [
+              { trigger: "shrewd", note: "'Shrewd' is a synonym of astute, but the question asks for the OPPOSITE (antonym)!" }
+            ],
+            skillId: "skill-ep-eng-concord-lexis",
+            difficulty: "medium"
+          },
+          {
+            id: "q-ep-eng-3",
+            type: "multiple_choice",
+            questionText: "Select the option that correctly completes the sentence: 'Neither the class monitor nor the prefects ________ willing to sign the requisition form.'",
+            options: ["were", "was", "is", "has been"],
+            correctAnswer: "were",
+            explanation: "In 'neither... nor...' constructions, the verb agrees with the closer subject (the rule of proximity). The closer subject is plural ('the prefects'), requiring the plural verb 'were'.",
+            hintLadder: [
+              "Identify the conjunction: 'Neither... nor...'.",
+              "Apply the rule of proximity: the verb must agree with the subject immediately preceding it.",
+              "'Prefects' is plural, so use a plural verb ('were')."
+            ],
+            misconceptionAlerts: [
+              { trigger: "was", note: "By the proximity rule in neither/nor pairs, the verb matches 'prefects' (plural), not 'class monitor' (singular)." }
+            ],
+            skillId: "skill-ep-eng-concord-lexis",
+            difficulty: "easy"
           }
         ]
       }
@@ -1059,6 +1657,43 @@ export const EXAM_PREP_UNITS: Unit[] = [
             ],
             misconceptionAlerts: [
               { trigger: "1 A", note: "1 Ω is the resistance, but the question asks for current (I = V / R)!" }
+            ],
+            skillId: "skill-ep-stem-cbt",
+            difficulty: "medium"
+          },
+          {
+            id: "q-ep-sci-2",
+            type: "multiple_choice",
+            questionText: "In human genetics, the allele for normal blood clotting (X^H) is dominant over the allele for hemophilia (X^h). If a carrier mother (X^H X^h) marries a normal father (X^H Y), what percentage of their MALE offspring is predicted to have hemophilia?",
+            options: ["50%", "25%", "0%", "100%"],
+            correctAnswer: "50%",
+            explanation: "Male offspring inherit Y from the father and either X^H or X^h from the mother with equal 50% probability. Therefore, 50% of sons (X^h Y) will express hemophilia.",
+            hintLadder: [
+              "Focus ONLY on the male offspring (those who receive the father's Y chromosome).",
+              "The mother can give either X^H (normal son: X^H Y) or X^h (hemophilic son: X^h Y).",
+              "Out of 2 possible male genotypes, 1 is hemophilic: 1/2 = 50%."
+            ],
+            misconceptionAlerts: [
+              { trigger: "25%", note: "25% is the probability across ALL offspring combined (sons + daughters). The question specifies MALE offspring only (50%)." }
+            ],
+            skillId: "skill-ep-stem-cbt",
+            difficulty: "medium"
+          },
+          {
+            id: "q-ep-sci-3",
+            type: "multiple_choice",
+            questionText: "What volume of 0.50 M hydrochloric acid (HCl) is required to completely neutralize 25.0 cm³ of 0.20 M sodium hydroxide (NaOH) solution?",
+            mathExpression: "\\frac{C_a V_a}{C_b V_b} = \\frac{n_a}{n_b} \\implies \\frac{(0.50) V_a}{(0.20)(25.0)} = \\frac{1}{1}",
+            options: ["10.0 cm³", "62.5 cm³", "25.0 cm³", "5.0 cm³"],
+            correctAnswer: "10.0 cm³",
+            explanation: "Reaction: HCl + NaOH -> NaCl + H2O (1:1 mole ratio). Ca Va = Cb Vb => (0.50) Va = (0.20)(25.0) = 5.0 => Va = 5.0 / 0.50 = 10.0 cm³.",
+            hintLadder: [
+              "Write balanced equation: HCl + NaOH -> NaCl + H2O (n_a = 1, n_b = 1).",
+              "Use volumetric formula: Ca Va / Cb Vb = 1 / 1.",
+              "Va = (0.20 × 25.0) / 0.50 = 5.0 / 0.50 = 10.0 cm³."
+            ],
+            misconceptionAlerts: [
+              { trigger: "62.5 cm³", note: "Did you invert the concentrations? (0.50 × 25) / 0.20 = 62.5, which is inverted." }
             ],
             skillId: "skill-ep-stem-cbt",
             difficulty: "medium"
@@ -1109,6 +1744,47 @@ export const EXAM_PREP_UNITS: Unit[] = [
             ],
             skillId: "skill-ep-ict-cbt",
             difficulty: "medium"
+          },
+          {
+            id: "q-ep-csc-2",
+            type: "multiple_choice",
+            questionText: "Consider a relational database table 'Students' with columns (StudentID, FullName, Score, Grade). Which SQL query correctly retrieves all students with a Score above 75, sorted in descending order of Score?",
+            options: [
+              "SELECT * FROM Students WHERE Score > 75 ORDER BY Score DESC;",
+              "SELECT ALL FROM Students IF Score > 75 SORT Score DESC;",
+              "GET Students WHERE Score > 75 ORDERED BY Score DOWN;",
+              "FILTER Students WITH Score > 75 ARRANGE DESC;"
+            ],
+            correctAnswer: "SELECT * FROM Students WHERE Score > 75 ORDER BY Score DESC;",
+            explanation: "Standard ANSI SQL syntax uses SELECT * FROM table WHERE condition ORDER BY column DESC;",
+            hintLadder: [
+              "Standard SQL requires SELECT, FROM, WHERE, and ORDER BY clauses.",
+              "Descending order keyword is DESC.",
+              "Select the query with valid ANSI SQL syntax."
+            ],
+            misconceptionAlerts: [
+              { trigger: "SELECT ALL FROM Students IF Score > 75 SORT Score DESC;", note: "'IF' and 'SORT' are not standard SQL keywords for filtering or ordering rows." }
+            ],
+            skillId: "skill-ep-ict-cbt",
+            difficulty: "easy"
+          },
+          {
+            id: "q-ep-csc-3",
+            type: "multiple_choice",
+            questionText: "Which network topology features a central hub or switch such that if a single client cable fails, all other network nodes continue communicating without disruption?",
+            options: ["Star Topology", "Bus Topology", "Ring Topology", "Linear Daisy Chain"],
+            correctAnswer: "Star Topology",
+            explanation: "In a Star topology, all devices connect independently to a central switch. A cable break between one node and the central switch affects only that specific node.",
+            hintLadder: [
+              "In a Bus topology, a severed backbone cable halts all communication.",
+              "In a Ring topology, a break in the ring halts the token circulation.",
+              "A central switch with point-to-point lines to each node is a Star topology."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Bus Topology", note: "In a Bus topology, a single cable break disconnects the entire network segment." }
+            ],
+            skillId: "skill-ep-ict-cbt",
+            difficulty: "easy"
           }
         ]
       }

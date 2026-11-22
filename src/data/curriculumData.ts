@@ -1,4 +1,5 @@
 import {
+  EducationalLevel,
   LearningDomain,
   Subject,
   Unit,
@@ -14,6 +15,8 @@ import {
   ALL_CURRICULUM_UNITS,
   ENRICHED_MATHEMATICS_UNITS
 } from "./extendedCurriculumUnits";
+import { EXPANDED_151_SUBJECT_CATEGORIES, TOTAL_EXPANDED_SUBJECT_COUNT } from "./expandedSubjectCategories";
+import { COMMON_ENTRANCE_FULL_EXAM_SIMULATION } from "./commonEntranceExamPackage";
 
 export const LEARNING_DOMAINS: LearningDomain[] = [
   {
@@ -25,66 +28,158 @@ export const LEARNING_DOMAINS: LearningDomain[] = [
     accentColor: "indigo",
     isFlagship: true,
     status: "active",
-    subjectsCount: 4
+    subjectsCount: 17
   },
   {
     id: "science",
     name: "Natural & Applied Sciences",
-    tagline: "Physics, Chemistry & Biological Systems",
-    description: "Understand the physical cosmos, molecular mechanisms, genetics, mechanics, and laboratory inquiry.",
+    tagline: "Physics, Chemistry, Biology & Earth Sciences",
+    description: "Understand the physical cosmos, molecular mechanisms, genetics, mechanics, agriculture, health, and laboratory inquiry.",
     iconName: "Atom",
     accentColor: "teal",
     isFlagship: true,
     status: "active",
-    subjectsCount: 3
+    subjectsCount: 26
   },
   {
     id: "computing_ai",
     name: "Computer Science & AI",
     tagline: "Algorithms, Python, Software & Machine Intelligence",
-    description: "Computational thinking, structured programming, web architecture, and applied neural networks.",
+    description: "Computational thinking, structured programming, web architecture, robotics, technical drafting, and applied neural networks.",
     iconName: "Cpu",
     accentColor: "cyan",
     isFlagship: true,
     status: "active",
-    subjectsCount: 4
+    subjectsCount: 25
   },
   {
     id: "business_finance",
     name: "Economics & Financial Literacy",
     tagline: "Markets, Accounting, Wealth Building & Enterprise",
-    description: "Microeconomics, balance sheets, corporate accounting, personal investment models, and entrepreneurial skills.",
+    description: "Microeconomics, balance sheets, corporate accounting, personal investment models, commerce, and entrepreneurial skills.",
     iconName: "TrendingUp",
     accentColor: "emerald",
     isFlagship: false,
     status: "expanding",
-    subjectsCount: 3
+    subjectsCount: 15
   },
   {
     id: "language_comm",
     name: "English & Communication",
     tagline: "Rhetoric, Critical Reading, Academic & Professional Writing",
-    description: "Grammar mastery, comprehension synthesis, persuasive discourse, and standardized verbal reasoning.",
+    description: "Grammar mastery, comprehension synthesis, literature, national and foreign languages, and verbal reasoning.",
     iconName: "BookOpen",
     accentColor: "amber",
     isFlagship: true,
     status: "active",
-    subjectsCount: 2
+    subjectsCount: 23
   },
   {
     id: "career_uni_prep",
     name: "University & Career Pathways",
-    tagline: "WAEC, JAMB, SAT, Professional Portfolios & Research",
-    description: "Targeted examination simulations, academic scholarship prep, research methodology, and career transition roadmaps.",
+    tagline: "WAEC, JAMB, SAT, Professional Portfolios, Humanities & Clubs",
+    description: "Targeted examination simulations, academic scholarship prep, research methodology, social studies, civics, and innovation clubs.",
     iconName: "GraduationCap",
     accentColor: "rose",
     isFlagship: false,
     status: "active",
-    subjectsCount: 5
+    subjectsCount: 55
   }
 ];
 
-export const SUBJECTS: Subject[] = [
+export function getDomainIdForCategory(code: string): string {
+  if (
+    code.startsWith("pri_math") ||
+    code.startsWith("pri_quantitative") ||
+    code.startsWith("jss_math") ||
+    code.startsWith("sss_general_math") ||
+    code.startsWith("sss_further_math") ||
+    code.includes("actuarial_math")
+  ) {
+    return "mathematics";
+  }
+
+  if (
+    code.includes("comp") ||
+    code.includes("coding") ||
+    code.includes("robot") ||
+    code.includes("data_processing") ||
+    code.includes("technical_drawing") ||
+    code.includes("applied_electricity") ||
+    code.includes("auto_mechanics") ||
+    code.includes("building_construction") ||
+    code.includes("woodwork") ||
+    code.includes("metalwork") ||
+    code.includes("electronics") ||
+    code.includes("telecommunication") ||
+    code.includes("basic_technology") ||
+    code.includes("engineering") ||
+    code.includes("maker")
+  ) {
+    return "computing_ai";
+  }
+
+  if (
+    code.includes("science") ||
+    code.includes("physics") ||
+    code.includes("chemistry") ||
+    code.includes("biology") ||
+    code.includes("agric") ||
+    code.includes("animal_husbandry") ||
+    code.includes("fisheries") ||
+    code.includes("food_nutrition") ||
+    code.includes("mining_geology") ||
+    code.includes("geography") ||
+    code.includes("health") ||
+    code.includes("home_economics") ||
+    code.includes("mcat") ||
+    code.includes("olympiad")
+  ) {
+    return "science";
+  }
+
+  if (
+    code.includes("business") ||
+    code.includes("accounting") ||
+    code.includes("commerce") ||
+    code.includes("economics") ||
+    code.includes("marketing") ||
+    code.includes("office") ||
+    code.includes("store") ||
+    code.includes("banking") ||
+    code.includes("insurance") ||
+    code.includes("entrepreneurship") ||
+    code.includes("financial") ||
+    code.includes("investment")
+  ) {
+    return "business_finance";
+  }
+
+  if (
+    code.includes("english") ||
+    code.includes("phonics") ||
+    code.includes("spelling") ||
+    code.includes("handwriting") ||
+    code.includes("verbal_reasoning") ||
+    code.includes("creative_writing") ||
+    code.includes("french") ||
+    code.includes("arabic") ||
+    code.includes("yoruba") ||
+    code.includes("igbo") ||
+    code.includes("hausa") ||
+    code.includes("literature") ||
+    code.includes("public_speaking") ||
+    code.includes("academic_research") ||
+    code.includes("nonfiction") ||
+    code.includes("ielts")
+  ) {
+    return "language_comm";
+  }
+
+  return "career_uni_prep";
+}
+
+export const CANONICAL_CORE_SUBJECTS: Subject[] = [
   {
     id: "math_core",
     domainId: "mathematics",
@@ -184,14 +279,14 @@ export const SUBJECTS: Subject[] = [
   {
     id: "lang_english",
     domainId: "language_comm",
-    title: "English Language, Lexis & Grammatical Structure",
-    code: "ENG-101",
-    description: "Subject-verb concord, morphological etymology, sentence structure, and comprehension analysis.",
+    title: "English Language & ESL (English as a Second Language)",
+    code: "ENG-ESL-101",
+    description: "CEFR-aligned ESL pedagogy: phonetics, minimal pairs, contextual collocations, progressive grammar, listening, speaking, reading, and academic writing.",
     iconName: "BookOpen",
     levels: ["primary_foundations", "upper_primary", "junior_secondary", "senior_secondary", "university_prep", "exam_prep"],
     curricula: ["NERDC_NIGERIAN", "WAEC_WASSCE", "JAMB_UTME", "CAMBRIDGE_IGCSE"],
-    unitsCount: 5,
-    totalMasteryPoints: 1600
+    unitsCount: 8,
+    totalMasteryPoints: 2400
   },
   {
     id: "comm_financial_lit",
@@ -206,6 +301,98 @@ export const SUBJECTS: Subject[] = [
     totalMasteryPoints: 800
   }
 ];
+
+export const EXPANDED_151_SUBJECTS: Subject[] = EXPANDED_151_SUBJECT_CATEGORIES.map((cat) => ({
+  id: cat.code,
+  domainId: getDomainIdForCategory(cat.code),
+  title: cat.name,
+  code: cat.code.toUpperCase().replace(/_/g, "-"),
+  description: cat.description,
+  tagline: cat.tagline,
+  iconName: cat.iconName,
+  levels: cat.activeLevels,
+  curricula: [
+    "NERDC_NIGERIAN",
+    "WAEC_WASSCE",
+    "JAMB_UTME",
+    "CAMBRIDGE_IGCSE",
+    "COMMON_ENTRANCE"
+  ],
+  unitsCount: cat.courseCount * 2 || 4,
+  totalMasteryPoints: (cat.courseCount * 2 || 4) * 300,
+  stage: cat.stage,
+  keywords: cat.keywords,
+  courseCount: cat.courseCount
+}));
+
+/**
+ * Complete, verified catalogue of all 151 multidisciplinary subject definitions
+ * spanning Primary Foundations, Junior Secondary, Senior Secondary (Science, Tech,
+ * Commercial, Arts), and Advanced University & Standardized Exam Hall pathways.
+ */
+export const COMPLETE_151_SUBJECT_DEFINITIONS: Subject[] = EXPANDED_151_SUBJECTS;
+
+export const SUBJECTS: Subject[] = [
+  ...CANONICAL_CORE_SUBJECTS,
+  ...EXPANDED_151_SUBJECTS
+];
+
+/**
+ * Fast lookup for a subject by its identifier or formatted code
+ */
+export function getSubjectByCode(code: string): Subject | undefined {
+  const normalized = code.toLowerCase().trim();
+  return SUBJECTS.find(
+    (s) =>
+      s.id.toLowerCase() === normalized ||
+      s.code.toLowerCase() === normalized ||
+      s.code.toLowerCase().replace(/-/g, "_") === normalized
+  );
+}
+
+/**
+ * Retrieves subjects filtered by academic stage
+ */
+export function getSubjectsByStage(
+  stage: "all" | "primary" | "secondary" | "advanced"
+): Subject[] {
+  if (stage === "all") return SUBJECTS;
+  return SUBJECTS.filter((s) => s.stage === stage);
+}
+
+/**
+ * Searches curriculum subjects across 151 definitions by name, code, tagline, or keyword
+ */
+export function searchCurriculumSubjects(
+  query: string,
+  options?: {
+    stage?: "all" | "primary" | "secondary" | "advanced";
+    domainId?: string;
+    level?: EducationalLevel;
+  }
+): Subject[] {
+  const q = query.toLowerCase().trim();
+  return SUBJECTS.filter((s) => {
+    if (options?.stage && options.stage !== "all" && s.stage !== options.stage) {
+      return false;
+    }
+    if (options?.domainId && s.domainId !== options.domainId) {
+      return false;
+    }
+    if (options?.level && !s.levels.includes(options.level)) {
+      return false;
+    }
+    if (!q) return true;
+    return (
+      s.title.toLowerCase().includes(q) ||
+      s.code.toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q) ||
+      (s.tagline && s.tagline.toLowerCase().includes(q)) ||
+      s.description.toLowerCase().includes(q) ||
+      (s.keywords && s.keywords.some((k) => k.toLowerCase().includes(q)))
+    );
+  });
+}
 
 export const MATHEMATICS_UNITS: Unit[] = [
   {
@@ -1045,33 +1232,7 @@ export const EXAM_SIMULATIONS: ExamSimulation[] = [
       }
     ]
   },
-  {
-    id: "exam-common-entrance",
-    title: "National Common Entrance Examination (NCEE) Math",
-    subtitle: "Junior Secondary School Entrance Benchmark",
-    type: "COMMON_ENTRANCE",
-    targetYear: "Primary 5/6 Transition",
-    timeLimitMinutes: 10,
-    passingScore: 80,
-    questions: [
-      {
-        id: "ce-q1",
-        type: "multiple_choice",
-        questionText: "Find the Lowest Common Multiple (L.C.M.) of 12, 18, and 24.",
-        mathExpression: "\\text{LCM}(12, 18, 24)",
-        options: ["72", "36", "48", "144"],
-        correctAnswer: "72",
-        explanation: "Prime factorizations: 12 = 2² × 3, 18 = 2 × 3², 24 = 2³ × 3. LCM takes highest powers: 2³ × 3² = 8 × 9 = 72.",
-        hintLadder: [
-          "List multiples of 24: 24, 48, 72, 96.",
-          "Check which is also divisible by 18: 72 ÷ 18 = 4.",
-          "72 is also divisible by 12: 72 ÷ 12 = 6. So LCM is 72."
-        ],
-        skillId: "skill-frac-operations",
-        difficulty: "easy"
-      }
-    ]
-  }
+  COMMON_ENTRANCE_FULL_EXAM_SIMULATION
 ];
 
 export const SAMPLE_BADGES: Badge[] = [
@@ -1126,7 +1287,7 @@ export const SAMPLE_BADGES: Badge[] = [
 export const DEFAULT_LEARNER_PROFILE: LearnerProfile = {
   id: "learner-001",
   name: "Toluwani Adeyemi",
-  email: "toluwani.learner@moostechy.org",
+  email: "toluwani.learner@moos.academy",
   role: "learner",
   targetLevel: "senior_secondary",
   curriculum: "WAEC_WASSCE",

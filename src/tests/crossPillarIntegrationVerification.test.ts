@@ -356,7 +356,11 @@ async function runCrossPillarIntegrationVerification() {
   console.log("==========================================================================\n");
 }
 
-runCrossPillarIntegrationVerification().catch((err) => {
-  console.error("FATAL ERROR IN CROSS-PILLAR VERIFICATION:", err);
-  process.exit(1);
-});
+runCrossPillarIntegrationVerification()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("FATAL ERROR IN CROSS-PILLAR VERIFICATION:", err);
+    process.exit(1);
+  });

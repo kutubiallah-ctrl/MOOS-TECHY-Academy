@@ -67,7 +67,7 @@ export class AITeacherCopilotService {
       detectedType = "worksheet";
     } else if (text.includes("quiz") || text.includes("mcq")) {
       detectedType = "quiz";
-    } else if (text.includes("class test") || text.includes("unit test") || (text.includes("test") && !text.includes("testbook"))) {
+    } else if (text.includes("class test") || text.includes("unit test") || (text.includes("test") && !text.includes("testbook") && !text.includes("latest"))) {
       detectedType = "class_test";
     } else if (text.includes("assignment") || text.includes("take home") || text.includes("take-home")) {
       detectedType = "assignment";
@@ -75,7 +75,7 @@ export class AITeacherCopilotService {
       detectedType = "revision_material";
     } else if (text.includes("homework") || text.includes("home work")) {
       detectedType = "homework";
-    } else if (text.includes("remedial") || text.includes("remediation") || text.includes("struggling") || text.includes("scaffold")) {
+    } else if (text.includes("remedial activity") || text.includes("remediation drill") || text.includes("scaffold activity")) {
       detectedType = "remedial_activity";
     } else if (text.includes("extension") || text.includes("advanced activity") || text.includes("gifted") || text.includes("challenge activity")) {
       detectedType = "extension_activity";
@@ -83,11 +83,11 @@ export class AITeacherCopilotService {
       detectedType = "answer_key";
     } else if (text.includes("marking scheme") || text.includes("rubric")) {
       detectedType = "marking_scheme";
-    } else if (text.includes("exit ticket") || text.includes("exit check") || text.includes("plenary check")) {
+    } else if (text.includes("exit ticket") && !text.includes("lesson")) {
       detectedType = "exit_ticket";
     } else if (text.includes("study guide") || text.includes("cheat sheet") || text.includes("summary guide")) {
       detectedType = "study_guide";
-    } else if (text.includes("lesson plan") || text.includes("plan a lesson") || text.includes("prepare a lesson") || text.includes("prepare a 40") || text.includes("prepare a 45")) {
+    } else if (text.includes("lesson") || text.includes("plan a lesson") || text.includes("prepare a lesson") || text.includes("prepare a 40") || text.includes("prepare a 45")) {
       detectedType = "lesson_plan";
     }
 
@@ -112,7 +112,7 @@ export class AITeacherCopilotService {
     let targetSubjectId = "subj-mth-senior";
     let targetSubjectName = "Mathematics";
 
-    if (text.includes("english") || text.includes("grammar") || text.includes("verb") || text.includes("letter") || text.includes("essay") || text.includes("comprehension") || text.includes("syntax")) {
+    if (text.includes("english") || text.includes("grammar") || text.includes("verb") || text.includes("letter") || text.includes("essay") || text.includes("comprehension") || text.includes("syntax") || text.includes("speech") || text.includes("word class")) {
       targetDomain = "English Language";
       targetSubjectId = targetLevel === "junior_secondary" ? "subj-eng-junior" : "subj-eng-senior";
       targetSubjectName = "English Language";
@@ -120,7 +120,7 @@ export class AITeacherCopilotService {
       targetDomain = "Computer Science / ICT";
       targetSubjectId = "subj-ict-computing";
       targetSubjectName = "Computer Science & ICT";
-    } else if (text.includes("science") || text.includes("stem") || text.includes("electricity") || text.includes("circuits") || text.includes("physics") || text.includes("chemistry") || text.includes("biology") || text.includes("respiration") || text.includes("photosynthesis") || text.includes("newton")) {
+    } else if (text.includes("science") || text.includes("stem") || text.includes("electricity") || text.includes("circuits") || text.includes("physics") || text.includes("chemistry") || text.includes("biology") || text.includes("respiration") || text.includes("photosynthesis") || text.includes("newton") || text.includes("pressure")) {
       targetDomain = "STEM / Science";
       targetSubjectId = text.includes("circuit") || text.includes("electricity") || text.includes("physics") ? "subj-stem-physics" : "subj-stem-general";
       targetSubjectName = text.includes("circuit") || text.includes("electricity") || text.includes("physics") ? "Physics & Basic Electricity" : "Science & STEM";
@@ -143,16 +143,20 @@ export class AITeacherCopilotService {
       topic = activeContext.topic;
     } else if (text.includes("quadratic")) {
       topic = "Quadratic Equations & Roots";
-    } else if (text.includes("acid") || text.includes("base") || text.includes("indicator")) {
+    } else if (text.includes("normalization") || text.includes("database")) {
+      topic = "Database Normalization (1NF, 2NF, 3NF)";
+    } else if (text.includes("parts of speech") || text.includes("part of speech") || text.includes("word class") || text.includes("word classes")) {
+      topic = "Grammatical Word Classes & Parts of Speech";
+    } else if (text.includes("pressure") || text.includes("fluid")) {
+      topic = targetLevel === "upper_primary" || targetLevel === "primary_foundations"
+        ? "Force, Pressure & Everyday Applications"
+        : "Fluid Pressure & Hydraulics";
+    } else if (text.includes("acid") || text.includes("alkali") || text.includes("indicator") || (text.includes("base") && !text.includes("database"))) {
       topic = "Acids, Bases and Indicators";
-    } else if (text.includes("subject verb") || text.includes("subject-verb") || text.includes("agreement")) {
+    } else if (text.includes("subject verb") || text.includes("subject-verb") || text.includes("agreement") || text.includes("concord")) {
       topic = "Subject-Verb Agreement & Concord";
     } else if (text.includes("electricity") || text.includes("circuit")) {
       topic = "Basic Electricity & Simple Circuits";
-    } else if (text.includes("normalization") || text.includes("database")) {
-      topic = "Database Normalization (1NF, 2NF, 3NF)";
-    } else if (text.includes("pressure") || text.includes("fluid")) {
-      topic = "Fluid Pressure & Hydraulics";
     } else if (text.includes("fraction")) {
       topic = "Fractions & Proportions";
     } else if (text.includes("circle theorem")) {
@@ -170,7 +174,7 @@ export class AITeacherCopilotService {
     } else if (!topic) {
       // Clean query to grab key noun phrases
       const cleanWords = rawPrompt
-        .replace(/prepare|create|generate|make|build|need|want|for|a|an|the|minute|min|lesson|plan|note|worksheet|quiz|test|revision|activity|class|learners|students|who|are|struggling|on|about|tomorrow's|ss1|ss2|ss3|jss1|jss2|jss3|primary \d/gi, " ")
+        .replace(/\b(prepare|create|generate|make|build|need|want|for|a|an|the|minute|min|minutes|lesson|plan|note|worksheet|quiz|test|revision|activity|class|learners|students|who|are|struggling|on|about|tomorrow's|ss1|ss2|ss3|jss1|jss2|jss3|primary \d)\b/gi, " ")
         .trim();
       topic = cleanWords.length > 3 ? cleanWords.split(",")[0].trim() : "Core Curriculum Foundations";
     }
@@ -406,7 +410,11 @@ export class AITeacherCopilotService {
       derivedFromMaterialId: request.derivedFromMaterialId,
       sourcePrompt: request.rawPrompt || `Manual creation: ${materialType} for ${topic}`,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      type: materialType,
+      status: "awaiting_human_approval",
+      authorName: activeActor.displayName || teacherDisplayName,
+      targetAudience: level
     };
 
     this.materials.unshift(newMaterial);
@@ -574,7 +582,8 @@ export class AITeacherCopilotService {
       lessonPlan,
       lessonNote,
       worksheet,
-      exitTicket
+      exitTicket,
+      materials: [lessonPlan, lessonNote, worksheet, exitTicket]
     };
 
     auditService.recordEvent({
@@ -590,6 +599,23 @@ export class AITeacherCopilotService {
     });
 
     return packageRecord;
+  }
+
+  public prepareSynchronizedLessonPackage(
+    optionsOrPrompt: string | { subject?: string; topic?: string; level?: EducationalLevel; durationMinutes?: number; cohortId?: string; specialInstructions?: string },
+    optionalTopic?: string,
+    teacherId?: string
+  ): Promise<PreparedLessonPackage> {
+    if (typeof optionsOrPrompt === "object") {
+      const topic = optionsOrPrompt.topic || optionalTopic;
+      const target = optionsOrPrompt.cohortId || optionsOrPrompt.specialInstructions || topic || "Mathematics";
+      return this.prepareMyLessonPackage(target, topic, teacherId);
+    }
+    return this.prepareMyLessonPackage(optionsOrPrompt, optionalTopic, teacherId);
+  }
+
+  public getMaterials(): TeacherEducationalMaterial[] {
+    return this.getAllMaterials();
   }
 
   // --- Human Review, Editing, Certification & Governance ---
@@ -767,6 +793,11 @@ export class AITeacherCopilotService {
         : undefined
     });
 
+    material.lifecycleStatus = "published";
+    material.provenance = "PUBLISHED";
+    material.updatedAt = new Date().toISOString();
+    this.saveToStorage();
+
     auditService.recordEvent({
       eventType: "TEACHER_MATERIAL_DISPATCHED",
       actorId: material.teacherId,
@@ -826,10 +857,13 @@ export class AITeacherCopilotService {
     isDifferentiated: boolean;
     standard: CurriculumStandard;
   }) {
-    const isEnglish = params.domain.toLowerCase().includes("english") || params.topic.toLowerCase().includes("verb") || params.topic.toLowerCase().includes("letter");
-    const isSTEM = params.domain.toLowerCase().includes("stem") || params.domain.toLowerCase().includes("science") || params.topic.toLowerCase().includes("electricity") || params.topic.toLowerCase().includes("circuit");
     const isICT = params.domain.toLowerCase().includes("ict") || params.domain.toLowerCase().includes("computer") || params.topic.toLowerCase().includes("database") || params.topic.toLowerCase().includes("normalization");
+    const isEnglish = !isICT && (params.domain.toLowerCase().includes("english") || params.topic.toLowerCase().includes("verb") || params.topic.toLowerCase().includes("speech") || params.topic.toLowerCase().includes("word class") || params.topic.toLowerCase().includes("letter"));
+    const isSTEM = !isICT && !isEnglish && (params.domain.toLowerCase().includes("stem") || params.domain.toLowerCase().includes("science") || params.topic.toLowerCase().includes("electricity") || params.topic.toLowerCase().includes("circuit") || params.topic.toLowerCase().includes("pressure") || params.topic.toLowerCase().includes("force"));
     const isMath = !isEnglish && !isSTEM && !isICT;
+
+    const isPartsOfSpeech = isEnglish && (params.topic.toLowerCase().includes("speech") || params.topic.toLowerCase().includes("word class") || params.topic.toLowerCase().includes("noun"));
+    const isPressure = isSTEM && (params.topic.toLowerCase().includes("pressure") || params.topic.toLowerCase().includes("force") || params.topic.toLowerCase().includes("fluid"));
 
     // Unit & Skill Resolution
     let unitId = "unit-curr-01";
@@ -839,17 +873,29 @@ export class AITeacherCopilotService {
     let qrCompanion = "CEMM-CH03-SEC02-EX04";
 
     if (isMath) {
-      unitId = "unit-mth-ss1-03";
+      unitId = "unit-sss-quadratics";
       unitTitle = "Quadratic Equations & Polynomial Analysis";
-      skillId = "skill-quad-02";
-      skillTitle = "Roots of Quadratic Equations via General Formula";
+      skillId = "skill-quad-factoring";
+      skillTitle = "Factorization & Roots of Quadratics";
       qrCompanion = "MTH-SS1-QUAD-04";
+    } else if (isPartsOfSpeech) {
+      unitId = "unit-eng-parts-of-speech";
+      unitTitle = "Grammatical Word Classes & Morphological Functions";
+      skillId = "skill-eng-word-classes";
+      skillTitle = "Word Classes, Pronoun Cases & Syntactic Functions";
+      qrCompanion = "ENG-JSS2-POS-01";
     } else if (isEnglish) {
-      unitId = "unit-eng-jss2-01";
+      unitId = "unit-eng-concord-syntax";
       unitTitle = "Grammatical Concord & Syntactic Structures";
-      skillId = "skill-eng-concord-01";
+      skillId = "skill-eng-concord";
       skillTitle = "Subject-Verb Agreement with Intervening Phrases";
       qrCompanion = "ENG-JSS2-CONC-02";
+    } else if (isPressure) {
+      unitId = "unit-pri-upper-stem-matter";
+      unitTitle = "States of Matter, Mixtures & Simple Machines";
+      skillId = "skill-up-matter-machines";
+      skillTitle = "Pressure, Force, Area & Mechanical Advantage";
+      qrCompanion = "SCI-UP-PRESS-01";
     } else if (isSTEM) {
       unitId = "unit-stem-pri6-02";
       unitTitle = "Basic Electricity, Energy & Electric Circuits";
@@ -857,9 +903,9 @@ export class AITeacherCopilotService {
       skillTitle = "Series vs. Parallel Circuits and Energy Flow";
       qrCompanion = "SCI-PRI6-CIRC-01";
     } else if (isICT) {
-      unitId = "unit-ict-ss2-02";
-      unitTitle = "Relational Database Design & Normalization";
-      skillId = "skill-ict-norm-01";
+      unitId = "unit-cs-relational-databases-sql";
+      unitTitle = "Relational Databases, Normalization & SQL Queries";
+      skillId = "skill-cs-sql-ddl-dml-normalization";
       skillTitle = "Functional Dependency, 1NF, 2NF, and 3NF Decomposition";
       qrCompanion = "ICT-SS2-NORM-03";
     }
@@ -871,11 +917,23 @@ export class AITeacherCopilotService {
           "Calculate the discriminant Δ = b² - 4ac and classify roots (two distinct real roots, equal real roots, or complex roots).",
           "Solve quadratic equations with non-integer coefficients without sign transposition errors."
         ]
+      : isPartsOfSpeech
+      ? [
+          "Identify and classify the eight parts of speech (noun, pronoun, verb, adjective, adverb, preposition, conjunction, interjection) by their syntactic job.",
+          "Distinguish words that look identical but function as different parts of speech depending on sentence context (e.g., 'water' as noun vs verb; 'fast' as adjective vs adverb).",
+          "Correct common usage errors by replacing misused word classes in scaffolded sentence strips."
+        ]
       : isEnglish
       ? [
           "Identify singular and plural subjects when separated from verbs by intervening prepositional phrases.",
           "Apply grammatical concord rules to compound subjects joined by 'and', 'or', and 'neither/nor'.",
           "Detect and correct subject-verb disagreement in authentic written passages."
+        ]
+      : isPressure
+      ? [
+          "Define pressure as force (push) exerted over an area (Pressure = Force / Area) in accessible elementary terms.",
+          "Demonstrate through simple classroom activities why small contact areas produce high pressure (sharp points) and large contact areas distribute push (broad feet/tracks).",
+          "Explain liquid pressure: water exerts pressure in all directions and pressure increases with depth."
         ]
       : isSTEM
       ? [
@@ -892,8 +950,12 @@ export class AITeacherCopilotService {
     // Prerequisites
     const prerequisiteKnowledge: string[] = isMath
       ? ["Linear algebraic manipulation", "Operations on signed integers", "Square root properties of positive numbers"]
+      : isPartsOfSpeech
+      ? ["Basic vocabulary recognition", "Understanding that sentences express complete thoughts", "Capitalization and punctuation conventions"]
       : isEnglish
       ? ["Parts of speech (nouns, pronouns, verbs)", "Singular vs. plural noun inflections", "Basic sentence clauses"]
+      : isPressure
+      ? ["Concepts of push and pull (force)", "Surface area (wide vs narrow)", "States of matter (solids, liquids, gases)"]
       : isSTEM
       ? ["Forms of energy (light, heat, chemical)", "Conductors vs. insulators", "Battery terminals (positive and negative)"]
       : ["Relational database fundamentals (entities, records, fields)", "Candidate keys and primary keys", "Basic SQL SELECT queries"];
@@ -901,8 +963,12 @@ export class AITeacherCopilotService {
     // Instructional Materials
     const instructionalMaterials: string[] = isMath
       ? ["Graph paper", "Scientific calculators", "Formula Codex interactive discriminant widget", "Whiteboard grid"]
+      : isPartsOfSpeech
+      ? ["Color-coded sentence strips (blue=nouns, red=verbs, green=adjectives)", "Word-class role cards", "Highlighter pens", "Visual sentence anchor chart"]
       : isEnglish
       ? ["Color-coded subject/verb sentence strips", "Sample essay excerpts with planted concord traps", "Concord rulebook"]
+      : isPressure
+      ? ["Clear plastic bottles with pinholes at three depths", "Masking tape and water basin", "Plastic rulers and cups", "Modelling clay or foam blocks", "Flat pencil erasers and sharpened pencil points"]
       : isSTEM
       ? ["1.5V D-cell batteries & holders", "Flashlight bulbs & sockets", "Insulated copper jumper wires with alligator clips", "Knife switches"]
       : ["ER Diagram schema charts", "Unnormalized hospital/school registration tables", "Live SQLite database sandbox"];
@@ -919,8 +985,12 @@ export class AITeacherCopilotService {
           durationMinutes: 8,
           content: isMath
             ? "Present a parabolic trajectory problem: 'A ball is kicked upwards. At what two times does it hit a height of 5 meters?' Guide students to recognize that the equation has two simultaneous roots."
+            : isPartsOfSpeech
+            ? "The Secret Identity of Words: Write on the board: 'I like to dance' and 'The dance was thrilling'. Ask: 'Is dance an action or a thing?' Guide learners to discover that a word's part of speech depends on the job it performs in the sentence."
             : isEnglish
             ? "Write on the board: 'The bouquet of yellow roses (smell / smells) heavenly.' Ask learners to vote and explain why their eye is tricked by 'roses'."
+            : isPressure
+            ? "The Mystery of the Camel's Foot: Present the challenge: 'A heavy 500kg camel walks effortlessly across soft desert sand without sinking, but a light person in sharp high heels sinks right in. Why?'"
             : isSTEM
             ? "Demonstrate two flashlights: one goes dim when one bulb is unscrewed (series), while the other stays lit (parallel). Challenge learners: 'Why do home lights never turn off when one bulb burns out?'"
             : "Display a single student registration spreadsheet cell with three phone numbers crammed into one column. Ask: 'How can our code send an SMS to just the second number?'",
@@ -928,9 +998,9 @@ export class AITeacherCopilotService {
           studentActivity: "Pair-share hypothesis with peer and record initial prediction in concept notebook.",
           commonMisconceptions: [
             {
-              misconception: isMath ? "Assuming every quadratic must equal zero naturally without transposition" : isEnglish ? "Matching verb number to the closest noun rather than the head subject" : isSTEM ? "Believing electric current gets 'used up' along the wire" : "Treating multi-valued comma strings as valid atomic database columns",
+              misconception: isMath ? "Assuming every quadratic must equal zero naturally without transposition" : isPartsOfSpeech ? "Assuming words have only one permanent part of speech regardless of sentence context" : isEnglish ? "Matching verb number to the closest noun rather than the head subject" : isPressure ? "Believing that weight alone determines whether an object sinks or cuts" : isSTEM ? "Believing electric current gets 'used up' along the wire" : "Treating multi-valued comma strings as valid atomic database columns",
               whyStudentsStumble: "Surface-level heuristic shortcuts overrule formal structural analysis.",
-              correctionTip: "Explicitly isolate head noun, or verify Kirchhoff's conservation rule."
+              correctionTip: isPartsOfSpeech ? "Apply the 'Sentence Job Test': look at what the word does right here." : isPressure ? "Remind students that force spread over a large surface area creates low pressure." : "Explicitly isolate head noun, or verify Kirchhoff's conservation rule."
             }
           ]
         },
@@ -941,8 +1011,12 @@ export class AITeacherCopilotService {
           durationMinutes: 14,
           content: isMath
             ? "Derive the quadratic formula by completing the square on ax² + bx + c = 0. Highlight the division by 2a and the sign switch on (-b). Define the discriminant Δ = b² - 4ac."
+            : isPartsOfSpeech
+            ? "Introduce the 8 parts of speech with student-friendly functional anchors: Noun (Naming things), Pronoun (Stand-in), Verb (Action/State), Adjective (Describing nouns), Adverb (Modifying verbs/how-when-where), Preposition (Position/Relationship), Conjunction (Bridge), Interjection (Emotion). Teach the 3-step 'Sentence Job Test' to identify words in context."
             : isEnglish
             ? "Introduce the Golden Concord Principle: Singular subjects require singular verbs (with -s in present tense); plural subjects require plural verbs. Teach the 'Intervening Prepositional Phrase Shield': Ignore 'of...', 'with...', 'along with...' when finding the true subject."
+            : isPressure
+            ? "Define Pressure = Force / Area (P = F / A). Demonstrate that when contact area is small, pressure is high (sharp knife edge, injection needle, nail point). When contact area is large, pressure is low (snowshoes, broad tires, flat camel feet). Introduce liquid pressure: water exerts pressure in all directions and increases with depth."
             : isSTEM
             ? "Draw circuit schematics using standardized engineering symbols (battery, lamp, wire, switch). Explain Ohm's law V = I × R and how series circuits share voltage (V_total = V1 + V2) while parallel circuits maintain full supply voltage across each branch."
             : "Define Functional Dependency X -> Y. Demonstrate 1NF (all attributes atomic, primary key identified). Walk through 2NF (remove partial dependencies on composite keys into separate relation). Explain 3NF (every non-key attribute must depend on nothing but the key: 'The key, the whole key, and nothing but the key').",
@@ -965,6 +1039,24 @@ export class AITeacherCopilotService {
                   examinerTip: "Always write down the substituted formula before doing arithmetic to secure WAEC method marks."
                 }
               ]
+            : isPartsOfSpeech
+            ? [
+                {
+                  title: "Exemplar 1: Classifying Word Classes in Context",
+                  problem: "Identify the part of speech of each word in: 'The playful kitten purred softly under the wooden chair.'",
+                  stepByStepSolution: [
+                    "kitten, chair = Nouns (names of an animal and an object).",
+                    "purred = Verb (the action performed by the kitten).",
+                    "playful, wooden = Adjectives (describing what kind of kitten and chair).",
+                    "softly = Adverb (describing how the kitten purred).",
+                    "under = Preposition (showing position of the kitten relative to the chair).",
+                    "The = Definite Article / Determiner."
+                  ],
+                  explanation: "Words take their part of speech from their syntactic function in the sentence.",
+                  keyPrinciple: "Ask: 'What job is this word doing in this sentence?'",
+                  examinerTip: "Watch out for words that look identical but have different functions (e.g., 'water' as noun vs verb)."
+                }
+              ]
             : isEnglish
             ? [
                 {
@@ -979,6 +1071,22 @@ export class AITeacherCopilotService {
                   explanation: "The verb agrees with the head noun 'captain', not with the object of the preposition 'teams'.",
                   keyPrinciple: "Prepositional modifiers never govern verb agreement.",
                   examinerTip: "WAEC examiners intentionally insert plural nouns inside prepositional phrases to mislead candidates."
+                }
+              ]
+            : isPressure
+            ? [
+                {
+                  title: "Exemplar 1: Comparing Flat vs Narrow Brick Pressure",
+                  problem: "A brick weighing 20N rests on a table. On its broad face of area 0.1m², calculate the pressure. When turned onto its narrow end of area 0.02m², calculate the pressure.",
+                  stepByStepSolution: [
+                    "State the fundamental formula: Pressure = Force / Area (P = F / A).",
+                    "Broad face calculation: P = 20 N / 0.1 m² = 200 N/m².",
+                    "Narrow end calculation: P = 20 N / 0.02 m² = 1,000 N/m².",
+                    "Compare results: The exact same weight produces 5 times greater pressure on the smaller contact area!"
+                  ],
+                  explanation: "Reducing the contact area dramatically intensifies the pressure exerted by a constant force.",
+                  keyPrinciple: "Pressure is inversely proportional to contact area for a constant force.",
+                  examinerTip: "Always check units: Force in Newtons (N), Area in square meters (m²), Pressure in N/m² (Pascals)."
                 }
               ]
             : isSTEM
@@ -1195,6 +1303,52 @@ export class AITeacherCopilotService {
           remedialHint: "Test intervals on a number line after factoring the difference of squares."
         }
       );
+    } else if (isPartsOfSpeech) {
+      questions.push(
+        {
+          id: "q-pos-01",
+          questionNumber: 1,
+          stem: "In the sentence 'The cheetah ran swiftly across the open savannah', which word is an adverb of manner?",
+          questionType: "multiple_choice",
+          options: ["cheetah", "ran", "swiftly", "open"],
+          correctIndex: 2,
+          answerKey: "Option C (swiftly)",
+          stepByStepExplanation: "'Swiftly' describes how the action was performed (modifies the verb 'ran'). Most adverbs of manner answer 'how?' and end in -ly.",
+          misconceptionTrap: "Confusing 'open' (an adjective describing the savannah) with an adverb.",
+          difficulty: "introductory",
+          bloomTaxonomy: "recall",
+          points: 2,
+          remedialHint: "Ask yourself: which word tells you HOW the cheetah ran?"
+        },
+        {
+          id: "q-pos-02",
+          questionNumber: 2,
+          stem: "In the sentence 'Please water the wilted plants', what part of speech is the word 'water'?",
+          questionType: "multiple_choice",
+          options: ["Noun", "Verb", "Adjective", "Adverb"],
+          correctIndex: 1,
+          answerKey: "Option B (Verb)",
+          stepByStepExplanation: "Here, 'water' expresses an imperative action to be carried out on the plants. Although 'water' is commonly a noun, words change word class depending on sentence usage.",
+          misconceptionTrap: "Assuming 'water' is always a noun because it names a liquid.",
+          difficulty: "standard",
+          bloomTaxonomy: "analysis",
+          points: 3,
+          remedialHint: "Look at the function: is it naming a physical liquid here, or commanding an action to be done?"
+        },
+        {
+          id: "q-pos-03",
+          questionNumber: 3,
+          stem: "Identify the part of speech of each underlined word in: 'She wore a bright yellow dress to the ceremony.' Explain your reasoning.",
+          questionType: "worked_solution",
+          answerKey: "'bright' = Adverb (modifies 'yellow'); 'yellow' = Adjective (modifies 'dress'); 'dress' = Noun (object worn); 'to' = Preposition (shows direction).",
+          stepByStepExplanation: "1. 'dress' is the naming word for the garment (Noun). 2. 'yellow' describes the dress (Adjective). 3. 'bright' modifies the color degree of yellow (Adverb). 4. 'to' links the motion to the noun ceremony (Preposition).",
+          misconceptionTrap: "Classifying 'bright' as an adjective modifying 'dress' directly.",
+          difficulty: "standard",
+          bloomTaxonomy: "application",
+          points: 4,
+          remedialHint: "Test what 'bright' is modifying: is it a 'bright dress' or 'brightly yellow'?"
+        }
+      );
     } else if (isEnglish) {
       questions.push(
         {
@@ -1244,6 +1398,62 @@ export class AITeacherCopilotService {
           bloomTaxonomy: "application",
           points: 4,
           remedialHint: "Identify what has actually been published: the 'list' or the 'candidates'?"
+        }
+      );
+    } else if (isPressure) {
+      questions.push(
+        {
+          id: "q-press-01",
+          questionNumber: 1,
+          stem: "Why are the cutting edges of kitchen knives and scissors made very thin and sharp?",
+          questionType: "multiple_choice",
+          options: [
+            "To reduce contact surface area and produce high cutting pressure with small force",
+            "To decrease the weight and mass of the blade",
+            "To make the blade shiny and rust-resistant",
+            "To increase heat conduction through the blade"
+          ],
+          correctIndex: 0,
+          answerKey: "Option A (To reduce contact surface area and produce high cutting pressure)",
+          stepByStepExplanation: "Pressure = Force / Area. When the cutting edge is extremely narrow, the contact area 'A' is tiny, generating massive localized pressure that easily slices through materials.",
+          misconceptionTrap: "Thinking sharp knives somehow exert more downward force on their own.",
+          difficulty: "introductory",
+          bloomTaxonomy: "comprehension",
+          points: 2,
+          remedialHint: "Remember the formula: P = F / A. What happens when area A gets very small?"
+        },
+        {
+          id: "q-press-02",
+          questionNumber: 2,
+          stem: "A plastic bottle of water has three pinholes drilled at different heights: top, middle, and bottom. When tape covering the holes is removed, from which hole does water squirt the furthest horizontal distance?",
+          questionType: "multiple_choice",
+          options: [
+            "Bottom hole, because liquid pressure increases with depth",
+            "Top hole, because atmospheric air presses down on it",
+            "Middle hole, because it is at the center of gravity",
+            "All three holes squirt equal distance because water is incompressible"
+          ],
+          correctIndex: 0,
+          answerKey: "Option A (Bottom hole, because liquid pressure increases with depth)",
+          stepByStepExplanation: "Liquid pressure depends directly on depth (P = ρgh). The bottom hole has the greatest column of water above it, producing the highest pressure and highest exit velocity.",
+          misconceptionTrap: "Assuming the top hole has highest pressure because it is closest to the open air.",
+          difficulty: "standard",
+          bloomTaxonomy: "application",
+          points: 3,
+          remedialHint: "Think about deep sea divers: where is water pressure felt strongest?"
+        },
+        {
+          id: "q-press-03",
+          questionNumber: 3,
+          stem: "A student pushes with a downward force of 60 N on a wooden block with a base contact area of 2 m². Calculate the pressure exerted on the floor in N/m² (Pascals).",
+          questionType: "worked_solution",
+          answerKey: "Pressure = 30 N/m² (or 30 Pa)",
+          stepByStepExplanation: "1. State the formula: Pressure = Force / Area. 2. Substitute given values: P = 60 N / 2 m². 3. Calculate: P = 30 N/m².",
+          misconceptionTrap: "Multiplying force by area instead of dividing.",
+          difficulty: "standard",
+          bloomTaxonomy: "application",
+          points: 4,
+          remedialHint: "Use the formula triangle: Force is on top, Pressure and Area are on the bottom."
         }
       );
     } else if (isSTEM) {
@@ -1358,7 +1568,7 @@ export class AITeacherCopilotService {
 
     // Differentiation Tiers
     let differentiationTiers: StructuredDifferentiationTier[] | undefined = undefined;
-    if (params.isDifferentiated || params.materialType === "worksheet") {
+    if (params.isDifferentiated || params.materialType === "worksheet" || params.materialType === "lesson_plan") {
       differentiationTiers = [
         {
           tier: "foundation",
@@ -1401,41 +1611,85 @@ export class AITeacherCopilotService {
     const remedialSupport = {
       targetGaps: isMath
         ? ["Sign flips during negative substitution in x = (-b ± √Δ)/2a", "Incorrect fraction transposition across equals sign"]
+        : isPartsOfSpeech
+        ? ["Confusing nouns and verbs for words with identical spelling like 'run/water/walk'", "Misidentifying adverbs that do not end in -ly", "Confusing adjectives (describing nouns) with adverbs (describing verbs)"]
         : isEnglish
         ? ["Distraction by intervening prepositional phrases", "Failure to detect plural head subjects"]
+        : isPressure
+        ? ["Confusing total force with pressure (forgetting area matters)", "Thinking water pressure depends on container width rather than depth"]
         : isSTEM
         ? ["Confusing series voltage division with parallel constant voltage", "Believing current is consumed by bulbs"]
         : ["Confusing multi-valued columns with 1NF atomicity", "Overlooking partial key dependencies in composite keys"],
-      scaffoldingStrategy: "Socratic Step-by-Step Drill with explicit color-coding and immediate feedback loops.",
-      guidedPrompts: [
-        "What is the exact definition of our target term?",
-        "If we remove the modifier phrase, what is the core subject?",
-        "Check your signs: does a negative multiplied by a negative yield a positive?"
-      ]
+      scaffoldingStrategy: isPartsOfSpeech
+        ? "Color-coded visual token cards and the 'Sentence Job Test' question ladder."
+        : isPressure
+        ? "Concrete physical demonstrations (pressing flat vs sharp side of pencil into clay) and simple calculation tables."
+        : "Socratic Step-by-Step Drill with explicit color-coding and immediate feedback loops.",
+      guidedPrompts: isPartsOfSpeech
+        ? [
+            "What job is this word doing in this exact sentence?",
+            "Is it naming something, showing an action, or describing?",
+            "If you replace it with an obvious noun or verb, does the sentence still make sense?"
+          ]
+        : isPressure
+        ? [
+            "Is the force pushing on a wide surface or a tiny point?",
+            "What happens to pressure when the contact area gets smaller?",
+            "Which hole has more water pressing down from above it?"
+          ]
+        : [
+            "What is the exact definition of our target term?",
+            "If we remove the modifier phrase, what is the core subject?",
+            "Check your signs: does a negative multiplied by a negative yield a positive?"
+          ]
     };
 
     // Formative Exit Ticket
     const exitTicket = {
       prompt: isMath
         ? "Solve 2x² - 8 = 0. State clearly whether the roots are rational or irrational."
+        : isPartsOfSpeech
+        ? "In the sentence 'We booked a quiet room at the hotel', what part of speech is 'booked' and what part of speech is 'quiet'?"
         : isEnglish
         ? "Write down whether 'The sound of drums (echo / echoes) in the valley' takes 'echo' or 'echoes', and name the head subject."
+        : isPressure
+        ? "Explain in one sentence why someone wearing wide snowshoes does not sink into deep snow, while someone wearing normal shoes sinks."
         : isSTEM
         ? "In your own words: If a strings of holiday lights goes completely dark when one bulb blows, is the string wired in series or in parallel?"
         : "True or False: A table with a single-column primary key cannot violate Second Normal Form (2NF). Justify in one sentence.",
       sampleCorrectResponse: isMath
         ? "2x² = 8 => x² = 4 => x = ±2. The roots are x = 2 and x = -2 (rational numbers)."
+        : isPartsOfSpeech
+        ? "'Booked' is a verb (action of reserving). 'Quiet' is an adjective (describing the room)."
         : isEnglish
         ? "The verb is 'echoes'. The head subject is 'sound' (singular), not 'drums'."
+        : isPressure
+        ? "Wide snowshoes increase the surface area in contact with the snow, which lowers the pressure exerted by the person's weight and prevents sinking."
         : isSTEM
         ? "It is wired in series, because an open bulb breaks the single shared conducting circuit path."
         : "True. Partial key dependency requires a composite (multi-column) primary key; if the key is single, it automatically satisfies 2NF.",
-      commonErrorsToLookFor: [
-        "Omitting the ± negative square root branch",
-        "Selecting the verb that agrees with the closest plural noun",
-        "Guessing without explaining the physical circuit path"
-      ],
-      remedialNextStep: "Assign 5-minute Formula Codex drill for learners scoring below 100% on this check."
+      commonErrorsToLookFor: isPartsOfSpeech
+        ? [
+            "Calling 'booked' an adjective because it ends in -ed",
+            "Confusing 'quiet' (adjective) with 'quietly' (adverb)",
+            "Naming 'hotel' instead of identifying the parts of speech of 'booked' and 'quiet'"
+          ]
+        : isPressure
+        ? [
+            "Saying snowshoes make the person lighter",
+            "Forgetting to mention surface area or contact area",
+            "Stating that pressure increases instead of decreases"
+          ]
+        : [
+            "Omitting the ± negative square root branch",
+            "Selecting the verb that agrees with the closest plural noun",
+            "Guessing without explaining the physical circuit path"
+          ],
+      remedialNextStep: isPartsOfSpeech
+        ? "Provide 3-minute sentence strip sorting card practice before next period."
+        : isPressure
+        ? "Perform quick clay block indentation re-test before class dismisses."
+        : "Assign 5-minute Formula Codex drill for learners scoring below 100% on this check."
     };
 
     // Marking Scheme
@@ -1462,7 +1716,9 @@ export class AITeacherCopilotService {
       answer_key: "Verified Master Answer Key",
       marking_scheme: "Official Examiner Marking Scheme",
       exit_ticket: "Diagnostic Exit Ticket",
-      study_guide: "Condensed Student Study Guide"
+      study_guide: "Condensed Student Study Guide",
+      video_lesson_script: "Instructional Video Masterclass Script",
+      video_explanation_package: "Curriculum Video Explanation Package"
     };
 
     const title = `${typePrefixMap[params.materialType] || "Educational Material"}: ${params.topic}`;
@@ -1513,7 +1769,22 @@ export class AITeacherCopilotService {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        this.materials = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          this.materials = parsed.map((m: any) => {
+            const matType = m.materialType || m.type || "lesson_plan";
+            const lifecycle = m.lifecycleStatus || m.status || "draft";
+            return {
+              ...m,
+              materialType: matType,
+              type: matType,
+              lifecycleStatus: lifecycle,
+              status: lifecycle,
+              authorName: m.authorName || m.teacherDisplayName || "Certified Educator",
+              targetAudience: m.targetAudience || m.targetLevel || "senior_secondary"
+            };
+          });
+        }
       }
     } catch (err) {
       console.warn("Could not load teacher educational materials from storage", err);
@@ -1695,7 +1966,11 @@ export class AITeacherCopilotService {
       derivedFromMaterialId: config.derivedFromId,
       sourcePrompt: config.prompt,
       createdAt: new Date(Date.now() - 3600000).toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      type: config.materialType,
+      status: config.lifecycleStatus,
+      authorName: "Babatunde Ojo",
+      targetAudience: config.level
     };
   }
 }

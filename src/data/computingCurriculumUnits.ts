@@ -596,7 +596,7 @@ export const COMPUTING_UNITS: Unit[] = [
               "To store backups of website databases on decentralized servers."
             ],
             correctAnswer: "To translate human-readable domain names (e.g., example.com) into numeric IP addresses.",
-            explanation: "DNS acts as the phonebook of the Internet, translating user-friendly domain names like 'moostechy.academy' into machine-routable IP addresses like '192.0.2.1'.",
+            explanation: "DNS acts as the phonebook of the Internet, translating user-friendly domain names like 'moos.academy' into machine-routable IP addresses like '192.0.2.1'.",
             hintLadder: [
               "Think about what happens when you type a web URL into your browser.",
               "Computers communicate using IP addresses, but humans prefer words.",
@@ -979,19 +979,19 @@ export const COMPUTING_UNITS: Unit[] = [
           {
             id: "q-cs-web-2",
             type: "multiple_choice",
-            questionText: "When a user types 'https://academy.moostechy.org' into their browser, in what hierarchical order does DNS resolve the domain name into an IP address if not cached?",
+            questionText: "When a user types 'https://learn.moos.academy' into their browser, in what hierarchical order does DNS resolve the domain name into an IP address if not cached?",
             options: [
-              "Recursive Resolver -> Root Nameserver (.) -> Top-Level Domain (TLD) Nameserver (.org) -> Authoritative Nameserver (moostechy.org)",
+              "Recursive Resolver -> Root Nameserver (.) -> Top-Level Domain (TLD) Nameserver (.academy) -> Authoritative Nameserver (moos.academy)",
               "Authoritative Nameserver -> Root Nameserver -> Browser -> ISP Resolver",
               "Top-Level Domain Nameserver -> Web Host Server -> DNS Cache -> Root Server",
               "Client Browser -> Web Gateway -> DHCP Server -> Proxy Server"
             ],
-            correctAnswer: "Recursive Resolver -> Root Nameserver (.) -> Top-Level Domain (TLD) Nameserver (.org) -> Authoritative Nameserver (moostechy.org)",
-            explanation: "DNS query resolution traverses a strict hierarchy: The local/ISP Recursive Resolver queries the Root DNS server ('.'), which points to the TLD server ('.org'), which points to the Authoritative DNS server for the domain, which returns the actual A record IP address.",
+            correctAnswer: "Recursive Resolver -> Root Nameserver (.) -> Top-Level Domain (TLD) Nameserver (.academy) -> Authoritative Nameserver (moos.academy)",
+            explanation: "DNS query resolution traverses a strict hierarchy: The local/ISP Recursive Resolver queries the Root DNS server ('.'), which points to the TLD server ('.academy'), which points to the Authoritative DNS server for the domain, which returns the actual A record IP address.",
             hintLadder: [
               "Starts with your local recursive resolver (ISP/DNS 8.8.8.8).",
               "First queries the root servers at the top of the tree ('.').",
-              "Then goes to the specific TLD ('.org'), and finally to the authoritative nameserver holding the records."
+              "Then goes to the specific TLD ('.academy'), and finally to the authoritative nameserver holding the records."
             ],
             misconceptionAlerts: [
               { trigger: "Authoritative Nameserver -> Root Nameserver -> Browser -> ISP Resolver", note: "The query goes top-down (Root -> TLD -> Authoritative), not bottom-up." }

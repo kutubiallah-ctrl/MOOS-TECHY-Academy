@@ -270,7 +270,11 @@ async function runRealUserAcceptanceJourneys() {
   console.log("==========================================================================\n");
 }
 
-runRealUserAcceptanceJourneys().catch((err) => {
-  console.error("User acceptance journey verification failed:", err);
-  process.exit(1);
-});
+runRealUserAcceptanceJourneys()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("User acceptance journey verification failed:", err);
+    process.exit(1);
+  });

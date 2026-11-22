@@ -115,7 +115,11 @@ async function runBookpreneurMarketplaceWorkflowTests() {
   console.log("\n🎉 ALL BOOKPRENEUR MARKETPLACE WORKFLOW & GOVERNANCE TESTS PASSED (100%)\n");
 }
 
-runBookpreneurMarketplaceWorkflowTests().catch((err) => {
-  console.error("Test execution fatal error:", err);
-  process.exit(1);
-});
+runBookpreneurMarketplaceWorkflowTests()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("Test execution fatal error:", err);
+    process.exit(1);
+  });

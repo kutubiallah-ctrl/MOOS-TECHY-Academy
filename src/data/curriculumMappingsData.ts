@@ -756,5 +756,75 @@ export const SUPPORTED_EDUCATION_SYSTEMS: Array<{
     levels: ["Lower Secondary (Stages 7-9)", "IGCSE Core (Stages 10-11)", "IGCSE Extended (Stages 10-11)"],
     keyExams: ["Cambridge IGCSE 0580 Paper 2/4", "Cambridge IGCSE 0607"],
     defaultFlagEmoji: "🌍"
+  },
+  {
+    code: "CANADA_PROVINCIAL",
+    country: "CA",
+    countryName: "Canada",
+    name: "Canadian Provincial Curriculum (Ontario / Alberta Standard)",
+    shortLabel: "Canada Provincial",
+    levels: ["Intermediate (Grades 7-8)", "Grade 9 De-streamed", "Grade 10 Principles", "Grade 11 Functions", "Grade 12 Advanced Functions / Calculus"],
+    keyExams: ["OSSLT / EQAO Grade 9", "Alberta Diploma Exams"],
+    defaultFlagEmoji: "🇨🇦"
+  },
+  {
+    code: "JAPAN_MEXT",
+    country: "JP",
+    countryName: "Japan",
+    name: "Japanese National Curriculum Guidelines (MEXT Monbukagakusho)",
+    shortLabel: "Japan MEXT",
+    levels: ["Junior High (Grades 7-9)", "Senior High Mathematics I/A (Grade 10)", "Mathematics II/B (Grade 11)", "Mathematics III/C (Grade 12)"],
+    keyExams: ["Common Test for University Admissions (Daigaku Nyūgaku Kyōtsū Test)"],
+    defaultFlagEmoji: "🇯🇵"
+  },
+  {
+    code: "CHINA_NATIONAL",
+    country: "CN",
+    countryName: "China",
+    name: "National Senior High School Mathematics Curriculum (Ministry of Education)",
+    shortLabel: "China Gaokao Standard",
+    levels: ["Senior High Year 1 (Gao Yi)", "Senior High Year 2 (Gao Er)", "Senior High Year 3 (Gao San)"],
+    keyExams: ["National College Entrance Examination (Gaokao)"],
+    defaultFlagEmoji: "🇨🇳"
+  },
+  {
+    code: "KOREA_CSAT",
+    country: "KR",
+    countryName: "South Korea",
+    name: "South Korea National Curriculum (Ministry of Education Korea)",
+    shortLabel: "Korea CSAT (Suneung)",
+    levels: ["Middle School 1-3", "High School Common Math", "Calculus & Geometry (Selective)"],
+    keyExams: ["College Scholastic Ability Test (CSAT / Suneung)"],
+    defaultFlagEmoji: "🇰🇷"
+  },
+  {
+    code: "INDIA_CBSE",
+    country: "IN",
+    countryName: "India",
+    name: "Central Board of Secondary Education (CBSE / NCERT)",
+    shortLabel: "India CBSE",
+    levels: ["Secondary (Class 9-10)", "Senior Secondary (Class 11-12)"],
+    keyExams: ["CBSE Class 10 Board", "CBSE Class 12 Board", "JEE Main STEM Prep"],
+    defaultFlagEmoji: "🇮🇳"
+  },
+  {
+    code: "AUSTRALIA_ACARA",
+    country: "AU",
+    countryName: "Australia",
+    name: "Australian Curriculum (ACARA / Senior Secondary Australian Standard)",
+    shortLabel: "Australia ACARA",
+    levels: ["Years 7-10 Australian Curriculum", "Year 11-12 Mathematical Methods", "Specialist Mathematics"],
+    keyExams: ["HSC (NSW)", "VCE (Victoria)", "QCE (Queensland)", "ATAR Pathways"],
+    defaultFlagEmoji: "🇦🇺"
+  },
+  {
+    code: "SOUTH_AFRICA_CAPS",
+    country: "ZA",
+    countryName: "South Africa",
+    name: "Curriculum and Assessment Policy Statement (CAPS / DBE)",
+    shortLabel: "South Africa CAPS",
+    levels: ["Senior Phase (Grades 7-9)", "FET Phase (Grades 10-12)"],
+    keyExams: ["National Senior Certificate (NSC / Matric)"],
+    defaultFlagEmoji: "🇿🇦"
   }
 ];

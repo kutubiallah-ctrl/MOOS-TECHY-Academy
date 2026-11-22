@@ -11,7 +11,10 @@ import {
   X,
   Bot,
   Brain,
-  MessageSquareQuote
+  MessageSquareQuote,
+  Mic,
+  Radio,
+  Video
 } from "lucide-react";
 import { PracticeQuestion } from "../types/curriculum";
 import { useLearner } from "../context/LearnerContext";
@@ -47,7 +50,7 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
     {
       id: "initial-1",
       sender: "tutor",
-      text: `👋 Greetings! I am **Tutor Moos**, your Socratic learning guide for **MOOS TECHY ACADEMY**.\n\nI won't just give you the answer outright—instead, I'll help you build genuine problem-solving mastery by guiding your thinking step by step. What are you working on right now?`,
+      text: `👋 Greetings! I am **Tutor Moos**, your Socratic learning guide for **MOOS Academy**.\n\nI won't just give you the answer outright—instead, I'll help you build genuine problem-solving mastery by guiding your thinking step by step. What are you working on right now?`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       suggestionButtons: [
         "How do I start this problem?",
@@ -58,7 +61,65 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVoiceRecording, setIsVoiceRecording] = useState(false);
+  const [isTranscribingVoice, setIsTranscribingVoice] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const startVoiceInput = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setIsVoiceRecording(false);
+        setIsTranscribingVoice(true);
+
+        try {
+          const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            const b64 = (reader.result as string).split(",")[1];
+            const res = await fetch("/api/audio/transcribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ audioData: b64, mimeType: "audio/webm" })
+            });
+            const data = await res.json();
+            if (data.transcript) {
+              setInputMessage((prev) => (prev ? `${prev} ${data.transcript}` : data.transcript));
+            }
+            setIsTranscribingVoice(false);
+          };
+          reader.readAsDataURL(blob);
+        } catch (e) {
+          console.error("Audio transcribe error:", e);
+          setIsTranscribingVoice(false);
+        }
+      };
+
+      recorder.start(250);
+      setIsVoiceRecording(true);
+    } catch (err) {
+      console.error("Microphone access error:", err);
+    }
+  };
+
+  const stopVoiceInput = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -323,19 +384,35 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
         }}
         className="flex items-center gap-2 border-t border-slate-200 bg-white p-3"
       >
+        <button
+          type="button"
+          onClick={isVoiceRecording ? stopVoiceInput : startVoiceInput}
+          disabled={isTranscribingVoice || isLoading}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl transition shrink-0 ${
+            isVoiceRecording
+              ? "bg-rose-600 text-white animate-pulse"
+              : isTranscribingVoice
+              ? "bg-amber-100 text-amber-700 animate-spin"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          }`}
+          title={isVoiceRecording ? "Stop recording & transcribe with Gemini 3.5" : "Speak your message (Voice-to-Text)"}
+        >
+          <Mic className="h-4 w-4" />
+        </button>
+
         <input
           id="tutor-chat-input"
           type="text"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Ask Tutor Moos for a hint or explain your thought..."
+          placeholder={isVoiceRecording ? "Listening to your voice..." : isTranscribingVoice ? "Transcribing audio..." : "Ask Tutor Moos for a hint or explain your thought..."}
           className="flex-1 rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
-          disabled={isLoading}
+          disabled={isLoading || isTranscribingVoice}
         />
         <button
           id="tutor-chat-send-btn"
           type="submit"
-          disabled={!inputMessage.trim() || isLoading}
+          disabled={!inputMessage.trim() || isLoading || isTranscribingVoice}
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white disabled:opacity-40 hover:bg-indigo-700 transition shadow-xs"
           title="Send to Tutor Moos"
         >

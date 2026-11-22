@@ -1,5 +1,5 @@
 /**
- * MOOS TECHY ACADEMY — AI TEACHER COPILOT STUDIO
+ * MOOS ACADEMY — AI TEACHER COPILOT STUDIO
  * 
  * Primary Teacher Productivity Interface:
  * - Natural language request parsing & minimal clarification
@@ -74,7 +74,9 @@ const MATERIAL_TYPE_LABELS: Record<EducationalMaterialType, { label: string; ico
   answer_key: { label: "Answer Key", icon: "🔑" },
   marking_scheme: { label: "Marking Scheme", icon: "📐" },
   exit_ticket: { label: "Exit Ticket", icon: "🎟️" },
-  study_guide: { label: "Study Guide", icon: "💡" }
+  study_guide: { label: "Study Guide", icon: "💡" },
+  video_lesson_script: { label: "Video Lesson Script", icon: "🎬" },
+  video_explanation_package: { label: "Video Explanation Package", icon: "🎥" }
 };
 
 const SUGGESTED_PROMPTS = [
@@ -731,6 +733,16 @@ export const TeacherCopilotStudio: React.FC<TeacherCopilotStudioProps> = ({
                     title="Duplicate material for another cohort"
                   >
                     <Copy className="h-4 w-4" />
+                  </button>
+
+                  {/* Print / Export */}
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
+                    title="Print / Save as PDF"
+                  >
+                    <Printer className="h-4 w-4" />
                   </button>
 
                   {/* Delete */}

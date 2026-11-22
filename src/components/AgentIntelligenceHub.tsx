@@ -95,7 +95,7 @@ export const AgentIntelligenceHub: React.FC<AgentIntelligenceHubProps> = ({ onNa
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-bold uppercase tracking-wider">
               <BrainCircuit className="h-3.5 w-3.5" />
-              MOOS TECHY INTELLIGENCE ARCHITECTURE • GOVERNED AGENT REGISTRY
+              MOOS Academy Intelligence Architecture • Governed Agent Registry
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Agent Orchestrator, Quality Audits & Human Approval

@@ -19,6 +19,7 @@ import {
 import { storageService } from "../services/storageService";
 import { AnalyticsService, DashboardMetrics } from "../services/analyticsService";
 import { curriculumService } from "../services/curriculumService";
+import { firebaseSyncService } from "../services/firebaseSyncService";
 import { MATHEMATICS_UNITS, DEFAULT_EXTENDED_LEARNER_PROFILE } from "../data/curriculumData";
 
 interface LearnerContextType {
@@ -51,12 +52,14 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [activeUnit, setActiveUnit] = useState<Unit>(defaultUnit);
   const [activeSkill, setActiveSkill] = useState<Skill>(defaultSkill);
 
-  // Initialize from storage service on mount
+  // Initialize from storage service on mount and subscribe to Firebase auth sync
   useEffect(() => {
+    let isSubscribed = true;
+
     async function init() {
       try {
         const loadedProfile = await storageService.getProfile();
-        if (loadedProfile) {
+        if (loadedProfile && isSubscribed) {
           setProfile(loadedProfile);
 
           // Match initial active unit with profile's activeUnitId or targetLevel
@@ -77,10 +80,32 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
       } catch (err) {
         console.error("Failed to load initial learner profile:", err);
       } finally {
-        setIsLoading(false);
+        if (isSubscribed) setIsLoading(false);
       }
     }
     init();
+
+    // Subscribe to Firebase Auth state for bidirectional reconciliation
+    const unsubscribeAuth = firebaseSyncService.onAuthChange(async (firebaseUser) => {
+      if (!isSubscribed) return;
+      if (firebaseUser) {
+        try {
+          const currentLocal = await storageService.getProfile();
+          const reconciled = await firebaseSyncService.reconcileLearnerProfile(currentLocal);
+          if (reconciled && isSubscribed) {
+            setProfile(reconciled);
+            await storageService.saveProfile(reconciled);
+          }
+        } catch (e) {
+          console.warn("LearnerContext cloud reconciliation deferred:", e);
+        }
+      }
+    });
+
+    return () => {
+      isSubscribed = false;
+      unsubscribeAuth();
+    };
   }, []);
 
   const setActiveSkillAndUnit = (skill: Skill, unit: Unit) => {
@@ -208,7 +233,7 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
           <span className="text-sm font-semibold tracking-wider uppercase text-slate-300">
-            Initializing MOOS TECHY ACADEMY...
+            Initializing MOOS Academy...
           </span>
         </div>
       </div>

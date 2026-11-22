@@ -21,11 +21,22 @@ import {
   CheckCircle2,
   ShieldCheck,
   User,
-  Network
+  Network,
+  Globe,
+  Video,
+  Radio,
+  Mic,
+  LogIn,
+  LogOut,
+  AlertTriangle
 } from "lucide-react";
 import { LearnerProfile } from "../types/curriculum";
 import { identityService, ALL_SEEDED_IDENTITIES } from "../services/identityService";
 import { InstitutionalUser, UserSession } from "../types/identity";
+import { firebaseSyncService } from "../services/firebaseSyncService";
+import { User as FirebaseUser } from "firebase/auth";
+import { mfaService } from "../services/mfaService";
+import { MfaModal } from "./mfa/MfaModal";
 
 export type ActiveView =
   | "dashboard"
@@ -42,7 +53,12 @@ export type ActiveView =
   | "textbook_studio"
   | "bookpreneur_studio"
   | "agent_hub"
-  | "architecture";
+  | "architecture"
+  | "saturation_studio"
+  | "video_studio"
+  | "live_voice"
+  | "transcribe"
+  | "development_guardian";
 
 interface NavbarProps {
   activeView: ActiveView;
@@ -50,6 +66,8 @@ interface NavbarProps {
   profile: LearnerProfile;
   onOpenAITutor: () => void;
   onQuickDiagnostic: () => void;
+  onOpenGlobalSettings?: () => void;
+  onOpenClubs?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -57,23 +75,129 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   profile,
   onOpenAITutor,
-  onQuickDiagnostic
+  onQuickDiagnostic,
+  onOpenGlobalSettings,
+  onOpenClubs
 }) => {
   const [showStudioDropdown, setShowStudioDropdown] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [currentSession, setCurrentSession] = useState<UserSession>(() => identityService.getActiveSession());
   const [allUsers] = useState<InstitutionalUser[]>(() => identityService.getIdentities());
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(() => firebaseSyncService.getCurrentUser());
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authErrorNotice, setAuthErrorNotice] = useState<string | null>(null);
 
-  const isStudioActive = ["teacher_studio", "textbook_studio", "bookpreneur_studio", "agent_hub", "architecture", "stakeholders"].includes(activeView);
+  // MFA Modal state
+  const [isMfaModalOpen, setIsMfaModalOpen] = useState(false);
+  const [mfaModalMode, setMfaModalMode] = useState<"ENROLL" | "CHALLENGE" | "RECOVERY" | "SETTINGS">("CHALLENGE");
+  const [pendingMfaUserId, setPendingMfaUserId] = useState<string | null>(null);
+  const [pendingMfaUserEmail, setPendingMfaUserEmail] = useState<string>("");
+
+  useEffect(() => {
+    const unsub = firebaseSyncService.onAuthChange((user) => {
+      setFirebaseUser(user);
+    });
+    const unsubChallenge = firebaseSyncService.onMfaChallenge((resolver) => {
+      setPendingMfaUserId(firebaseSyncService.getCurrentUser()?.uid || "firebase_user");
+      setPendingMfaUserEmail(firebaseSyncService.getCurrentUser()?.email || "user@moos.academy");
+      setMfaModalMode("CHALLENGE");
+      setIsMfaModalOpen(true);
+    });
+    return () => {
+      unsub();
+      unsubChallenge();
+    };
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    if (isSigningIn) return;
+    setAuthErrorNotice(null);
+    try {
+      setIsSigningIn(true);
+      const user = await firebaseSyncService.signInWithGoogle();
+      if (!user) {
+        // User closed or dismissed popup, or triggered MFA challenge
+      }
+    } catch (err: any) {
+      const code = err?.code || "";
+      const msg = err?.message || "";
+      if (code === "auth/popup-blocked" || msg.includes("popup-blocked")) {
+        setAuthErrorNotice("Browser blocked the sign-in pop-up window. Please enable pop-ups for this site, or continue with your local institutional profile.");
+      } else if (code === "auth/popup-closed-by-user" || msg.includes("popup-closed")) {
+        // Intentionally closed by user
+      } else {
+        setAuthErrorNotice("Sign-in could not be completed at this moment. You can continue using your local institutional account.");
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await firebaseSyncService.signOutUser();
+    } catch (err) {
+      console.error("Sign out failure:", err);
+    }
+  };
+
+  const isStudioActive = [
+    "teacher_studio",
+    "textbook_studio",
+    "bookpreneur_studio",
+    "agent_hub",
+    "architecture",
+    "stakeholders",
+    "saturation_studio",
+    "video_studio",
+    "live_voice",
+    "transcribe",
+    "development_guardian"
+  ].includes(activeView);
 
   const handleSwitchUser = (userId: string) => {
+    const target = allUsers.find(u => u.id === userId);
+    if (target?.role === "ADMIN") {
+      const hasMfa = mfaService.hasActiveAssurance(userId, "ADMIN_ROLE_SWITCH");
+      if (!hasMfa) {
+        setPendingMfaUserId(userId);
+        setPendingMfaUserEmail(target.email || `${userId}@moos.academy`);
+        const prof = mfaService.getMfaProfile(userId);
+        setMfaModalMode(prof?.isEnrolled ? "CHALLENGE" : "ENROLL");
+        setIsMfaModalOpen(true);
+        setShowUserMenu(false);
+        return;
+      }
+    }
+
     try {
       const newSession = identityService.switchUser(userId);
       setCurrentSession(newSession);
       setShowUserMenu(false);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to switch user:", e);
+      if (e?.message?.includes("MFA_VERIFICATION_REQUIRED")) {
+        setPendingMfaUserId(userId);
+        setPendingMfaUserEmail(target?.email || `${userId}@moos.academy`);
+        const prof = mfaService.getMfaProfile(userId);
+        setMfaModalMode(prof?.isEnrolled ? "CHALLENGE" : "ENROLL");
+        setIsMfaModalOpen(true);
+        setShowUserMenu(false);
+      }
     }
+  };
+
+  const handleMfaModalSuccess = (ticket?: any) => {
+    if (pendingMfaUserId) {
+      try {
+        const newSession = identityService.switchUser(pendingMfaUserId, { skipMfaCheck: false });
+        setCurrentSession(newSession);
+      } catch (err) {
+        console.error("Post-MFA switch error:", err);
+      }
+    }
+    setIsMfaModalOpen(false);
+    setPendingMfaUserId(null);
   };
 
   return (
@@ -81,13 +205,22 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Top Banner: Global Vision & Flagship Domain */}
       <div className="bg-slate-900 px-4 py-1.5 text-center text-xs text-slate-300 flex items-center justify-between sm:justify-center gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-amber-300">MOOS TECHY ACADEMY</span>
+          <span className="font-semibold text-amber-300">MOOS Academy</span>
           <span className="hidden sm:inline">— Global Multidisciplinary Learning Ecosystem</span>
           <span className="text-slate-500 hidden sm:inline">•</span>
           <span className="text-slate-400 hidden sm:inline">LEARN • TEACH • CREATE • INTELLIGENCE</span>
         </div>
 
-        <div className="flex items-center gap-2 text-[11px]">
+        <div className="flex items-center gap-3 text-[11px]">
+          <button
+            type="button"
+            onClick={() => onNavigate("development_guardian")}
+            className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/80"
+          >
+            <ShieldCheck className="h-3 w-3 text-emerald-400" />
+            <span>Development Guardian</span>
+            <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1 rounded">Phase 3</span>
+          </button>
           <button
             type="button"
             onClick={() => onNavigate("agent_hub")}
@@ -112,7 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-black text-slate-900 text-base tracking-tight group-hover:text-indigo-600 transition">
-                MOOS TECHY
+                MOOS
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200/60">
                 ACADEMY
@@ -206,6 +339,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Award className="h-3.5 w-3.5" />
             <span>Exam Hall</span>
+          </button>
+
+          <button
+            id="nav-btn-clubs"
+            type="button"
+            onClick={onOpenClubs}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition cursor-pointer"
+          >
+            <Users className="h-3.5 w-3.5 text-amber-500" />
+            <span>Clubs</span>
           </button>
 
           {/* Studios Dropdown Menu */}
@@ -331,6 +474,115 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="text-[10px] text-slate-500">Multi-agent orchestrator & approvals</span>
                   </div>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate("saturation_studio");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "saturation_studio" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
+                  <div>
+                    <span className="font-bold block text-slate-900">Content Saturation & Depth</span>
+                    <span className="text-[10px] text-slate-500">32-dim index, flashcards & vernacular</span>
+                  </div>
+                </button>
+
+                <div className="pt-1.5 pb-1 px-2 border-t border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Advanced Media & Multimodal
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate("video_studio");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "video_studio" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Video className="h-4 w-4 text-indigo-600 shrink-0" />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold block text-slate-900">Veo 3 Video Studio</span>
+                      <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1.5 rounded font-extrabold">Veo 3</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500">Fast video generation (16:9 / 9:16)</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate("live_voice");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "live_voice" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Radio className="h-4 w-4 text-indigo-600 shrink-0" />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold block text-slate-900">Live Voice Call</span>
+                      <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 rounded font-extrabold">Live API</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500">Real-time speech dialogue (gemini-3.8-live)</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate("transcribe");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "transcribe" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Mic className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold block text-slate-900">Speech Transcriber</span>
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 rounded font-extrabold">3.5</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500">Audio speech-to-text transcription</span>
+                  </div>
+                </button>
+
+                <div className="pt-1.5 pb-1 px-2 border-t border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    DevOps & Continuous Governance
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate("development_guardian");
+                    setShowStudioDropdown(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                    activeView === "development_guardian" ? "bg-emerald-50 text-emerald-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold block text-slate-900">Development Guardian</span>
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 rounded font-extrabold">Ops Level 6</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500">Requirements memory & multi-agent workflow</span>
+                  </div>
+                </button>
               </div>
             )}
           </div>
@@ -338,6 +590,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Stats & Socratic AI Trigger */}
         <div className="flex items-center gap-2.5">
+          {/* Global Location & Curriculum Trigger */}
+          <button
+            id="nav-btn-global-settings"
+            type="button"
+            onClick={onOpenGlobalSettings}
+            className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-xl transition cursor-pointer"
+            title="Learning Location & Language Standards"
+          >
+            <Globe className="h-3.5 w-3.5 text-indigo-600" />
+            <span>{(profile as any).academicContext?.country || "Global"}</span>
+          </button>
+
           {/* Streak Indicator */}
           <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-slate-700 bg-amber-50/80 border border-amber-200/80 px-2.5 py-1.5 rounded-xl">
             <Flame className="h-4 w-4 text-amber-500 fill-amber-500" />
@@ -349,6 +613,49 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Trophy className="h-4 w-4 text-amber-500" />
             <span>{profile.masteryPoints} pts</span>
           </div>
+
+          {/* Firebase Auth & Firestore Sync Gateway */}
+          {firebaseUser ? (
+            <div className="hidden md:flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-xl bg-emerald-50/90 border border-emerald-200 text-xs shadow-2xs">
+              {firebaseUser.photoURL ? (
+                <img src={firebaseUser.photoURL} alt="" className="h-6 w-6 rounded-full border border-emerald-300" />
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
+                  {firebaseUser.displayName?.charAt(0) || "G"}
+                </div>
+              )}
+              <div className="text-left hidden lg:block leading-tight">
+                <span className="block text-[11px] font-bold text-slate-800 truncate max-w-[100px]">
+                  {firebaseUser.displayName?.split(" ")[0] || "Scholar"}
+                </span>
+                <span className="flex items-center gap-1 text-[9px] text-emerald-700 font-semibold">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Firestore Synced
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                title="Sign out of Firebase"
+                className="p-1 hover:bg-emerald-100 rounded-lg text-slate-500 hover:text-slate-800 transition ml-0.5"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              id="nav-firebase-auth-btn"
+              type="button"
+              disabled={isSigningIn}
+              onClick={handleGoogleSignIn}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 text-xs font-bold transition shadow-2xs"
+              title="Sign in with Google to sync with Firebase Firestore"
+            >
+              <LogIn className="h-3.5 w-3.5 text-indigo-600" />
+              <span className="hidden md:inline">{isSigningIn ? "Connecting..." : "Sign in with Google"}</span>
+              <span className="md:hidden">Google</span>
+            </button>
+          )}
 
           {/* Institutional Role Switcher */}
           <div className="relative">
@@ -451,6 +758,76 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </button>
                   );
                 })}
+
+                <div className="pt-2 border-t border-slate-100">
+                  <div className="px-2 py-1 flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Cloud Persistence (Firebase)
+                    </span>
+                  </div>
+
+                  {firebaseUser ? (
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+                      <div className="flex items-center gap-2">
+                        {firebaseUser.photoURL ? (
+                          <img
+                            src={firebaseUser.photoURL}
+                            alt=""
+                            className="h-6 w-6 rounded-full border border-slate-200"
+                          />
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
+                            {firebaseUser.displayName?.charAt(0) || "U"}
+                          </div>
+                        )}
+                        <div className="truncate">
+                          <span className="block font-bold text-slate-800 text-[11px] truncate">
+                            {firebaseUser.displayName || "Google Scholar"}
+                          </span>
+                          <span className="block text-[9px] text-slate-400 truncate">
+                            {firebaseUser.email}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="w-full py-1 px-2 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
+                      >
+                        <LogOut className="h-3 w-3" />
+                        <span>Sign Out of Google / Firebase</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        disabled={isSigningIn}
+                        onClick={handleGoogleSignIn}
+                        className="w-full py-2 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-bold flex items-center justify-center gap-2 shadow-xs transition"
+                      >
+                        <LogIn className="h-3.5 w-3.5" />
+                        <span>{isSigningIn ? "Connecting Google..." : "Sign in with Google"}</span>
+                      </button>
+                      {authErrorNotice && (
+                        <div className="p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-[10px] leading-relaxed flex items-start gap-1.5">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <span>{authErrorNotice}</span>
+                            <button
+                              type="button"
+                              onClick={() => setAuthErrorNotice(null)}
+                              className="block mt-1 font-bold text-amber-900 underline hover:text-amber-950"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 <div className="pt-1.5 border-t border-slate-100 px-1 text-[10px] text-slate-400 flex items-center justify-between">
                   <span className="flex items-center gap-1">
@@ -558,7 +935,31 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           Exam Hall
         </button>
+        <button
+          type="button"
+          onClick={() => onNavigate("saturation_studio")}
+          className={`whitespace-nowrap font-bold ${activeView === "saturation_studio" ? "text-emerald-600" : "text-slate-600"}`}
+        >
+          Saturation
+        </button>
       </div>
+
+      {/* Interactive Multi-Factor Authentication Modal */}
+      {isMfaModalOpen && (
+        <MfaModal
+          isOpen={isMfaModalOpen}
+          onClose={() => {
+            setIsMfaModalOpen(false);
+            setPendingMfaUserId(null);
+          }}
+          targetUserId={pendingMfaUserId || currentSession.userId}
+          targetUserEmail={pendingMfaUserEmail || (currentSession as any).email || `${currentSession.userId}@moos.academy`}
+          mode={mfaModalMode}
+          onSuccess={handleMfaModalSuccess}
+          title={mfaModalMode === "ENROLL" ? "Institutional Admin MFA Setup" : "Administrator Second-Factor Verification"}
+          description="Verification of authentic RFC 6238 TOTP code is required for elevated governance privileges."
+        />
+      )}
     </header>
   );
 };
