@@ -29,8 +29,7 @@ import {
   StorageCategory,
   UserRole
 } from "../types/backendFoundation";
-import crypto from "crypto";
-import path from "path";
+import { sha256Hex, utf8ByteLength } from "../utils/browserCrypto";
 
 const LOCAL_STORAGE_ARTIFACTS_KEY = "moos_academy_storage_artifacts_v1";
 
@@ -75,7 +74,8 @@ export class FirebaseStorageService {
    */
   public getStoragePath(category: StorageCategory, userId: string, filename: string, extraId?: string): string {
     // Strip any directory traversal dots or slashes
-    const sanitizedFilename = path.basename(filename).replace(/[^a-zA-Z0-9._\-]/g, "_").replace(/\.+/g, ".");
+    const baseFilename = filename.split(/[\\/]/).pop() || filename;
+    const sanitizedFilename = baseFilename.replace(/[^a-zA-Z0-9._\-]/g, "_").replace(/\.+/g, ".");
     const sanitizedUserId = userId.replace(/[^a-zA-Z0-9_\-]/g, "_");
     const sanitizedExtraId = extraId ? extraId.replace(/[^a-zA-Z0-9_\-]/g, "_") : undefined;
 
@@ -101,13 +101,11 @@ export class FirebaseStorageService {
    * Compute SHA-256 hash of payload
    */
   public computeHash(data: Blob | Uint8Array | string): string {
-    if (typeof data === "string") {
-      return crypto.createHash("sha256").update(data).digest("hex");
-    } else if (data instanceof Uint8Array) {
-      return crypto.createHash("sha256").update(Buffer.from(data)).digest("hex");
+    if (typeof data === "string" || data instanceof Uint8Array) {
+      return sha256Hex(data);
     } else {
       // Fallback for Blob representation in non-browser or mock
-      return crypto.createHash("sha256").update(String(data)).digest("hex");
+      return sha256Hex(String(data));
     }
   }
 
@@ -118,7 +116,7 @@ export class FirebaseStorageService {
     const artifactId = `art_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
     const storagePath = params.customPath || this.getStoragePath(params.category, params.userId, params.filename);
     const sha256 = this.computeHash(params.data);
-    const sizeBytes = typeof params.data === "string" ? Buffer.byteLength(params.data, "utf8") : (params.data as any).size || (params.data as any).byteLength || 0;
+    const sizeBytes = typeof params.data === "string" ? utf8ByteLength(params.data) : (params.data as any).size || (params.data as any).byteLength || 0;
     const now = new Date().toISOString();
 
     let downloadUrl = `https://storage.googleapis.com/${this.getBucketName()}/${storagePath}`;

@@ -227,7 +227,7 @@ export class ManuscriptIngestionService {
         } catch (docxErr: any) {
           warnings.push(`DOCX binary notice: ${docxErr.message || "Attempting text decode fallback."}`);
           if (fileInput.buffer) {
-            extractedRawText = Buffer.isBuffer(fileInput.buffer)
+            extractedRawText = (typeof Buffer !== "undefined" && Buffer.isBuffer(fileInput.buffer))
               ? fileInput.buffer.toString("utf-8")
               : new TextDecoder().decode(fileInput.buffer);
           }
@@ -257,8 +257,8 @@ export class ManuscriptIngestionService {
           const decoder = new TextDecoder("utf-8");
           extractedRawText = decoder.decode(buf);
         } else if (fileInput.buffer) {
-          extractedRawText = Buffer.isBuffer(fileInput.buffer) 
-            ? fileInput.buffer.toString("utf-8") 
+          extractedRawText = (typeof Buffer !== "undefined" && Buffer.isBuffer(fileInput.buffer))
+            ? fileInput.buffer.toString("utf-8")
             : new TextDecoder().decode(fileInput.buffer);
         }
       }
@@ -361,7 +361,7 @@ export class ManuscriptIngestionService {
     }
 
     if (fileInput.buffer) {
-      const rawStr = Buffer.isBuffer(fileInput.buffer)
+      const rawStr = (typeof Buffer !== "undefined" && Buffer.isBuffer(fileInput.buffer))
         ? fileInput.buffer.toString("binary")
         : new Uint8Array(fileInput.buffer).reduce((acc, byte) => acc + String.fromCharCode(byte), "");
       

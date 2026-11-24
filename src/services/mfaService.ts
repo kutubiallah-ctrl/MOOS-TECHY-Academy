@@ -20,7 +20,14 @@
  * - Database readiness gate is completely decoupled from MFA enforcement.
  */
 
-import crypto from "crypto";
+import {
+  getRandomBytes,
+  randomHex,
+  hmacSha1Bytes,
+  sha256Hex,
+  hmacSha256Hex,
+  uint64BigEndianBytes
+} from "../utils/browserCrypto";
 import {
   User as FirebaseUser,
   multiFactor,
@@ -49,15 +56,7 @@ function resolveRuntimeMfaSigningKey(): string {
   if (typeof process !== "undefined" && process.env?.MFA_SECRET_SIGNING_KEY) {
     return process.env.MFA_SECRET_SIGNING_KEY;
   }
-  if (typeof crypto !== "undefined" && typeof crypto.randomBytes === "function") {
-    return crypto.randomBytes(32).toString("hex");
-  }
-  if (typeof globalThis !== "undefined" && globalThis.crypto?.getRandomValues) {
-    const bytes = new Uint8Array(32);
-    globalThis.crypto.getRandomValues(bytes);
-    return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-  }
-  throw new Error("Secure cryptographic RNG unavailable for MFA signing key.");
+  return randomHex(32);
 }
 
 const MFA_SECRET_SIGNING_KEY = resolveRuntimeMfaSigningKey();
@@ -109,7 +108,7 @@ export class MfaService {
    */
   public generateBase32Secret(length: number = 20): string {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    const bytes = crypto.randomBytes(length);
+    const bytes = getRandomBytes(length);
     let secret = "";
     for (let i = 0; i < length; i++) {
       secret += chars[bytes[i] % chars.length];
@@ -140,12 +139,8 @@ export class MfaService {
     const currentEpoch = Math.floor(Date.now() / 1000);
     const counter = Math.floor(currentEpoch / timeStepSeconds) + timeStepWindow;
 
-    const timeBuffer = Buffer.alloc(8);
-    timeBuffer.writeBigInt64BE(BigInt(counter));
-
-    const hmac = crypto.createHmac("sha1", Buffer.from(secretBytes));
-    hmac.update(timeBuffer);
-    const digest = hmac.digest();
+    const timeBuffer = uint64BigEndianBytes(counter);
+    const digest = hmacSha1Bytes(secretBytes, timeBuffer);
 
     const offset = digest[digest.length - 1] & 0x0f;
     const binary =
@@ -394,12 +389,12 @@ export class MfaService {
     // 3. Generate 10 cryptographically random single-use Backup Recovery Codes
     const rawRecoveryCodes: string[] = [];
     const hashedCodes: string[] = [];
-    const salt = crypto.randomBytes(16).toString("hex");
+    const salt = randomHex(16);
 
     for (let i = 0; i < 10; i++) {
-      const part1 = crypto.randomBytes(2).toString("hex").toUpperCase();
-      const part2 = crypto.randomBytes(2).toString("hex").toUpperCase();
-      const part3 = crypto.randomBytes(2).toString("hex").toUpperCase();
+      const part1 = randomHex(2).toUpperCase();
+      const part2 = randomHex(2).toUpperCase();
+      const part3 = randomHex(2).toUpperCase();
       const code = `MOOS-${part1}-${part2}-${part3}`;
       rawRecoveryCodes.push(code);
 
@@ -628,7 +623,7 @@ export class MfaService {
   // =========================================================================
   private hashRecoveryCode(code: string, salt: string): string {
     const normalized = code.trim().toUpperCase().replace(/\s/g, "");
-    return crypto.createHash("sha256").update(`${salt}:${normalized}`).digest("hex");
+    return sha256Hex(`${salt}:${normalized}`);
   }
 
   public async verifyAndConsumeRecoveryCode(
@@ -743,14 +738,14 @@ export class MfaService {
     factorType: "totp" | "recovery_code",
     sessionId?: string
   ): MfaAssuranceTicket {
-    const ticketId = `mfa_ticket_${Date.now().toString(36)}_${crypto.randomBytes(4).toString("hex")}`;
+    const ticketId = `mfa_ticket_${Date.now().toString(36)}_${randomHex(4)}`;
     const now = new Date();
     const verifiedAt = now.toISOString();
     const expiresAt = new Date(now.getTime() + ASSURANCE_TICKET_TTL_MS).toISOString();
 
     // Cryptographic signature over [ticketId, userId, verifiedAt, expiresAt, factorType]
     const payload = `${ticketId}|${userId}|${verifiedAt}|${expiresAt}|${factorType}|${sessionId || "default"}`;
-    const signature = crypto.createHmac("sha256", MFA_SECRET_SIGNING_KEY).update(payload).digest("hex");
+    const signature = hmacSha256Hex(MFA_SECRET_SIGNING_KEY, payload);
 
     const ticket: MfaAssuranceTicket = {
       ticketId,
@@ -797,7 +792,7 @@ export class MfaService {
 
     // Verify cryptographic signature integrity
     const payload = `${ticket.ticketId}|${ticket.userId}|${ticket.verifiedAt}|${ticket.expiresAt}|${ticket.factorType}|${ticket.issuedForSessionId || "default"}`;
-    const expectedSig = crypto.createHmac("sha256", MFA_SECRET_SIGNING_KEY).update(payload).digest("hex");
+    const expectedSig = hmacSha256Hex(MFA_SECRET_SIGNING_KEY, payload);
     if (ticket.signature !== expectedSig) {
       console.error(`[MFA_SECURITY_BREACH] Tampered MFA Assurance Ticket detected for user ${userId}!`);
       this.verifiedTickets.delete(userId);

@@ -29,15 +29,20 @@ googleProvider.setCustomParameters({
 
 // Initialize Firestore strictly targeting the production database ID with ZERO fallback to (default) or demo databases
 let dbInstance;
-try {
-  dbInstance = initializeFirestore(
-    app,
-    {
-      experimentalAutoDetectLongPolling: true,
-    },
-    PRODUCTION_FIRESTORE_DATABASE_ID
-  );
-} catch {
+if (typeof window !== "undefined") {
+  try {
+    dbInstance = initializeFirestore(
+      app,
+      {
+        experimentalForceLongPolling: true,
+        ignoreUndefinedProperties: true,
+      },
+      PRODUCTION_FIRESTORE_DATABASE_ID
+    );
+  } catch {
+    dbInstance = getFirestore(app, PRODUCTION_FIRESTORE_DATABASE_ID);
+  }
+} else {
   dbInstance = getFirestore(app, PRODUCTION_FIRESTORE_DATABASE_ID);
 }
 export const db = dbInstance;
