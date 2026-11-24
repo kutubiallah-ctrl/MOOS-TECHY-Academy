@@ -8,6 +8,7 @@
 
 import { EducationalLevel, Subject } from "./curriculum";
 import { AgentRole } from "./agentOrchestrator";
+import { ElevenDepthMetrics, TopicGovernanceRecord } from "./contentGovernance";
 
 export type SupportedLanguage = "en" | "yo" | "ig" | "ha";
 
@@ -483,6 +484,27 @@ export interface ContentSaturationReport {
   totalVisualizations: number;
   totalActivities: number;
   totalProjects: number;
+  elevenDepthMetrics?: ElevenDepthMetrics;
+  catalogCoverage?: {
+    totalCatalogSubjects: number;
+    coveredCatalogSubjects: number;
+    roadmapOnlySubjects: number;
+    stageBreakdown: Array<{
+      stage: string;
+      catalogCount: number;
+      authoredSubjectsCount: number;
+      publishedUnitsCount: number;
+    }>;
+  };
+  governanceSummary?: {
+    approvalThreshold: number;
+    approvedCount: number;
+    isolatedCount: number;
+    totalAuditedCount: number;
+    averageApprovedQualityScore: number;
+    disqualifiedUnitsCount: number;
+    records: TopicGovernanceRecord[];
+  };
   auditProvenance: {
     scannedUnitsCount: number;
     scannedSkillsCount: number;

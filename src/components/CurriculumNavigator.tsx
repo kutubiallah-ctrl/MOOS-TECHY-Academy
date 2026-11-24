@@ -301,7 +301,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
 
   const allUnits = useMemo(() => {
     const code = selectedStandard === "ALL" ? (countryCode || "NG") : selectedStandard;
-    return curriculumService.getLocalizedUnits(code);
+    return curriculumService.getLocalizedPublishedUnits(code);
   }, [selectedStandard, countryCode]);
 
   // Handle generation of Required Lesson Note for a verified skill
@@ -439,7 +439,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 Omnilevel Curriculum Search & Lesson Note Synthesis
               </span>
               <span className="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">
-                All 6 Levels & 76 Units
+                6 Levels &bull; {allUnits.length} Verified Units
               </span>
             </div>
             <p className="text-xs text-slate-500">
@@ -536,7 +536,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            All Stages (151 Subjects)
+            All Stages ({stageCounts.all} Subjects)
           </button>
           <button
             type="button"
@@ -548,7 +548,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 : "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
             }`}
           >
-            Primary Foundations & Upper Primary (51)
+            Primary Foundations &amp; Upper Primary ({stageCounts.primary})
           </button>
           <button
             type="button"
@@ -560,7 +560,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 : "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100"
             }`}
           >
-            Junior & Senior Secondary (55)
+            Junior &amp; Senior Secondary ({stageCounts.secondary})
           </button>
           <button
             type="button"
@@ -572,7 +572,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 : "bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100"
             }`}
           >
-            Advanced & Exam Hall (35)
+            Advanced &amp; Exam Hall ({stageCounts.advanced})
           </button>
         </div>
 
@@ -674,7 +674,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 }`}
               >
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                <span>151-Subject List ({omnilevelSubjectMatches.length})</span>
+                <span>Subject Catalogue ({omnilevelSubjectMatches.length})</span>
               </button>
 
               <button
@@ -807,7 +807,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-indigo-600" />
                       <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        Matching Proposed Subject Categories ({omnilevelSubjectMatches.length} of 151)
+                        Matching Subject Categories ({omnilevelSubjectMatches.length} of {expandedSubjects.length})
                       </h3>
                     </div>
                     <span className="text-[11px] text-slate-500 font-medium">
@@ -1085,7 +1085,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 }`}
               >
                 <Sparkles className="h-4 w-4 text-amber-500" />
-                <span>151 Proposed Subjects</span>
+                <span>Subject Catalogue Directory</span>
                 <span
                   className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
                     navigatorMode === "expanded-subjects"
@@ -1093,7 +1093,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                       : "bg-amber-100 text-amber-900 border border-amber-300"
                   }`}
                 >
-                  151
+                  {expandedSubjects.length}
                 </span>
               </button>
 
@@ -1220,7 +1220,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
 
                     <div className="space-y-4">
                       {selectedCourse.unitIds.map((unitId, uIdx) => {
-                        const unit = allUnits.find((u) => u.id === unitId) || curriculumService.getUnitById(unitId);
+                        const unit = allUnits.find((u) => u.id === unitId);
                         if (!unit) return null;
 
                         return (
@@ -1376,9 +1376,9 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                                 : "text-slate-600 hover:text-slate-900"
                             }`}
                           >
-                            <span>151 Proposed</span>
+                            <span>{expandedSubjects.length} Subjects</span>
                             <span className="text-[10px] bg-amber-100 text-amber-900 px-1 py-0.2 rounded-full font-black">
-                              151
+                              {expandedSubjects.length}
                             </span>
                           </button>
                         </div>
@@ -1389,7 +1389,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                           className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 cursor-pointer bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 transition"
                         >
                           <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                          <span>Open 151 Directory</span>
+                          <span>Open Full Catalogue ({expandedSubjects.length})</span>
                           <ChevronRight className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -1474,7 +1474,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                                 : "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
                             }`}
                           >
-                            Primary (51)
+                            Primary ({stageCounts.primary})
                           </button>
                           <button
                             type="button"
@@ -1485,7 +1485,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                                 : "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100"
                             }`}
                           >
-                            Secondary (55)
+                            Secondary ({stageCounts.secondary})
                           </button>
                           <button
                             type="button"
@@ -1496,7 +1496,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                                 : "bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100"
                             }`}
                           >
-                            Advanced (35)
+                            Advanced ({stageCounts.advanced})
                           </button>
                         </div>
 
@@ -1614,25 +1614,25 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-300 font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5" />
-                      <span>Proposed Expanded 151-Subject List</span>
+                      <span>Expanded {expandedSubjects.length}-Subject Institutional Catalogue</span>
                     </span>
                     <span className="px-2.5 py-1 rounded-full bg-white/10 text-slate-200 text-xs font-semibold">
-                      Primary & Secondary Focus
+                      Primary, Secondary &amp; Tertiary
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 bg-emerald-400/10 border border-emerald-400/30 px-3 py-1 rounded-full">
                     <CheckCheck className="h-3.5 w-3.5" />
-                    <span>Global Search Ready (Name, Code & Keywords)</span>
+                    <span>{allUnits.length} QA-Verified Published Units Active</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <h2 className="text-2xl sm:text-3xl font-black text-white">
-                    Expanded 151-Subject Curriculum Catalogue
+                    {expandedSubjects.length}-Subject Curriculum Catalogue
                   </h2>
                   <p className="text-xs sm:text-sm text-indigo-100/90 leading-relaxed max-w-4xl">
-                    Expanding MOOS Academy's scope from the foundational 19 flagship disciplines to a complete 151-subject institutional taxonomy. Spans 41 Primary Foundations subjects (arithmetic, fractions, literacy, STEM, civic morals), 90 Junior & Senior Secondary disciplines (STEM, Commercial, Arts, Vocational/Technical), 14 Advanced Tertiary & Standardized Exam Preparations (WAEC, JAMB CBT, IGCSE), and 6 Co-Curricular Innovation Clubs.
+                    Complete institutional taxonomy spanning {stageCounts.primary} Primary subjects, {stageCounts.secondary} Junior &amp; Senior Secondary subjects, {stageCounts.advanced} Advanced Tertiary &amp; Exam Hall tracks, and {stageCounts.clubs} Co-Curricular clubs. Authored modules must pass MOOS Academy&apos;s 85% Weighted QA Gate before appearing to learners.
                   </p>
                 </div>
 
@@ -1640,24 +1640,24 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 <div className="pt-3 border-t border-indigo-800/80 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                     <div className="text-xl sm:text-2xl font-black text-white">{stageCounts.all}</div>
-                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Total Subjects</div>
+                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Catalog Subjects</div>
                   </div>
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                     <div className="text-xl sm:text-2xl font-black text-emerald-300">{stageCounts.primary}</div>
-                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Primary Foundations</div>
+                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Primary Stage</div>
                   </div>
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                     <div className="text-xl sm:text-2xl font-black text-sky-300">{stageCounts.secondary}</div>
-                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Junior & Senior Secondary</div>
+                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Secondary Stage</div>
                   </div>
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                     <div className="text-xl sm:text-2xl font-black text-purple-300">{stageCounts.advanced + stageCounts.clubs}</div>
-                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Advanced & Co-Curricular</div>
+                    <div className="text-[11px] font-semibold text-indigo-200 uppercase tracking-wider">Advanced &amp; Clubs</div>
                   </div>
                 </div>
               </div>
 
-              {/* DEDICATED GLOBAL SEARCH BAR FOR 151 SUBJECTS */}
+              {/* DEDICATED GLOBAL SEARCH BAR FOR SUBJECT CATALOGUE */}
               <div
                 id="global-151-subject-search-bar"
                 className="rounded-2xl border-2 border-indigo-200 bg-white p-4 sm:p-5 shadow-xs space-y-4"
@@ -1667,11 +1667,11 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                     <div className="flex items-center gap-2">
                       <Search className="h-4 w-4 text-indigo-600" />
                       <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        Global 151-Subject Search Filter
+                        Global {expandedSubjects.length}-Subject Search Filter
                       </span>
                     </div>
                     <p className="text-xs text-slate-500">
-                      Filter the 151 subject catalogue instantaneously by subject name, code, or associated curriculum keywords.
+                      Filter the {expandedSubjects.length}-subject catalogue by name, code, or curriculum keywords.
                     </p>
                   </div>
 
@@ -1854,7 +1854,7 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                       }}
                       className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition cursor-pointer"
                     >
-                      Clear Search & Show All 151 Subjects
+                      Clear Search &amp; Show All {expandedSubjects.length} Subjects
                     </button>
                   </div>
                 </div>
@@ -1862,6 +1862,12 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4.5">
                   {filteredExpandedSubjects.map((subj) => {
                     const matchReason = getSearchMatchReason(subj, subjectSearchQuery);
+                    const hasPublishedContent = allUnits.some(
+                      (u) =>
+                        u.subjectId === subj.code ||
+                        (subj.code.startsWith("math") && u.subjectId.startsWith("math")) ||
+                        (subj.code.includes("english") && u.subjectId.startsWith("lang_"))
+                    );
                     const stageConfig =
                       subj.stage === "primary"
                         ? { badge: "bg-emerald-100 text-emerald-900 border-emerald-300", label: "Primary (Grades 1-6)" }
@@ -1880,9 +1886,20 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                         <div className="space-y-3">
                           {/* Card Header Badges */}
                           <div className="flex items-center justify-between gap-1.5 flex-wrap">
-                            <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${stageConfig.badge}`}>
-                              {stageConfig.label}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${stageConfig.badge}`}>
+                                {stageConfig.label}
+                              </span>
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                  hasPublishedContent
+                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                    : "bg-slate-50 text-slate-500 border-slate-200"
+                                }`}
+                              >
+                                {hasPublishedContent ? "Published Modules Active" : "Catalog Roadmap"}
+                              </span>
+                            </div>
                             <button
                               type="button"
                               onClick={() => handleCopyCode(subj.code)}

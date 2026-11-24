@@ -14,6 +14,7 @@ import {
   Ratio
 } from "lucide-react";
 import { firebaseSyncService } from "../services/firebaseSyncService";
+import { emailAllowlistService } from "../services/emailAllowlistService";
 
 interface VideoGeneratorStudioProps {
   onClose?: () => void;
@@ -72,7 +73,7 @@ export const VideoGeneratorStudio: React.FC<VideoGeneratorStudioProps> = ({ onCl
         setPollingStatusMsg("Checking generation status with Google Veo 3 engine...");
         const res = await fetch("/api/video/status", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: emailAllowlistService.getAuthHeaders(),
           body: JSON.stringify({ operationName: activeJob.operationName })
         });
 
@@ -91,7 +92,7 @@ export const VideoGeneratorStudio: React.FC<VideoGeneratorStudioProps> = ({ onCl
           // Request download
           const dlRes = await fetch("/api/video/download", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: emailAllowlistService.getAuthHeaders(),
             body: JSON.stringify({ operationName: activeJob.operationName })
           });
 
@@ -148,7 +149,7 @@ export const VideoGeneratorStudio: React.FC<VideoGeneratorStudioProps> = ({ onCl
     try {
       const res = await fetch("/api/video/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: emailAllowlistService.getAuthHeaders(),
         body: JSON.stringify({
           prompt: prompt.trim(),
           aspectRatio

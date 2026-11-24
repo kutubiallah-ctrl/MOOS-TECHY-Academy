@@ -37,6 +37,7 @@ import { firebaseSyncService } from "../services/firebaseSyncService";
 import { User as FirebaseUser } from "firebase/auth";
 import { mfaService } from "../services/mfaService";
 import { MfaModal } from "./mfa/MfaModal";
+import { VerifiedAuthSession } from "../types/emailAllowlist";
 
 export type ActiveView =
   | "dashboard"
@@ -58,7 +59,8 @@ export type ActiveView =
   | "video_studio"
   | "live_voice"
   | "transcribe"
-  | "development_guardian";
+  | "development_guardian"
+  | "owner_directory";
 
 interface NavbarProps {
   activeView: ActiveView;
@@ -68,6 +70,8 @@ interface NavbarProps {
   onQuickDiagnostic: () => void;
   onOpenGlobalSettings?: () => void;
   onOpenClubs?: () => void;
+  authSession?: VerifiedAuthSession | null;
+  onSignOutAcademy?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -77,8 +81,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAITutor,
   onQuickDiagnostic,
   onOpenGlobalSettings,
-  onOpenClubs
+  onOpenClubs,
+  authSession,
+  onSignOutAcademy
 }) => {
+  const isOwner = Boolean(authSession?.isOwner);
+  const isAdminOrOwner = Boolean(authSession?.isAdminOrOwner);
   const [showStudioDropdown, setShowStudioDropdown] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [currentSession, setCurrentSession] = useState<UserSession>(() => identityService.getActiveSession());
@@ -152,10 +160,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     "video_studio",
     "live_voice",
     "transcribe",
-    "development_guardian"
+    "development_guardian",
+    "owner_directory"
   ].includes(activeView);
 
   const handleSwitchUser = (userId: string) => {
+    if (!isAdminOrOwner) return;
     const target = allUsers.find(u => u.id === userId);
     if (target?.role === "ADMIN") {
       const hasMfa = mfaService.hasActiveAssurance(userId, "ADMIN_ROLE_SWITCH");
@@ -211,25 +221,27 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-slate-400 hidden sm:inline">LEARN • TEACH • CREATE • INTELLIGENCE</span>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px]">
-          <button
-            type="button"
-            onClick={() => onNavigate("development_guardian")}
-            className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/80"
-          >
-            <ShieldCheck className="h-3 w-3 text-emerald-400" />
-            <span>Development Guardian</span>
-            <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1 rounded">Phase 3</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigate("agent_hub")}
-            className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold transition"
-          >
-            <BrainCircuit className="h-3 w-3" />
-            <span>Agentic AI Gov</span>
-          </button>
-        </div>
+        {isAdminOrOwner && (
+          <div className="flex items-center gap-3 text-[11px]">
+            <button
+              type="button"
+              onClick={() => onNavigate("development_guardian")}
+              className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/80"
+            >
+              <ShieldCheck className="h-3 w-3 text-emerald-400" />
+              <span>Development Guardian</span>
+              <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1 rounded">Gov</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("agent_hub")}
+              className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold transition"
+            >
+              <BrainCircuit className="h-3 w-3" />
+              <span>Agentic AI Gov</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main Nav Bar */}
@@ -441,56 +453,60 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    onNavigate("architecture");
-                    setShowStudioDropdown(false);
-                  }}
-                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
-                    activeView === "architecture" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <Network className="h-4 w-4 text-indigo-600 shrink-0" />
-                  <div>
-                    <span className="font-bold block text-slate-900">System Blueprint</span>
-                    <span className="text-[10px] text-slate-500">Institutional architecture & flow</span>
-                  </div>
-                </button>
+                {isAdminOrOwner && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onNavigate("architecture");
+                        setShowStudioDropdown(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                        activeView === "architecture" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Network className="h-4 w-4 text-indigo-600 shrink-0" />
+                      <div>
+                        <span className="font-bold block text-slate-900">System Blueprint</span>
+                        <span className="text-[10px] text-slate-500">Institutional architecture & flow</span>
+                      </div>
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    onNavigate("agent_hub");
-                    setShowStudioDropdown(false);
-                  }}
-                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
-                    activeView === "agent_hub" ? "bg-cyan-50 text-cyan-800 font-bold" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <BrainCircuit className="h-4 w-4 text-cyan-600 shrink-0" />
-                  <div>
-                    <span className="font-bold block text-slate-900">Agent Intelligence Hub</span>
-                    <span className="text-[10px] text-slate-500">Multi-agent orchestrator & approvals</span>
-                  </div>
-                </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onNavigate("agent_hub");
+                        setShowStudioDropdown(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                        activeView === "agent_hub" ? "bg-cyan-50 text-cyan-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <BrainCircuit className="h-4 w-4 text-cyan-600 shrink-0" />
+                      <div>
+                        <span className="font-bold block text-slate-900">Agent Intelligence Hub</span>
+                        <span className="text-[10px] text-slate-500">Multi-agent orchestrator & approvals</span>
+                      </div>
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    onNavigate("saturation_studio");
-                    setShowStudioDropdown(false);
-                  }}
-                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
-                    activeView === "saturation_studio" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
-                  <div>
-                    <span className="font-bold block text-slate-900">Content Saturation & Depth</span>
-                    <span className="text-[10px] text-slate-500">32-dim index, flashcards & vernacular</span>
-                  </div>
-                </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onNavigate("saturation_studio");
+                        setShowStudioDropdown(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                        activeView === "saturation_studio" ? "bg-indigo-50 text-indigo-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
+                      <div>
+                        <span className="font-bold block text-slate-900">Content Saturation &amp; Depth</span>
+                        <span className="text-[10px] text-slate-500">300-subject audit, QA gate &amp; metrics</span>
+                      </div>
+                    </button>
+                  </>
+                )}
 
                 <div className="pt-1.5 pb-1 px-2 border-t border-slate-100">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -558,31 +574,54 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </button>
 
-                <div className="pt-1.5 pb-1 px-2 border-t border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    DevOps & Continuous Governance
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    onNavigate("development_guardian");
-                    setShowStudioDropdown(false);
-                  }}
-                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
-                    activeView === "development_guardian" ? "bg-emerald-50 text-emerald-800 font-bold" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold block text-slate-900">Development Guardian</span>
-                      <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 rounded font-extrabold">Ops Level 6</span>
+                {isAdminOrOwner && (
+                  <>
+                    <div className="pt-1.5 pb-1 px-2 border-t border-slate-100">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        DevOps &amp; Continuous Governance
+                      </span>
                     </div>
-                    <span className="text-[10px] text-slate-500">Requirements memory & multi-agent workflow</span>
-                  </div>
-                </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onNavigate("development_guardian");
+                        setShowStudioDropdown(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                        activeView === "development_guardian" ? "bg-emerald-50 text-emerald-800 font-bold" : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold block text-slate-900">Development Guardian</span>
+                          <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 rounded font-extrabold">Admin</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500">Requirements memory &amp; multi-agent workflow</span>
+                      </div>
+                    </button>
+
+                    {isOwner && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onNavigate("owner_directory");
+                          setShowStudioDropdown(false);
+                        }}
+                        className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2.5 transition ${
+                          activeView === "owner_directory" ? "bg-amber-50 text-amber-900 font-bold" : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        <Shield className="h-4 w-4 text-amber-600 shrink-0" />
+                        <div>
+                          <span className="font-bold block text-slate-900">Owner User Directory</span>
+                          <span className="text-[10px] text-slate-500">Account status &amp; role authorization</span>
+                        </div>
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -657,47 +696,77 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* Institutional Role Switcher */}
+          {/* Verified Session Identity / Admin Role Switcher (Role Switcher restricted to verified Admin/Owner) */}
           <div className="relative">
-            <button
-              id="nav-role-switcher-btn"
-              type="button"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition shadow-2xs ${
-                currentSession.role === "ADMIN"
-                  ? "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100"
-                  : currentSession.role === "TEACHER"
-                  ? "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100"
-              }`}
-              title="Switch Institutional User Role"
-            >
-              <div className="h-5 w-5 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-slate-900">
-                {currentSession.role === "ADMIN" ? "AD" : currentSession.role === "TEACHER" ? "TC" : "LN"}
-              </div>
-              <div className="text-left hidden md:block">
-                <span className="block text-[11px] font-extrabold leading-tight truncate max-w-[100px]">
-                  {currentSession.displayName.split(" ")[0]}
+            {isAdminOrOwner ? (
+              <button
+                id="nav-role-switcher-btn"
+                type="button"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition shadow-2xs ${
+                  currentSession.role === "ADMIN"
+                    ? "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100"
+                    : currentSession.role === "TEACHER"
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100"
+                    : "bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100"
+                }`}
+                title="Institutional Account Controls"
+              >
+                <div className="h-5 w-5 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-slate-900">
+                  {currentSession.role === "ADMIN" ? "AD" : currentSession.role === "TEACHER" ? "TC" : "LN"}
+                </div>
+                <div className="text-left hidden md:block">
+                  <span className="block text-[11px] font-extrabold leading-tight truncate max-w-[100px]">
+                    {authSession?.fullName?.split(" ")[0] || currentSession.displayName.split(" ")[0]}
+                  </span>
+                  <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75 leading-tight">
+                    {authSession?.role || currentSession.role}
+                  </span>
+                </div>
+                <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
+              </button>
+            ) : (
+              <button
+                id="nav-role-switcher-btn"
+                type="button"
+                onClick={() => onSignOutAcademy?.()}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition"
+                title="Sign out of MOOS Academy"
+              >
+                <User className="h-3.5 w-3.5 text-indigo-600" />
+                <span className="hidden md:inline max-w-[110px] truncate">
+                  {authSession?.fullName?.split(" ")[0] || "Scholar"}
                 </span>
-                <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75 leading-tight">
-                  {currentSession.role}
-                </span>
-              </div>
-              <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
-            </button>
+                <LogOut className="h-3.5 w-3.5 text-slate-500" />
+              </button>
+            )}
 
-            {showUserMenu && (
+            {showUserMenu && isAdminOrOwner && (
               <div
                 className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl p-2.5 z-50 space-y-1.5"
                 onMouseLeave={() => setShowUserMenu(false)}
               >
-                <div className="px-2 py-1.5 border-b border-slate-100 mb-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Institutional Role Switcher
-                  </span>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Local shared-device profile context
-                  </p>
+                <div className="px-2 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Role Preview Context
+                    </span>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Verified Admin/Owner workspace
+                    </p>
+                  </div>
+                  {onSignOutAcademy && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onSignOutAcademy();
+                      }}
+                      className="text-[11px] font-bold text-rose-600 hover:text-rose-800 px-2 py-1 rounded border border-rose-200 bg-rose-50"
+                    >
+                      Sign Out
+                    </button>
+                  )}
                 </div>
 
                 {allUsers.map((user) => {
@@ -907,19 +976,30 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           Bookpreneur
         </button>
-        <button
-          type="button"
-          onClick={() => onNavigate("agent_hub")}
-          className={`whitespace-nowrap font-bold ${activeView === "agent_hub" ? "text-cyan-600" : "text-slate-600"}`}
-        >
-          Agent AI
-        </button>
+        {isAdminOrOwner && (
+          <>
+            <button
+              type="button"
+              onClick={() => onNavigate("agent_hub")}
+              className={`whitespace-nowrap font-bold ${activeView === "agent_hub" ? "text-cyan-600" : "text-slate-600"}`}
+            >
+              Agent AI
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("saturation_studio")}
+              className={`whitespace-nowrap font-bold ${activeView === "saturation_studio" ? "text-emerald-600" : "text-slate-600"}`}
+            >
+              Saturation
+            </button>
+          </>
+        )}
         <button
           type="button"
           onClick={() => onNavigate("play")}
           className={`whitespace-nowrap font-bold ${activeView === "play" ? "text-amber-600" : "text-slate-600"}`}
         >
-          Learn & Play
+          Learn &amp; Play
         </button>
         <button
           type="button"
@@ -934,13 +1014,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           className={`whitespace-nowrap font-bold ${activeView === "exam_hall" ? "text-indigo-600" : "text-slate-600"}`}
         >
           Exam Hall
-        </button>
-        <button
-          type="button"
-          onClick={() => onNavigate("saturation_studio")}
-          className={`whitespace-nowrap font-bold ${activeView === "saturation_studio" ? "text-emerald-600" : "text-slate-600"}`}
-        >
-          Saturation
         </button>
       </div>
 

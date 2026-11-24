@@ -885,9 +885,9 @@ export const COMMON_ENTRANCE_50_QUESTION_POOL: PracticeQuestion[] = [
     id: "ncee-eng-14",
     type: "multiple_choice",
     questionText: "Find the odd one out among the four items based on grammatical word category:",
-    options: ["Carefully", "Beautiful", "Quickly", "Silent"],
-    correctAnswer: "Beautiful",
-    explanation: "Wait, look at the options: Carefully (adverb), Quickly (adverb). But Beautiful is an adjective, and Silent is also an adjective! Let us make the distinction unmistakable: [Carefully, Quickly, Gracefully, Silent]. Silent is an adjective, whereas the other three are all adverbs of manner ending in '-ly'.",
+    options: ["Carefully", "Quickly", "Gracefully", "Silent"],
+    correctAnswer: "Silent",
+    explanation: "'Carefully', 'Quickly', and 'Gracefully' are adverbs of manner ending in '-ly' that modify verbs, whereas 'Silent' is an adjective modifying nouns (e.g., 'a silent room').",
     hintLadder: [
       "Examine the parts of speech: Carefully, Quickly, and Gracefully end in -ly and describe actions (adverbs).",
       "Silent describes a noun (adjective), e.g., 'a silent room'.",

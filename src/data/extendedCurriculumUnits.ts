@@ -166,9 +166,12 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     level: "junior_secondary",
     title: "Linear Equations & Algebraic Expansion",
     code: "UNIT-02",
-    description: "Master unknown variable isolation, expansion of binomials, and simultaneous linear systems.",
+    description: "Master unknown variable isolation, expansion of binomials, and simultaneous linear systems with balanced algebraic justification.",
     order: 2,
     category: "core",
+    estimatedHours: 4.0,
+    curriculumStandardMappings: ["NERDC_JSS2_JSS3_ALGEBRA", "BECE_MATH", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-linear-equations",
@@ -183,6 +186,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "foundational",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-pri-arith-regrouping", "skill-frac-operations"],
         questions: [
           {
             id: "q-lin-1",
@@ -191,7 +195,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             mathExpression: "3(2x - 5) = 4x + 7",
             options: ["x = 11", "x = 6", "x = 8", "x = 4"],
             correctAnswer: "x = 11",
-            explanation: "Expand left side: 6x - 15 = 4x + 7. Subtract 4x from both sides: 2x - 15 = 7. Add 15: 2x = 22. Divide by 2: x = 11.",
+            explanation: "Expand left side: 6x - 15 = 4x + 7. Subtract 4x from both sides: 2x - 15 = 7. Add 15: 2x = 22. Divide by 2: x = 11. Check: 3(22 - 5) = 51 and 4(11) + 7 = 51.",
             hintLadder: [
               "Step 1: Expand brackets on left side: 3 × 2x - 3 × 5 = 6x - 15.",
               "Step 2: Collect like terms: 6x - 4x = 7 + 15.",
@@ -207,17 +211,17 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             id: "q-lin-2",
             type: "multiple_choice",
             questionText: "Solve the algebraic fractional equation for y:",
-            mathExpression: "\\frac{2y + 3}{4} - \\frac{y - 1}{3} = 2",
+            mathExpression: "\\frac{2y + 2}{4} - \\frac{y - 1}{3} = 2",
             options: ["y = 7", "y = 9", "y = 5", "y = 11"],
             correctAnswer: "y = 7",
-            explanation: "Multiply entire equation by LCM 12: 3(2y + 3) - 4(y - 1) = 24 => (6y + 9) - (4y - 4) = 24 => 2y + 13 = 24 => 2y = 11... Wait: 6y + 9 - 4y + 4 = 2y + 13 = 24 => 2y = 11, wait: if 3(2y+3) - 4(y-1) = 6y+9 - 4y + 4 = 2y + 13 = 27 => y = 7.",
+            explanation: "Multiply every term by the LCM 12: 3(2y + 2) - 4(y - 1) = 24 => 6y + 6 - 4y + 4 = 24 => 2y + 10 = 24 => 2y = 14 => y = 7. Verify: (14 + 2)/4 - (7 - 1)/3 = 4 - 2 = 2.",
             hintLadder: [
-              "Multiply each term by LCM = 12.",
-              "3(2y + 3) - 4(y - 1) = 12 × 2 = 24.",
-              "6y + 9 - 4y + 4 = 24 => 2y + 13 = 27 (if RHS is changed) or 2y = 14 => y = 7."
+              "Find the LCM of denominators 4 and 3, which is 12, and multiply each term by 12.",
+              "Simplify to 3(2y + 2) - 4(y - 1) = 24, noting that -4 × (-1) = +4.",
+              "Combine like terms: 2y + 10 = 24, so 2y = 14 and y = 7."
             ],
             misconceptionAlerts: [
-              { trigger: "y = 5", note: "Careful with the minus sign in -4(y - 1) = -4y + 4, not -4y - 4!" }
+              { trigger: "y = 5", note: "Watch the double negative sign in -4(y - 1) = -4y + 4, not -4y - 4." }
             ],
             skillId: "skill-linear-equations",
             difficulty: "medium"
@@ -240,6 +244,44 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-linear-equations",
             difficulty: "medium"
+          },
+          {
+            id: "q-lin-4",
+            type: "multiple_choice",
+            questionText: "Solve for p in the literal balance equation with negative brackets:",
+            mathExpression: "5 - 2(p - 3) = 3(p + 2) - 10",
+            options: ["p = 3", "p = 1", "p = -3", "p = 5"],
+            correctAnswer: "p = 3",
+            explanation: "Expand both sides: 5 - 2p + 6 = 3p + 6 - 10 => 11 - 2p = 3p - 4 => 15 = 5p => p = 3. Check: 5 - 2(0) = 5; 3(5) - 10 = 5.",
+            hintLadder: [
+              "Distribute -2 across (p - 3) to obtain -2p + 6 on the left side.",
+              "Simplify both sides: 11 - 2p = 3p - 4.",
+              "Add 2p and add 4 to both sides: 15 = 5p, giving p = 3."
+            ],
+            misconceptionAlerts: [
+              { trigger: "p = 1", note: "Remember -2 × (-3) = +6, not -6." }
+            ],
+            skillId: "skill-linear-equations",
+            difficulty: "hard"
+          },
+          {
+            id: "q-lin-5",
+            type: "multiple_choice",
+            questionText: "A Lagos solar installer charges a flat call-out fee of ₦6,000 plus ₦4,500 per hour of labour. If a school's total bill was ₦24,000, how many hours (h) did the job take?",
+            mathExpression: "4500h + 6000 = 24000",
+            options: ["4 hours", "3 hours", "5 hours", "6 hours"],
+            correctAnswer: "4 hours",
+            explanation: "Subtract the fixed call-out fee: 4500h = 24000 - 6000 = 18000. Divide by 4500: h = 18000 / 4500 = 4 hours.",
+            hintLadder: [
+              "Write the cost equation: Total = 4500h + 6000.",
+              "Subtract 6000 from both sides: 4500h = 18000.",
+              "Divide 18000 by 4500 to obtain h = 4."
+            ],
+            misconceptionAlerts: [
+              { trigger: "5 hours", note: "Dividing 24000 directly by 4500 ignores the ₦6,000 flat call-out fee." }
+            ],
+            skillId: "skill-linear-equations",
+            difficulty: "easy"
           }
         ]
       },
@@ -248,7 +290,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         unitId: "unit-jss-algebra-linear",
         title: "Simultaneous Linear Equations",
         code: "SKL-SIM-202",
-        summary: "Solving systems of two linear equations using substitution and elimination methods.",
+        summary: "Solving systems of two linear equations using substitution, elimination, and graphical intersection.",
         objectives: [
           "Eliminate a variable by balancing coefficients and adding/subtracting equations",
           "Solve for the remaining unknown and back-substitute to find the complete pair (x, y)",
@@ -256,6 +298,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
         questions: [
           {
             id: "q-sim-1",
@@ -300,16 +343,54 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             type: "multiple_choice",
             questionText: "Two books and three pens cost ₦1,200. Three books and two pens cost ₦1,550. What is the cost of ONE book?",
             mathExpression: "\\begin{cases} 2b + 3p = 1200 \\\\ 3b + 2p = 1550 \\end{cases}",
-            options: ["₦450", "₦350", "₦500", "₦400"],
+            options: ["₦450", "₦100", "₦500", "₦400"],
             correctAnswer: "₦450",
-            explanation: "Multiply eq 1 by 2: 4b + 6p = 2400. Multiply eq 2 by 3: 9b + 6p = 4650. Subtract: 5b = 2250 => b = ₦450.",
+            explanation: "Multiply eq 1 by 2: 4b + 6p = 2400. Multiply eq 2 by 3: 9b + 6p = 4650. Subtract: 5b = 2250 => b = ₦450. Back-substituting gives pen p = (1200 - 900)/3 = ₦100.",
             hintLadder: [
               "Set up the system: 2b + 3p = 1200 and 3b + 2p = 1550.",
               "Equate coefficients of p: multiply first eq by 2 (4b + 6p = 2400) and second eq by 3 (9b + 6p = 4650).",
               "Subtract to eliminate p: 9b - 4b = 4650 - 2400 => 5b = 2250 => b = 450."
             ],
             misconceptionAlerts: [
-              { trigger: "₦350", note: "₦350 is the price of the pen: p = (1200 - 2(450))/3 = 100, wait, check the solution!" }
+              { trigger: "₦100", note: "₦100 is the price of ONE pen (p), whereas the question asks for ONE book (b = ₦450)." }
+            ],
+            skillId: "skill-simultaneous-eq",
+            difficulty: "hard"
+          },
+          {
+            id: "q-sim-4",
+            type: "multiple_choice",
+            questionText: "Find the unique intersection coordinates (x, y) of the two lines 4x + y = 17 and 2x + 3y = 16:",
+            mathExpression: "\\begin{cases} 4x + y = 17 \\\\ 2x + 3y = 16 \\end{cases}",
+            options: ["(3.5,\\, 3)", "(3,\\, 5)", "(4,\\, 1)", "(2.5,\\, 7)"],
+            correctAnswer: "(3.5,\\, 3)",
+            explanation: "Express y = 17 - 4x from eq 1 and substitute into eq 2: 2x + 3(17 - 4x) = 16 => 2x + 51 - 12x = 16 => -10x = -35 => x = 3.5. Then y = 17 - 4(3.5) = 3.",
+            hintLadder: [
+              "Isolate y in equation 1: y = 17 - 4x.",
+              "Substitute into equation 2: 2x + 3(17 - 4x) = 16 => 51 - 10x = 16.",
+              "Solve -10x = -35 => x = 3.5, and substitute back for y = 3."
+            ],
+            misconceptionAlerts: [
+              { trigger: "(4,\\, 1)", note: "Check (4, 1) in equation 2: 2(4) + 3(1) = 11, not 16." }
+            ],
+            skillId: "skill-simultaneous-eq",
+            difficulty: "medium"
+          },
+          {
+            id: "q-sim-5",
+            type: "multiple_choice",
+            questionText: "A linear system has no solution when the two lines are parallel. Which value of k makes this system inconsistent (parallel lines)?",
+            mathExpression: "\\begin{cases} 2x - 3y = 7 \\\\ 6x + ky = 15 \\end{cases}",
+            options: ["k = -9", "k = 9", "k = -3", "k = 3"],
+            correctAnswer: "k = -9",
+            explanation: "Parallel lines have identical gradients (equal ratios of x and y coefficients) but distinct constants: 6/2 = 3, so k/(-3) = 3 => k = -9. Notice 15 ≠ 3(7) = 21, so the lines never meet.",
+            hintLadder: [
+              "Compare the ratio of the x-coefficients: 6 / 2 = 3.",
+              "For parallel lines, k / (-3) must also equal 3.",
+              "Solving k / (-3) = 3 gives k = -9."
+            ],
+            misconceptionAlerts: [
+              { trigger: "k = 9", note: "Check the sign: the first equation has -3y, so 3 × (-3) = -9, not +9." }
             ],
             skillId: "skill-simultaneous-eq",
             difficulty: "hard"
@@ -324,23 +405,27 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     level: "senior_secondary",
     title: "Quadratic Equations & Polynomials",
     code: "UNIT-03",
-    description: "Factorization, completing the square, quadratic formula derivations, and parabolic graphing.",
+    description: "Factorization, completing the square, quadratic formula derivations, discriminant classification, and parabolic vertex geometry.",
     order: 3,
     category: "core",
+    estimatedHours: 4.5,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-quad-factoring",
         unitId: "unit-sss-quadratics",
-        title: "Factorization & Roots of Quadratics",
+        title: "Factorization, Completing the Square & Quadratic Formula",
         code: "SKL-QUAD-301",
-        summary: "Finding factor pairs of ac that sum to b, factoring by grouping, and solving monic/non-monic quadratics.",
+        summary: "Solving monic/non-monic quadratics via ac-splitting, completing the square, quadratic formula, and discriminant analysis.",
         objectives: [
-          "Identify product (ac) and sum (b) integer pairs",
-          "Apply the zero-product property: if AB = 0 then A = 0 or B = 0",
-          "Factor difference of two squares: a² - b² = (a - b)(a + b)"
+          "Identify product (ac) and sum (b) integer pairs to factor ax² + bx + c = 0",
+          "Complete the square to express quadratics in vertex form a(x - h)² + k and derive the quadratic formula",
+          "Classify roots using the discriminant Δ = b² - 4ac and relate roots to parabolic x-intercepts"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
         questions: [
           {
             id: "q-quad-1",
@@ -398,6 +483,44 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-quad-factoring",
             difficulty: "medium"
+          },
+          {
+            id: "q-quad-4",
+            type: "multiple_choice",
+            questionText: "By completing the square, express y = x² - 6x + 5 in vertex form (x - h)² + k and state the minimum vertex coordinates (h, k):",
+            mathExpression: "y = x^2 - 6x + 5 = (x - h)^2 + k",
+            options: ["(3,\\, -4)", "(-3,\\, -4)", "(3,\\, 5)", "(6,\\, -4)"],
+            correctAnswer: "(3,\\, -4)",
+            explanation: "Half the x-coefficient is -6/2 = -3. Add and subtract (-3)² = 9: y = (x² - 6x + 9) - 9 + 5 = (x - 3)² - 4. Thus h = 3 and k = -4, giving minimum vertex (3, -4).",
+            hintLadder: [
+              "Take half of -6 (which is -3) and square it: (-3)² = 9.",
+              "Rewrite x² - 6x + 5 = (x - 3)² - 9 + 5.",
+              "Simplify to (x - 3)² - 4, so the vertex is (3, -4)."
+            ],
+            misconceptionAlerts: [
+              { trigger: "(-3,\\, -4)", note: "In vertex form (x - h)² + k, (x - 3)² means h = +3, not -3." }
+            ],
+            skillId: "skill-quad-factoring",
+            difficulty: "medium"
+          },
+          {
+            id: "q-quad-5",
+            type: "multiple_choice",
+            questionText: "If the quadratic equation x² + kx + 16 = 0 has two equal (repeated) real roots, find the positive value of k:",
+            mathExpression: "\\Delta = k^2 - 4(1)(16) = 0",
+            options: ["k = 8", "k = 4", "k = 16", "k = 64"],
+            correctAnswer: "k = 8",
+            explanation: "For equal roots, discriminant Δ = b² - 4ac = 0 => k² - 4(1)(16) = 0 => k² = 64 => k = ±8. The positive value is k = 8, yielding (x + 4)² = 0.",
+            hintLadder: [
+              "Repeated real roots occur strictly when discriminant Δ = b² - 4ac = 0.",
+              "Substitute a = 1, b = k, c = 16 into b² - 4ac = 0.",
+              "Solve k² - 64 = 0 for k > 0."
+            ],
+            misconceptionAlerts: [
+              { trigger: "k = 4", note: "Note that (x + 4)² expands to x² + 8x + 16, so k = 2 × 4 = 8, not 4." }
+            ],
+            skillId: "skill-quad-factoring",
+            difficulty: "hard"
           }
         ]
       }
@@ -914,7 +1037,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
           {
             id: "q-calc-2",
             type: "multiple_choice",
-            questionText: "Evaluate the definite integral:",
+            questionText: "Evaluate the definite integral of the linear binomial 2x + 1 from x = 0 to x = 3:",
             mathExpression: "\\int_{0}^{3} (2x + 1) \\, dx",
             options: ["12", "9", "15", "6"],
             correctAnswer: "12",
@@ -1512,7 +1635,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
           {
             id: "q-math-int-1",
             type: "multiple_choice",
-            questionText: "Evaluate the definite integral:",
+            questionText: "Evaluate the definite integral of the quadratic polynomial 3x² - 4x + 1 on the interval [1, 3]:",
             mathExpression: "\\int_{1}^{3} (3x^2 - 4x + 1) \\, dx",
             options: ["12", "14", "10", "16"],
             correctAnswer: "12",

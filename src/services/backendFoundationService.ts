@@ -84,7 +84,7 @@ export class BackendFoundationService {
     const rawRole = activeSession.role.toLowerCase() as UserRole;
     const role: UserRole = ["learner", "teacher", "admin", "system"].includes(rawRole) ? rawRole : "learner";
 
-    const isSuperAdmin = auth.currentUser?.email === "kutubiallah@gmail.com" || role === "admin";
+    const isSuperAdmin = role === "admin" || (activeSession.role === "ADMIN");
     const isTeacher = role === "teacher";
     const isLearner = role === "learner";
 

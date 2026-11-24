@@ -12,6 +12,7 @@ import {
   User,
   Bot
 } from "lucide-react";
+import { emailAllowlistService } from "../services/emailAllowlistService";
 
 interface LiveVoiceConversationProps {
   onClose?: () => void;
@@ -141,9 +142,12 @@ export const LiveVoiceConversation: React.FC<LiveVoiceConversationProps> = ({ on
       outputAudioCtxRef.current = outputCtx;
       nextStartTimeRef.current = outputCtx.currentTime;
 
-      // 3. Connect WebSocket to backend server's /live endpoint
+      // 3. Connect WebSocket to backend server's authenticated /live endpoint
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/live`;
+      const token = emailAllowlistService.getActiveToken();
+      const wsUrl = token
+        ? `${protocol}//${window.location.host}/live?token=${encodeURIComponent(token)}`
+        : `${protocol}//${window.location.host}/live`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 

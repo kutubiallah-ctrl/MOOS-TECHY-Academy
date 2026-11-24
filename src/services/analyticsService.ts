@@ -214,7 +214,7 @@ export class AnalyticsService {
 
         if (unmasteredPrereq) {
           const prereqUnit = curriculumService.getUnitBySkillId(unmasteredPrereq.id);
-          if (prereqUnit) {
+          if (prereqUnit && prereqUnit.level === targetLevel) {
             recommendedSkill = unmasteredPrereq;
             recommendedUnit = prereqUnit;
             recommendationType = "remediation";
@@ -224,6 +224,9 @@ export class AnalyticsService {
             recommendedSkill = candidateSkill;
             recommendedUnit = activeUnit;
             recommendedReason = `Next key milestone in ${activeUnit.title}`;
+            if (prereqUnit) {
+              prerequisiteGapNotice = `Helpful foundation refresher: ${unmasteredPrereq.title} (${prereqUnit.title}).`;
+            }
           }
         } else {
           recommendedSkill = candidateSkill;

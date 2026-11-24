@@ -44,7 +44,23 @@ import {
 
 const MFA_PROFILE_KEY_PREFIX = "moos_mfa_profile_v1_";
 const MFA_RECOVERY_KEY_PREFIX = "moos_mfa_recovery_v1_";
-const MFA_SECRET_SIGNING_KEY = "moos_mfa_hmac_secret_internal_2026_aal2_key";
+
+function resolveRuntimeMfaSigningKey(): string {
+  if (typeof process !== "undefined" && process.env?.MFA_SECRET_SIGNING_KEY) {
+    return process.env.MFA_SECRET_SIGNING_KEY;
+  }
+  if (typeof crypto !== "undefined" && typeof crypto.randomBytes === "function") {
+    return crypto.randomBytes(32).toString("hex");
+  }
+  if (typeof globalThis !== "undefined" && globalThis.crypto?.getRandomValues) {
+    const bytes = new Uint8Array(32);
+    globalThis.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  throw new Error("Secure cryptographic RNG unavailable for MFA signing key.");
+}
+
+const MFA_SECRET_SIGNING_KEY = resolveRuntimeMfaSigningKey();
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes

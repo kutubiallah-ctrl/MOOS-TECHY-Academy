@@ -343,7 +343,7 @@ export const WAVE1_DEEP_SATURATED_MATH_UNITS: Unit[] = [
             questionText: "Calculate the exact difference: 402 - 178",
             options: ["224", "234", "324", "334"],
             correctAnswer: "224",
-            explanation: "Borrow from hundreds: 4 becomes 3 hundreds and 10 tens. Borrow from tens: 10 becomes 9 tens and 14 units. 14 - 8 = 6? Wait: 402 - 178: Units: 12 - 8 = 4. Tens: 9 - 7 = 2. Hundreds: 3 - 1 = 2. Total = 224.",
+            explanation: "Borrow 1 hundred from 4 hundreds (leaving 3 hundreds and 10 tens). Regroup 1 ten into 10 units (leaving 9 tens and 12 units). Compute column by column: Units 12 - 8 = 4; Tens 9 - 7 = 2; Hundreds 3 - 1 = 2. Total = 224.",
             hintLadder: [
               "Units: 2 - 8 cannot be done directly. We must borrow.",
               "Hundreds gives 1 to Tens (leaving 3 hundreds, making 10 tens). Tens gives 1 to Units (leaving 9 tens, making 12 units).",
@@ -1222,13 +1222,13 @@ export const WAVE1_DEEP_SATURATED_MATH_UNITS: Unit[] = [
           workedExamples: [
             {
               title: "Deducing Triangle Box Patterns",
-              problemStatement: "Given samples: Triangle 1: [Top: 6, Left: 4, Right: 2 -> Center: 14]. Triangle 2: [Top: 8, Left: 5, Right: 3 -> Center: 27]. Find Center for [Top: 7, Left: 6, Right: 4].",
+              problemStatement: "Given samples: Triangle 1: [Top: 6, Left: 4, Right: 2 -> Center: 14]. Triangle 2: [Top: 8, Left: 5, Right: 3 -> Center: 23]. Find Center for [Top: 7, Left: 6, Right: 4].",
               steps: [
-                { stepNumber: 1, instruction: "Test candidate rules on Sample 1", reasoning: "(6 + 4) + 2 = 12 ≠ 14. Try (Left × Right) + Top: (4 × 2) + 6 = 8 + 6 = 14! Holds for Sample 1." },
-                { stepNumber: 2, instruction: "Verify rule on Sample 2", reasoning: "(Left × Right) + Top: (5 × 3) + 8 = 15 + 8 = 23 ≠ 27. Wait! Try (Top - Left) × Right? No. Try (Top + Left) × Right? Sample 1: (6+4)=10 ≠ 14. What about Top + (Left + Right)? What about Top + Left × 2? Let's check: (Top × Right) - Left: (6×2)-4=8≠14. What about (Top × Left) ÷ Right? 24÷2 = 12. Let's inspect (Top + Right) × ...: (6 + 2) + ... Notice: (Top × 2) + (Left - Right): (12) + (2) = 14! Sample 2: (8 × 2) + (5 - 3) = 16 + 2 = 18 ≠ 27. Re-test: (Top + Left - Right)... In NCEE, standard pattern is (Top × Left) - (Right²): 24 - 4 = 20. But Top: 6, Left: 4, Right: 2 -> Center: (6 + 4) × 2 - 6 = 14! Sample 2: (8 + 5) × 3 - 12 = 27! In practice, NCEE uses clean composite rules like Center = (Left + Right) × (Top ÷ 2): (4+2) × 3 = 18. Keep rules transparent and unambiguous: Center = Left × Right + Top." },
-                { stepNumber: 3, instruction: "Apply verified rule", reasoning: "Ensure the rule is verified across all nodes before computing target." }
+                { stepNumber: 1, instruction: "Formulate a candidate algebraic rule on Sample 1", reasoning: "Notice that (Left × Right) + Top = (4 × 2) + 6 = 8 + 6 = 14, matching Sample 1." },
+                { stepNumber: 2, instruction: "Verify the candidate rule on Sample 2", reasoning: "Substitute Sample 2 values into the same formula: (Left × Right) + Top = (5 × 3) + 8 = 15 + 8 = 23. Since 23 matches Sample 2 identically, the rule is confirmed invariant." },
+                { stepNumber: 3, instruction: "Apply the verified rule to the target triangle", reasoning: "For [Top: 7, Left: 6, Right: 4]: Center = (6 × 4) + 7 = 24 + 7 = 31." }
               ],
-              takeawayRule: "Never trust a rule that only matches one sample; verify it across all samples before solving."
+              takeawayRule: "Never rely on a rule that only matches one sample; verify it across all given samples before solving."
             }
           ],
           commonMisconceptionsAndTraps: [
@@ -1257,14 +1257,14 @@ export const WAVE1_DEEP_SATURATED_MATH_UNITS: Unit[] = [
           {
             id: "q-pri-qnt-01",
             type: "multiple_choice",
-            questionText: "Examine the sample pattern: [4, 5 -> 29], [3, 7 -> 30], [6, 2 -> 20]. (Rule: Square the first number and add the second number: a² + b). Apply this rule to find the missing value for [5, 8 -> ?]:",
+            questionText: "Examine the sample pattern: [4, 5 -> 21], [3, 7 -> 16], [6, 2 -> 38]. (Rule: Square the first number and add the second number: a² + b). Apply this rule to find the missing value for [5, 8 -> ?]:",
             options: ["33", "40", "26", "38"],
             correctAnswer: "33",
-            explanation: "Rule is a² + b. For 5 and 8: 5² + 8 = 25 + 8 = 33.",
+            explanation: "Rule is a² + b. Sample verification: 4² + 5 = 21; 3² + 7 = 16; 6² + 2 = 38. Applying the rule to [5, 8]: 5² + 8 = 25 + 8 = 33.",
             hintLadder: [
-              "Verify the rule on samples: 4² + 5 = 16 + 5 = 21 (wait, sample 1: 4×5 + 9? Or 4×5 + (5-1)? Notice: 4² + ? = 16 + 13? Let's check: a × b + (a + b)? (4×5)+(9) = 29. (3×7)+(10) = 31. Let's look at 4×5 + 9 = 29. 6×2 + 8 = 20! Notice: a × b + 9? 6×2=12 + 8=20).",
-              "Look at the explicit rule statement in question: 'Square the first number and add the second: a² + b'. For 5 and 8: 5² + 8.",
-              "5² = 25. 25 + 8 = 33."
+              "Verify the rule across all three samples: 4² + 5 = 16 + 5 = 21, 3² + 7 = 9 + 7 = 16, and 6² + 2 = 36 + 2 = 38.",
+              "Apply the rule a² + b to the pair [5, 8]: compute 5² + 8.",
+              "5² = 25, and 25 + 8 = 33."
             ],
             misconceptionAlerts: [
               { trigger: "40", note: "40 is 5 × 8, which ignores the squaring step." },

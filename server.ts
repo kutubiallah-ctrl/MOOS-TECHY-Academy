@@ -6,7 +6,7 @@ import { GoogleGenAI, GenerateVideosOperation, Modality } from "@google/genai";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import { openAiArchitectAdapter } from "./src/services/openAiArchitectAdapter";
-import { emailAllowlistService } from "./src/services/emailAllowlistService";
+import { serverAuthGovernance, AuthenticatedRequest } from "./server/authGovernance";
 
 dotenv.config();
 
@@ -42,120 +42,108 @@ app.get("/api/health", (_req: Request, res: Response) => {
 });
 
 // =========================================================================
-// EMAIL-ENTRY GATE & OWNER ALLOWLIST ENDPOINTS
+// SERVER-AUTHORITATIVE AUTHENTICATION & OWNER ALLOWLIST ENDPOINTS
 // =========================================================================
 
-// Verify candidate email against allowlist (generates cryptographic HMAC token)
-app.post("/api/allowlist/verify", async (req: Request, res: Response) => {
+// Email-only bypass permanently retired (HTTP 401)
+app.post("/api/allowlist/verify", (_req: Request, res: Response) => {
+  return res.status(401).json({
+    isAllowed: false,
+    status: "INVALID_CREDENTIALS",
+    message: "Email-only verification has been disabled. Authenticate with password or verified Firebase Auth."
+  });
+});
+
+// Public User Sign-Up Endpoint (Learner / Teacher only, hashed password required)
+app.post("/api/auth/signup", (req: Request, res: Response) => {
   try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ isAllowed: false, status: "INVALID_EMAIL", message: "Email is required." });
-    }
-    const result = await emailAllowlistService.verifyEmail(email);
-    return res.json({
-      isAllowed: result.isAllowed,
-      status: result.status,
-      email: result.email,
-      message: result.message,
-      token: result.serverVerificationToken,
-      entry: result.entry
-    });
-  } catch (err: any) {
-    return res.status(500).json({ isAllowed: false, message: err.message });
-  }
-});
-
-// List allowlist entries (Owner only)
-app.get("/api/allowlist/list", (req: Request, res: Response) => {
-  const callerEmail = (req.headers["x-caller-email"] || req.query.callerEmail) as string;
-  if (!emailAllowlistService.isOwner(callerEmail)) {
-    return res.status(403).json({ error: "Access denied: Owner privileges required." });
-  }
-  const entries = emailAllowlistService.listEntries();
-  return res.json({ entries });
-});
-
-// Insert email into allowlist (Owner only)
-app.post("/api/allowlist/insert", (req: Request, res: Response) => {
-  const { callerEmail, targetEmail, role, notes } = req.body;
-  const result = emailAllowlistService.insertEmail(callerEmail, targetEmail, role, notes);
-  if (!result.success) {
-    return res.status(403).json(result);
-  }
-  return res.json(result);
-});
-
-// Set allowlist entry status (Owner only)
-app.post("/api/allowlist/status", (req: Request, res: Response) => {
-  const { callerEmail, targetEmail, status } = req.body;
-  const result = emailAllowlistService.setStatus(callerEmail, targetEmail, status);
-  if (!result.success) {
-    return res.status(403).json(result);
-  }
-  return res.json(result);
-});
-
-// Remove email from allowlist (Owner only)
-app.delete("/api/allowlist/remove", (req: Request, res: Response) => {
-  const { callerEmail, targetEmail } = req.body;
-  const result = emailAllowlistService.removeEmail(callerEmail, targetEmail);
-  if (!result.success) {
-    return res.status(403).json(result);
-  }
-  return res.json(result);
-});
-
-// Validate token endpoint (Cryptographic server-side verification)
-app.post("/api/allowlist/validate-token", (req: Request, res: Response) => {
-  const { token, email } = req.body;
-  const isValid = emailAllowlistService.validateVerificationToken(token, email);
-  return res.json({ isValid });
-});
-
-// Public User Sign-Up Endpoint
-app.post("/api/auth/signup", async (req: Request, res: Response) => {
-  try {
-    const { fullName, email, password, role, targetLevel, notes } = req.body;
+    const { fullName, email, password, role, targetLevel, notes } = req.body || {};
     if (!email) {
       return res.status(400).json({ success: false, message: "Email is required." });
     }
-    const result = await emailAllowlistService.signUpUser({
-      fullName: fullName || "Academy Scholar",
+    const result = serverAuthGovernance.signUpUser({
+      fullName: fullName || "",
       email,
       password,
-      role: role || "learner",
+      role,
       targetLevel,
       notes
     });
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-    return res.json(result);
+    return res.status(result.statusCode || (result.success ? 201 : 400)).json(result);
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Public User Sign-In Endpoint (with Owner Auto-Elevation)
-app.post("/api/auth/signin", async (req: Request, res: Response) => {
+// User Sign-In Endpoint (scrypt password verification; server-side owner elevation only when verified)
+app.post("/api/auth/signin", (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
     if (!email) {
       return res.status(400).json({ isAllowed: false, message: "Email is required." });
     }
-    const result = await emailAllowlistService.signInUser({ email, password });
-    if (!result.isAllowed) {
-      return res.status(401).json(result);
-    }
-    return res.json(result);
+    const result = serverAuthGovernance.signInUser({ email, password });
+    return res.status(result.statusCode || (result.isAllowed ? 200 : 401)).json(result);
   } catch (err: any) {
     return res.status(500).json({ isAllowed: false, message: err.message });
   }
 });
 
-// Autonomous Development Bridge: Status & Audit Endpoint
-app.get("/api/development-bridge/status", (_req: Request, res: Response) => {
+// Firebase Auth ID Token Verification & Server Session Exchange
+app.post("/api/auth/firebase-session", async (req: Request, res: Response) => {
+  try {
+    const { idToken } = req.body || {};
+    if (!idToken) {
+      return res.status(400).json({ isAllowed: false, message: "Firebase ID token is required." });
+    }
+    const result = await serverAuthGovernance.exchangeFirebaseTokenForSession(idToken);
+    return res.status(result.statusCode).json(result);
+  } catch (err: any) {
+    return res.status(500).json({ isAllowed: false, message: err.message });
+  }
+});
+
+// Inspect Active Server Session
+app.get("/api/auth/session", serverAuthGovernance.authenticateRequest, (req: AuthenticatedRequest, res: Response) => {
+  return res.json({ authenticated: true, session: req.authSession });
+});
+
+// List allowlist entries (Verified Owner only — ignores header/query callerEmail)
+app.get("/api/allowlist/list", serverAuthGovernance.requireOwner, (req: AuthenticatedRequest, res: Response) => {
+  const entries = serverAuthGovernance.listEntries(req.authSession!);
+  return res.json({ entries });
+});
+
+// Insert email into allowlist (Verified Owner only)
+app.post("/api/allowlist/insert", serverAuthGovernance.requireOwner, (req: AuthenticatedRequest, res: Response) => {
+  const { targetEmail, role, notes } = req.body || {};
+  const result = serverAuthGovernance.insertEmail(req.authSession!, targetEmail, role, notes);
+  return res.status(result.statusCode).json(result);
+});
+
+// Set allowlist entry status (Verified Owner only)
+app.post("/api/allowlist/status", serverAuthGovernance.requireOwner, (req: AuthenticatedRequest, res: Response) => {
+  const { targetEmail, status } = req.body || {};
+  const result = serverAuthGovernance.setStatus(req.authSession!, targetEmail, status);
+  return res.status(result.statusCode).json(result);
+});
+
+// Remove email from allowlist (Verified Owner only)
+app.delete("/api/allowlist/remove", serverAuthGovernance.requireOwner, (req: AuthenticatedRequest, res: Response) => {
+  const { targetEmail } = req.body || {};
+  const result = serverAuthGovernance.removeEmail(req.authSession!, targetEmail);
+  return res.status(result.statusCode).json(result);
+});
+
+// Validate token endpoint (Server cryptographic HMAC check)
+app.post("/api/allowlist/validate-token", (req: Request, res: Response) => {
+  const { token, email } = req.body || {};
+  const session = serverAuthGovernance.verifySessionToken(token, email);
+  return res.json({ isValid: Boolean(session), session });
+});
+
+// Autonomous Development Bridge: Status & Audit Endpoint (Verified Admin/Owner only)
+app.get("/api/development-bridge/status", serverAuthGovernance.requireAdminOrOwner, (_req: AuthenticatedRequest, res: Response) => {
   const cred = openAiArchitectAdapter.getCredentialStatus();
   res.json({
     status: "OPERATIONAL",
@@ -179,10 +167,10 @@ app.get("/api/development-bridge/status", (_req: Request, res: Response) => {
   });
 });
 
-// Autonomous Development Bridge: OpenAI Architect Reasoning Endpoint
-app.post("/api/development-bridge/chatgpt/reason", async (req: Request, res: Response) => {
+// Autonomous Development Bridge: OpenAI Architect Reasoning Endpoint (Verified Admin/Owner only)
+app.post("/api/development-bridge/chatgpt/reason", serverAuthGovernance.requireAdminOrOwner, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { envelope, simulationMode } = req.body;
+    const { envelope, simulationMode } = req.body || {};
     if (!envelope || !envelope.taskId) {
       return res.status(400).json({ error: "Missing or invalid DevelopmentFeedbackEnvelope: taskId is required" });
     }
@@ -205,8 +193,8 @@ app.post("/api/development-bridge/chatgpt/reason", async (req: Request, res: Res
   }
 });
 
-// Autonomous Development Bridge: Ingest Feedback Envelope
-app.post("/api/development-bridge/envelope", (req: Request, res: Response) => {
+// Autonomous Development Bridge: Ingest Feedback Envelope (Verified Admin/Owner only)
+app.post("/api/development-bridge/envelope", serverAuthGovernance.requireAdminOrOwner, (req: AuthenticatedRequest, res: Response) => {
   const envelope = req.body;
   if (!envelope || !envelope.taskId) {
     return res.status(400).json({ error: "Invalid feedback envelope: taskId is required" });
@@ -488,8 +476,8 @@ Return strict JSON:
 // VEO 3 VIDEO GENERATION (veo-3.1-fast-generate-preview)
 // --------------------------------------------------------------------------
 
-// 1. Start Video Generation Operation
-app.post("/api/video/generate", async (req: Request, res: Response) => {
+// 1. Start Video Generation Operation (Authenticated users only)
+app.post("/api/video/generate", serverAuthGovernance.authenticateRequest, async (req: Request, res: Response) => {
   try {
     const { prompt, aspectRatio = "16:9" } = req.body;
 
@@ -530,8 +518,8 @@ app.post("/api/video/generate", async (req: Request, res: Response) => {
   }
 });
 
-// 2. Poll Video Generation Status
-app.post("/api/video/status", async (req: Request, res: Response) => {
+// 2. Poll Video Generation Status (Authenticated users only)
+app.post("/api/video/status", serverAuthGovernance.authenticateRequest, async (req: Request, res: Response) => {
   try {
     const { operationName } = req.body;
 
@@ -559,8 +547,8 @@ app.post("/api/video/status", async (req: Request, res: Response) => {
   }
 });
 
-// 3. Download/Stream Video Result
-app.post("/api/video/download", async (req: Request, res: Response) => {
+// 3. Download/Stream Video Result (Authenticated users only)
+app.post("/api/video/download", serverAuthGovernance.authenticateRequest, async (req: Request, res: Response) => {
   try {
     const { operationName } = req.body;
 
@@ -627,7 +615,7 @@ app.post("/api/video/download", async (req: Request, res: Response) => {
 // --------------------------------------------------------------------------
 // AUDIO TRANSCRIPTION (gemini-3.5-transcribe)
 // --------------------------------------------------------------------------
-app.post("/api/audio/transcribe", async (req: Request, res: Response) => {
+app.post("/api/audio/transcribe", serverAuthGovernance.authenticateRequest, async (req: Request, res: Response) => {
   try {
     const { audioData, mimeType = "audio/webm", prompt = "Transcribe this audio recording accurately with proper technical terminology." } = req.body;
 
@@ -1035,8 +1023,20 @@ async function startServer() {
   // WebSocket Server for Live Voice Conversation (gemini-3.8-live)
   const wss = new WebSocketServer({ server, path: "/live" });
 
-  wss.on("connection", async (clientWs: WebSocket) => {
-    console.log("[Live API] Client connected to /live");
+  wss.on("connection", async (clientWs: WebSocket, req) => {
+    const parsedUrl = new URL(req.url || "/live", `http://${req.headers.host || "localhost"}`);
+    const wsToken = parsedUrl.searchParams.get("token") || serverAuthGovernance.extractBearerToken(req as any);
+    const verifiedSession = serverAuthGovernance.verifySessionToken(wsToken);
+
+    if (!verifiedSession) {
+      clientWs.send(JSON.stringify({
+        error: "Unauthorized: Valid authenticated session token required for Live voice."
+      }));
+      clientWs.close(4001, "Unauthorized");
+      return;
+    }
+
+    console.log(`[Live API] Authenticated client connected (${verifiedSession.role})`);
 
     if (!ai) {
       clientWs.send(JSON.stringify({
@@ -1151,9 +1151,16 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`MOOS Academy server running on http://localhost:${PORT}`);
-  });
+  if (!server.listening) {
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`MOOS Academy server running on http://localhost:${PORT}`);
+    });
+  }
+  return server;
 }
 
-startServer();
+export { app, startServer };
+
+if (process.env.MOOS_SKIP_AUTO_LISTEN !== "true") {
+  startServer();
+}

@@ -43,14 +43,15 @@ export const CANONICAL_TEST_SUITES: CanonicalSuiteDefinition[] = [
   { path: "src/tests/eslPedagogicalArchitecture.test.ts", name: "eslPedagogicalArchitecture" },
   { path: "src/tests/postFirebaseHardeningAndMultimodalRegression.test.ts", name: "postFirebaseHardeningAndMultimodalRegression" },
   { path: "src/tests/mfaSecurityForensics.test.ts", name: "mfaSecurityForensics" },
-  { path: "src/tests/emailEntryGateForensics.test.ts", name: "emailEntryGateForensics" }
+  { path: "src/tests/emailEntryGateForensics.test.ts", name: "emailEntryGateForensics" },
+  { path: "src/tests/directive002HardeningAndContentQA.test.ts", name: "directive002HardeningAndContentQA" }
 ];
 
 export const TEST_SUITES = CANONICAL_TEST_SUITES.map((s) => s.path);
 
 async function runAll() {
   console.log("==========================================================================");
-  console.log("🏛️  MOOS TECHY ACADEMY — COMPLETE VERIFICATION HARNESS (21 SUITES)");
+  console.log(`🏛️  MOOS ACADEMY — COMPLETE VERIFICATION HARNESS (${TEST_SUITES.length} SUITES)`);
   console.log("==========================================================================\n");
 
   const results: SuiteResult[] = [];

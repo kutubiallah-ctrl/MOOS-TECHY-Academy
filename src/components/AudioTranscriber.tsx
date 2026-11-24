@@ -13,6 +13,7 @@ import {
   Clock
 } from "lucide-react";
 import { firebaseSyncService } from "../services/firebaseSyncService";
+import { emailAllowlistService } from "../services/emailAllowlistService";
 
 interface AudioTranscriberProps {
   onInsertTranscript?: (text: string) => void;
@@ -121,7 +122,7 @@ export const AudioTranscriber: React.FC<AudioTranscriberProps> = ({
 
       const res = await fetch("/api/audio/transcribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: emailAllowlistService.getAuthHeaders(),
         body: JSON.stringify({
           audioData: base64Data,
           mimeType: audioBlob.type || "audio/webm",

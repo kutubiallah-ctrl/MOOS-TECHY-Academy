@@ -65,96 +65,149 @@ export const MATH_LESSONS: Record<string, SkillLesson> = {
   "skill-linear-equations": {
     id: "les-linear-equations",
     title: "Solving Single-Variable Linear Equations & Word Problems",
-    hookAndIntuition: "Think of a balance scale in ancient markets: whatever weight you add or remove from one pan, you must add or remove the exact same weight from the other pan to keep the beam level. Solving an algebraic equation is the art of maintaining perfect balance while isolating the unknown variable.",
-    conceptualExplanation: "A linear equation in one variable has the general form ax + b = c (where a ≠ 0). The fundamental axiom of equality states: operations performed on one side of an equation must be performed identically on the other side. Systematic steps to solve linear equations: (1) Clear parentheses using the distributive property: a(bx + c) = abx + ac. (2) Clear fractions by multiplying every term by the LCM of all denominators. (3) Collect variable terms on one side and constant terms on the opposite side using inverse operations. (4) Combine like terms: (a - d)x = e - b. (5) Isolate variable x by dividing both sides by its coefficient. Always check your solution by substituting the value back into the original equation.",
+    hookAndIntuition: "Think of a mechanical balance beam in a market stall: whatever mass you place on or lift from the left pan must be matched identically on the right pan to preserve level equilibrium. Every algebraic step when solving an equation is a reversible equilibrium-preserving operation isolating x.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC JSS2–JSS3 / BECE): A linear equation in one unknown x has the canonical form ax + b = c (a ≠ 0). By the Balancing Axioms of Equality, adding/subtracting the same constant or multiplying/dividing by the same non-zero constant preserves the solution set identically. Systematic Programme: (1) Clear grouping brackets using the Distributive Law: a(bx + c) = abx + ac, paying strict attention to negative multipliers: -(x + 1) = -x - 1. (2) Clear all fractional denominators in one clean step by multiplying every term on both sides by the Lowest Common Multiple (LCM) of all denominators. (3) Transpose variable terms to one side and constants to the other using inverse operations. (4) Divide by the coefficient of x to obtain x = (c - b)/a, then back-substitute into the original equation to verify LHS = RHS. ADVANCED ENRICHMENT: When a = 0 and b = c, the identity holds for all real x (infinite solutions); when a = 0 and b ≠ c, the equation is an inconsistent contradiction (zero solutions).",
+    conceptualModel: "Reversible Equilibrium Balance Scale: each equation transformation maps x identically forward and backward without altering the root.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Inverse Operations", definition: "Addition cancels subtraction; multiplication cancels division.", practicalExample: "To solve x/4 = 6, multiply both sides by 4: x = 24." },
-      { termOrSymbol: "Distributive Law: a(b + c) = ab + ac", definition: "Expanding parentheses by multiplying outer factor across all terms within.", practicalExample: "-3(2x - 5) = -6x + 15 (note the sign change on -5)." },
-      { termOrSymbol: "Fraction Clearing via LCM", definition: "Multiplying entire equation by common denominator eliminates all fractions in a single step.", practicalExample: "x/2 + x/3 = 5 -> Multiply by 6: 3x + 2x = 30 -> 5x = 30 -> x = 6." }
+      { termOrSymbol: "Canonical Linear Form: ax + b = c (a ≠ 0)", definition: "First-degree algebraic equation yielding unique root x = (c - b) / a.", practicalExample: "If 5x - 15 = 20, then 5x = 35 and x = 7." },
+      { termOrSymbol: "Distributive Axiom: k(u - v) = ku - kv", definition: "Multiplying a signed factor across every inner term inside brackets.", practicalExample: "-4(y - 1) = -4y + 4 (double-negative product is positive)." },
+      { termOrSymbol: "Fraction Clearing via LCM", definition: "Multiplying every term by LCM eliminates denominators identically.", practicalExample: "For (2y + 2)/4 - (y - 1)/3 = 2, multiply all terms by LCM(4,3)=12: 3(2y + 2) - 4(y - 1) = 24." }
     ],
     workedExamples: [
       {
-        title: "Solving a Multi-Step Linear Equation with Fractions and Parentheses",
-        problemStatement: "Solve for x: (2x - 3) / 4 - (x + 1) / 3 = 1/2.",
+        title: "Stroud Frame 1: Clearing Signed Algebraic Fractions via LCM",
+        problemStatement: "Solve cleanly and verify by back-substitution: (2y + 2)/4 - (y - 1)/3 = 2.",
         steps: [
-          { stepNumber: 1, instruction: "Find the LCM of all denominators (4, 3, 2).", reasoning: "The LCM of 4, 3, and 2 is 12." },
-          { stepNumber: 2, instruction: "Multiply every term in the equation by 12 to eliminate denominators.", reasoning: "12 × [(2x - 3)/4] - 12 × [(x + 1)/3] = 12 × [1/2] => 3(2x - 3) - 4(x + 1) = 6." },
-          { stepNumber: 3, instruction: "Expand parentheses carefully with attention to negative signs.", reasoning: "6x - 9 - 4x - 4 = 6." },
-          { stepNumber: 4, instruction: "Combine like terms.", reasoning: "(6x - 4x) + (-9 - 4) = 6 => 2x - 13 = 6." },
-          { stepNumber: 5, instruction: "Isolate variable term by adding 13 to both sides.", reasoning: "2x = 6 + 13 => 2x = 19." },
-          { stepNumber: 6, instruction: "Divide by coefficient 2.", reasoning: "x = 19/2 = 9.5 (or 9 1/2)." }
+          { stepNumber: 1, instruction: "Determine the Lowest Common Multiple (LCM) of all denominators.", reasoning: "The denominators are 4, 3, and 1. Their LCM is 12." },
+          { stepNumber: 2, instruction: "Multiply EVERY term across both sides by 12, protecting numerators with brackets.", reasoning: "12 × [(2y + 2)/4] - 12 × [(y - 1)/3] = 12 × 2, which simplifies cleanly to 3(2y + 2) - 4(y - 1) = 24." },
+          { stepNumber: 3, instruction: "Apply the distributive law carefully on both brackets.", reasoning: "3(2y + 2) = 6y + 6, and -4(y - 1) = -4y + 4. Thus: 6y + 6 - 4y + 4 = 24." },
+          { stepNumber: 4, instruction: "Collect like terms and isolate the unknown y.", reasoning: "2y + 10 = 24 => subtract 10 from both sides => 2y = 14 => divide by 2 => y = 7." },
+          { stepNumber: 5, instruction: "Verify LHS = RHS in the original equation.", reasoning: "Substitute y = 7: LHS = (14 + 2)/4 - (7 - 1)/3 = 16/4 - 6/3 = 4 - 2 = 2 = RHS. Verified!" }
         ],
-        takeawayRule: "Be vigilant with the minus sign in front of fractions: -4(x + 1) expands to -4x - 4, NOT -4x + 4."
+        takeawayRule: "Always enclose compound numerators in brackets before multiplying by the LCM so negative signs distribute safely."
+      },
+      {
+        title: "Stroud Frame 2: Modelling Commercial Utility & Service Tariffs",
+        problemStatement: "An Ibadan solar technician charges a flat diagnostic fee of ₦6,000 plus ₦4,500 per hour on site. A clinic pays ₦24,000 in total. Model the linear equation and solve for hours worked (h).",
+        steps: [
+          { stepNumber: 1, instruction: "Define the unknown and translate words into algebraic terms.", reasoning: "Let h = hours of technical work. Total cost = variable hourly cost + fixed fee = 4500h + 6000." },
+          { stepNumber: 2, instruction: "Equate the algebraic model to the invoice amount.", reasoning: "4500h + 6000 = 24000." },
+          { stepNumber: 3, instruction: "Subtract the fixed term from both sides.", reasoning: "4500h = 24000 - 6000 => 4500h = 18000." },
+          { stepNumber: 4, instruction: "Divide by the hourly rate and interpret.", reasoning: "h = 18000 / 4500 = 4 hours. Check: 4500(4) + 6000 = 18000 + 6000 = 24000." }
+        ],
+        takeawayRule: "In real-world rate problems, separate fixed flat fees (y-intercept) from variable per-unit rates (gradient)."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Forgetting to distribute the negative sign when expanding -(x + 1).", whyItIsWrong: "The negative sign applies to EVERY term inside the parentheses: -(x + 1) = -x - 1. Failing to distribute changes the solution completely.", correctCorrection: "Put parentheses around numerators before clearing fractions to protect signs." }
+      { misconception: "Writing -4(y - 1) = -4y - 4 during fraction clearing.", whyItIsWrong: "A negative coefficient multiplied by a negative constant produces a positive product: (-4) × (-1) = +4.", correctCorrection: "Wrap every compound numerator in brackets first and distribute signed factors explicitly." },
+      { misconception: "Multiplying fractional terms by the LCM while forgetting to multiply standalone integers on the RHS.", whyItIsWrong: "Equality holds only when EVERY additive term on both sides is scaled by the same LCM.", correctCorrection: "Write 12 × (...) explicitly beside every term, including whole numbers on the RHS." }
     ],
-    guidedPracticePrompt: "Solve for y: 4(2y - 1) = 3(y + 2) + 10.",
-    summaryRecap: "Clear fractions using the LCM. Distribute parentheses carefully. Group variables on one side, constants on the other, and divide by coefficient."
+    guidedPracticePrompt: "Solve step-by-step and verify by substitution: 4(2y - 1) - 3(y - 2) = 22.",
+    independentPracticePrompt: "Solve: (3x - 1)/5 - (x + 2)/2 = -1, then verify LHS = RHS.",
+    diagnosticSelfCheck: "If substituting your solution yields LHS ≠ RHS, trace back line-by-line looking for bracket sign flips.",
+    transferApplication: "Calibrating utility tariffs, electrical Ohm's-law circuit branches, and retail profit break-even points across Nigeria.",
+    masteryAssessment: "Solve 5 multi-step and fractional linear equations including 1 word model with 100% verified substitution checks.",
+    extensionActivity: "Investigate when ax + b = cx + d has zero solutions (parallel) versus infinitely many solutions (identity).",
+    summaryRecap: "Clear brackets carefully, scale all terms by the LCM to remove fractions, gather variable terms on one side, divide cleanly, and verify LHS = RHS.",
+    estimatedMinutes: 120
   },
 
   "skill-simultaneous-eq": {
     id: "les-simultaneous-eq",
     title: "Simultaneous Linear Equations: Elimination, Substitution, & Graphing",
-    hookAndIntuition: "Imagine two friends buying snacks: Alice buys 2 meat pies and 3 sodas for ₦1,900. Bob buys 4 meat pies and 1 soda for ₦2,300. How much does a single meat pie cost? Neither purchase alone tells you the price, but by comparing both transactions together, you can deduce the exact cost of each item!",
-    conceptualExplanation: "Simultaneous linear equations involve two or more equations sharing the same variables that must satisfy all equations at the same time. Geometrically, the solution represents the coordinates (x, y) where the two straight lines intersect. (1) Elimination Method: Multiply one or both equations by constants so that the coefficients of one variable become equal or opposite. Add or subtract the equations to eliminate that variable, solve for the remaining variable, and substitute back. (2) Substitution Method: Rearrange one equation to express one variable in terms of the other (e.g. y = 3 - 2x) and substitute this expression into the other equation. (3) Graphical Method: Plot both linear equations on coordinate axes; the point of intersection gives the solution. If lines are parallel, no solution exists (inconsistent); if lines are identical, infinitely many solutions exist.",
+    hookAndIntuition: "Suppose two traders visit Kano market: Trader A pays ₦1,200 for 2 books and 3 pens; Trader B pays ₦1,550 for 3 books and 2 pens. Neither receipt reveals the unit price by itself—yet combining both linear relationships uniquely locks in the exact price of one book and one pen!",
+    conceptualExplanation: "CORE SYLLABUS (NERDC JSS3 / WAEC / JAMB): A simultaneous linear system a₁x + b₁y = c₁ and a₂x + b₂y = c₂ asks for the single coordinate pair (x, y) satisfying both equations concurrently—geometrically, the intersection point of two straight lines in the Cartesian plane. Three Solution Methods: (1) Elimination Method: Scale one or both equations so the coefficients of one variable have equal magnitude. Add the equations if the signs are opposite, or subtract if the signs are identical, reducing the system to one linear equation in one variable. (2) Substitution Method: Express one variable explicitly from the simpler equation (e.g. x = y + 2) and substitute that expression into the second equation. (3) Graphical Intersection Method: Plot both lines; their intersection (x*, y*) gives the solution. ADVANCED ENRICHMENT (Cramer's Determinant Condition): A 2×2 system has a unique intersection iff Δ = a₁b₂ - a₂b₁ ≠ 0. If Δ = 0, the lines are parallel (inconsistent, 0 solutions) or coincident (dependent, infinitely many solutions).",
+    conceptualModel: "Intersecting Straight-Line Geometry: the algebraic solution (x*, y*) is the exact geometric point where both constraints cross.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Elimination Method", definition: "Equalizing coefficients and adding/subtracting equations to eliminate one variable.", practicalExample: "If Eq 1 has +3y and Eq 2 has -3y, adding the equations eliminates y immediately." },
-      { termOrSymbol: "Substitution Method", definition: "Isolating one variable in terms of the other and substituting into the second equation.", practicalExample: "If x = 2y + 1, substitute (2y + 1) wherever x appears in the other equation." },
-      { termOrSymbol: "Point of Intersection", definition: "The unique coordinate pair (x, y) where both line graphs meet.", practicalExample: "The lines 2x + y = 7 and x - y = 2 intersect at the unique point (3, 1)." }
+      { termOrSymbol: "Elimination Rule (Same Signs -> Subtract; Opposite Signs -> Add)", definition: "Balances a target variable's coefficients across both equations to cancel it cleanly.", practicalExample: "In 4b + 6p = 2400 and 9b + 6p = 4650, coefficients of p match (+6p), so subtract: 5b = 2250." },
+      { termOrSymbol: "Substitution Identity", definition: "Isolating one variable as an algebraic expression and inserting it into the companion equation.", practicalExample: "If x - y = 2, then x = y + 2 replaces x in 2x + 3y = 19." },
+      { termOrSymbol: "Consistency Condition: a₁/a₂ = b₁/b₂ ≠ c₁/c₂", definition: "Signals parallel lines with identical slope and distinct intercepts (no solution).", practicalExample: "2x - 3y = 7 and 6x - 9y = 15 are parallel and never intersect." }
     ],
     workedExamples: [
       {
-        title: "Solving a Linear System Using the Elimination Method",
-        problemStatement: "Solve the simultaneous equations:\n(1) 3x + 2y = 16\n(2) 2x - 3y = -11",
+        title: "Stroud Frame 1: Elimination Applied to Real Market Pricing",
+        problemStatement: "Two books and three pens cost ₦1,200. Three books and two pens cost ₦1,550. Find the exact unit price of one book (b) and one pen (p).",
         steps: [
-          { stepNumber: 1, instruction: "Choose variable to eliminate and equalize coefficients.", reasoning: "Let us eliminate y. The coefficients of y are +2 and -3. Multiply Eq (1) by 3 and Eq (2) by 2." },
-          { stepNumber: 2, instruction: "Multiply equations.", reasoning: "3 × (3x + 2y = 16) => 9x + 6y = 48 (Eq 3).\n2 × (2x - 3y = -11) => 4x - 6y = -22 (Eq 4)." },
-          { stepNumber: 3, instruction: "Add Eq (3) and Eq (4) to eliminate y.", reasoning: "(9x + 4x) + (6y - 6y) = 48 + (-22) => 13x = 26." },
-          { stepNumber: 4, instruction: "Solve for x.", reasoning: "x = 26 / 13 = 2." },
-          { stepNumber: 5, instruction: "Substitute x = 2 back into Eq (1) to solve for y.", reasoning: "3(2) + 2y = 16 => 6 + 2y = 16 => 2y = 10 => y = 5." },
-          { stepNumber: 6, instruction: "Verify in Eq (2).", reasoning: "2(2) - 3(5) = 4 - 15 = -11. Verified! Solution: x = 2, y = 5." }
+          { stepNumber: 1, instruction: "Formulate the two simultaneous linear equations.", reasoning: "(1) 2b + 3p = 1200; (2) 3b + 2p = 1550." },
+          { stepNumber: 2, instruction: "Equalize the coefficients of p by scaling Eq (1) by 2 and Eq (2) by 3.", reasoning: "Eq (3): 4b + 6p = 2400. Eq (4): 9b + 6p = 4650." },
+          { stepNumber: 3, instruction: "Subtract Eq (3) from Eq (4) to eliminate 6p.", reasoning: "(9b - 4b) + (6p - 6p) = 4650 - 2400 => 5b = 2250 => b = ₦450 per book." },
+          { stepNumber: 4, instruction: "Back-substitute b = 450 into Eq (1) to solve for p, then verify in Eq (2).", reasoning: "2(450) + 3p = 1200 => 3p = 300 => p = ₦100 per pen. Check in Eq (2): 3(450) + 2(100) = 1350 + 200 = 1550. Confirmed!" }
         ],
-        takeawayRule: "If signs of the equalized coefficients are opposite, ADD the equations; if signs are identical, SUBTRACT."
+        takeawayRule: "Always back-substitute BOTH values into the unused original equation to guarantee arithmetic accuracy."
+      },
+      {
+        title: "Stroud Frame 2: Graphical Intersection via Substitution",
+        problemStatement: "Find the intersection point of the lines 2x + 3y = 19 and x - y = 2.",
+        steps: [
+          { stepNumber: 1, instruction: "Isolate x from the simpler linear constraint.", reasoning: "From x - y = 2, write x = y + 2." },
+          { stepNumber: 2, instruction: "Substitute x = y + 2 into 2x + 3y = 19.", reasoning: "2(y + 2) + 3y = 19 => 2y + 4 + 3y = 19." },
+          { stepNumber: 3, instruction: "Solve for y.", reasoning: "5y = 15 => y = 3." },
+          { stepNumber: 4, instruction: "Determine x and write the intersection coordinate.", reasoning: "x = 3 + 2 = 5. Unique intersection coordinate is (5, 3)." }
+        ],
+        takeawayRule: "Substitution is fastest whenever one variable already carries coefficient +1 or -1."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Multiplying only the left side of an equation by a constant and forgetting the right side.", whyItIsWrong: "Failing to multiply the right side violates equality, producing completely false solutions.", correctCorrection: "Multiply EVERY term on both sides: k(ax + by) = k(c)." }
+      { misconception: "Scaling only the left-hand side of an equation when balancing coefficients.", whyItIsWrong: "Multiplying only 3x + 2y without scaling 16 destroys equality and shifts the line off its true locus.", correctCorrection: "Multiply EVERY term across LHS and RHS by the scaling factor." },
+      { misconception: "Sign error when subtracting a negative term: writing 2y - (-4y) = -2y.", whyItIsWrong: "Subtracting a negative adds its magnitude: 2y - (-4y) = 2y + 4y = 6y.", correctCorrection: "Write parentheses around subtracted negative expressions before simplifying." }
     ],
-    guidedPracticePrompt: "Solve using substitution: y = 2x - 5 and 3x + 2y = 18.",
-    summaryRecap: "Simultaneous equations find the common solution (x, y). Elimination equalizes coefficients; substitution replaces expressions. Geometrically, it is the line intersection."
+    guidedPracticePrompt: "Solve using elimination: 3x + 2y = 16 and 3x - 4y = -2.",
+    independentPracticePrompt: "A Lagos ferry carries 140 passengers across standard (₦500) and VIP (₦1,200) cabins, collecting ₦91,000. How many VIP passengers boarded?",
+    diagnosticSelfCheck: "Does your ordered pair (x, y) satisfy BOTH original equations simultaneously?",
+    transferApplication: "Engineering mesh-current analysis (Kirchhoff's Laws), supply-demand market equilibrium, and chemical mixture balancing.",
+    masteryAssessment: "Accurately solve 5 simultaneous systems spanning elimination, substitution, parallel inconsistency, and word modelling.",
+    extensionActivity: "Derive Cramer's Rule x = (c₁b₂ - c₂b₁)/(a₁b₂ - a₂b₁) for general 2×2 systems.",
+    summaryRecap: "Elimination cancels matched coefficients; substitution replaces an isolated variable; both locate the Cartesian intersection (x*, y*).",
+    estimatedMinutes: 120
   },
 
   "skill-quad-factoring": {
     id: "les-quad-factoring",
     title: "Quadratic Equations: Factoring, Completing the Square, & Quadratic Formula",
-    hookAndIntuition: "Why do satellite dishes have curved parabolic shapes? Why do fountain jets trace smooth symmetric arches? The parabola is the universal geometry of gravity and optics, described mathematically by quadratic equations.",
-    conceptualExplanation: "A quadratic equation is a second-degree polynomial equation of the form ax² + bx + c = 0 (where a ≠ 0). Three primary solution methods: (1) Factoring: Express as (px + q)(rx + s) = 0 and apply the Zero Product Property (if AB = 0, then A = 0 or B = 0). (2) Completing the Square: Transform ax² + bx + c into a(x - h)² + k = 0, useful for finding vertex coordinates and deriving the quadratic formula. (3) Quadratic Formula: x = (-b ± √(b² - 4ac)) / (2a). The Discriminant Δ = b² - 4ac reveals the nature of the roots: Δ > 0 gives two distinct real roots (parabola crosses x-axis twice); Δ = 0 gives one repeated real root (parabola touches x-axis at vertex); Δ < 0 gives no real roots (two complex conjugate roots, parabola does not intersect x-axis).",
+    hookAndIntuition: "Kick a football across an Abuja pitch or aim a satellite dish toward geostationary orbit: gravity and optics sculpt every path into a symmetric parabola y = ax² + bx + c. Understanding where that curve meets the ground—its roots—and where it peaks—its vertex—is the heart of quadratic mastery.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): A quadratic equation takes the canonical form ax² + bx + c = 0 (a ≠ 0). Three interlocking methods solve any quadratic: (1) Factorization by ac-Splitting: Find integers p, q such that p·q = a·c and p + q = b, split bx = px + qx, factor by grouping, and invoke the Zero-Product Property (AB = 0 => A = 0 or B = 0). (2) Completing the Square (Vertex Form): Rewrite ax² + bx + c as a(x + b/(2a))² - (b² - 4ac)/(4a), exposing the turning vertex (h, k) directly. (3) Universal Quadratic Formula (Stroud Derivation): Divide ax² + bx + c = 0 by a: x² + (b/a)x = -c/a. Add (b/(2a))² to both sides: (x + b/(2a))² = (b² - 4ac)/(4a²). Taking square roots yields x = (-b ± √(b² - 4ac)) / (2a). Discriminant Δ = b² - 4ac classifies roots: Δ > 0 gives two distinct real roots; Δ = 0 gives one repeated real root tangent at vertex; Δ < 0 gives complex conjugate roots with no x-intercept. ADVANCED ENRICHMENT: By Vieta's Formulas, the sum of roots α + β = -b/a and product αβ = c/a.",
+    conceptualModel: "Parabolic Symmetry Model: roots sit symmetrically at x = -b/(2a) ± √Δ/(2a) around the vertical axis of symmetry x = -b/(2a).",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Quadratic Formula: x = (-b ± √(b² - 4ac)) / (2a)", definition: "Universal formula for solving any quadratic equation.", practicalExample: "For 2x² - 5x + 2 = 0: x = (5 ± √(25 - 16))/4 = (5 ± 3)/4 => x = 2 or x = 0.5." },
-      { termOrSymbol: "Discriminant Δ = b² - 4ac", definition: "Determines root multiplicity: Δ > 0 (two real), Δ = 0 (one repeated), Δ < 0 (no real roots).", practicalExample: "For x² - 4x + 4 = 0: Δ = 16 - 16 = 0 (repeated root at x = 2)." },
-      { termOrSymbol: "Vertex of Parabola: x_v = -b / (2a)", definition: "Axis of symmetry and minimum/maximum turning point of y = ax² + bx + c.", practicalExample: "For y = x² - 6x + 8: x_v = -(-6)/2 = 3; y_v = 3² - 6(3) + 8 = -1." }
+      { termOrSymbol: "Quadratic Formula: x = (-b ± √(b² - 4ac)) / (2a)", definition: "Universal closed-form solver derived by completing the square on ax² + bx + c = 0.", practicalExample: "For 2x² + 5x - 12 = 0: x = (-5 ± √(25 + 96))/4 = (-5 ± 11)/4 => x = 3/2 or -4." },
+      { termOrSymbol: "Discriminant: Δ = b² - 4ac", definition: "Governs root reality and parabolic x-axis intersections.", practicalExample: "Δ = 0 implies the parabola touches the x-axis at exactly one tangent vertex." },
+      { termOrSymbol: "Vertex Form: a(x - h)² + k", definition: "Exposes axis of symmetry x = h = -b/(2a) and extremum value k directly.", practicalExample: "x² - 6x + 5 = (x - 3)² - 4 has minimum vertex (3, -4)." }
     ],
     workedExamples: [
       {
-        title: "Solving a Quadratic Equation by Factoring",
-        problemStatement: "Solve 2x² - 7x - 15 = 0 by factorization.",
+        title: "Stroud Frame 1: Deriving Roots by Completing the Square & Checking Vertex",
+        problemStatement: "Express y = x² - 4x + 3 in completed-square vertex form, locate its vertex, axis of symmetry, and both x-intercepts.",
         steps: [
-          { stepNumber: 1, instruction: "Find two numbers whose product is a·c and sum is b.", reasoning: "a = 2, b = -7, c = -15. Product = 2 × (-15) = -30. Sum = -7. Factors of -30 that sum to -7 are -10 and +3." },
-          { stepNumber: 2, instruction: "Split the middle term -7x using -10x and +3x.", reasoning: "2x² - 10x + 3x - 15 = 0." },
-          { stepNumber: 3, instruction: "Factor by grouping in pairs.", reasoning: "2x(x - 5) + 3(x - 5) = 0." },
-          { stepNumber: 4, instruction: "Extract the common binomial factor (x - 5).", reasoning: "(2x + 3)(x - 5) = 0." },
-          { stepNumber: 5, instruction: "Apply the Zero Product Property.", reasoning: "2x + 3 = 0 => x = -3/2 = -1.5; or x - 5 = 0 => x = 5." }
+          { stepNumber: 1, instruction: "Group the quadratic and linear x terms.", reasoning: "y = (x² - 4x) + 3." },
+          { stepNumber: 2, instruction: "Take half the coefficient of x (-4/2 = -2), square it ((-2)² = 4), and add/subtract 4.", reasoning: "y = (x² - 4x + 4) - 4 + 3 = (x - 2)² - 1." },
+          { stepNumber: 3, instruction: "Read the vertex and axis of symmetry directly.", reasoning: "Since (x - 2)² >= 0, the minimum value is y = -1 at x = 2. Vertex = (2, -1); axis of symmetry x = 2." },
+          { stepNumber: 4, instruction: "Set y = 0 to solve for the real roots.", reasoning: "(x - 2)² - 1 = 0 => (x - 2)² = 1 => x - 2 = ±1 => x = 3 or x = 1. Roots: (1, 0) and (3, 0)." }
         ],
-        takeawayRule: "When factoring ax² + bx + c with a > 1, split middle term b using factors of the product a·c."
+        takeawayRule: "Completing the square simultaneously reveals the extremum vertex (h, k) AND solves for both roots cleanly."
+      },
+      {
+        title: "Stroud Frame 2: Non-Monic Factorization & Discriminant Classification",
+        problemStatement: "Solve 2x² + 5x - 12 = 0 by ac-splitting, then test Δ = b² - 4ac on 3x² - 4x + 5 = 0.",
+        steps: [
+          { stepNumber: 1, instruction: "Compute product ac and target sum b for 2x² + 5x - 12 = 0.", reasoning: "ac = 2 × (-12) = -24; b = +5. Factor pair summing to +5 is +8 and -3." },
+          { stepNumber: 2, instruction: "Split middle term and factor in pairs.", reasoning: "2x² + 8x - 3x - 12 = 2x(x + 4) - 3(x + 4) = (2x - 3)(x + 4) = 0." },
+          { stepNumber: 3, instruction: "Apply Zero-Product Property.", reasoning: "2x - 3 = 0 => x = 3/2, or x + 4 = 0 => x = -4." },
+          { stepNumber: 4, instruction: "Compute discriminant Δ for 3x² - 4x + 5 = 0.", reasoning: "Δ = (-4)² - 4(3)(5) = 16 - 60 = -44 < 0, proving no real roots exist." }
+        ],
+        takeawayRule: "Always check signs when solving linear factors: (px - q) = 0 gives +q/p."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Canceling variable x from both sides: x² = 5x => x = 5.", whyItIsWrong: "Dividing by x eliminates the root x = 0! The correct method is to move all terms to one side: x² - 5x = 0 => x(x - 5) = 0 => x = 0 or x = 5.", correctCorrection: "Never divide an equation by a variable expression; factor it out instead." }
+      { misconception: "Canceling variable x from both sides of x² = 5x to conclude x = 5.", whyItIsWrong: "Dividing by x silently discards the valid root x = 0.", correctCorrection: "Move all terms to one side and factor: x(x - 5) = 0 => x = 0 or x = 5." },
+      { misconception: "Writing the vertex of y = (x - 3)² - 4 as (-3, -4).", whyItIsWrong: "The squared bracket vanishes when x - 3 = 0, which occurs at x = +3.", correctCorrection: "Flip the sign inside (x - h) to read h: vertex is (+3, -4)." }
     ],
-    guidedPracticePrompt: "Use the quadratic formula to solve 3x² + 5x - 2 = 0.",
-    summaryRecap: "Quadratic equations ax² + bx + c = 0 are solved by factoring or formula x = (-b ± √Δ)/(2a). Discriminant Δ reveals root nature."
+    guidedPracticePrompt: "Complete the square on y = x² - 6x + 5 to find its vertex and roots.",
+    independentPracticePrompt: "Find k > 0 such that x² + kx + 16 = 0 has exactly one repeated root, and solve for that root.",
+    diagnosticSelfCheck: "Can you derive x = (-b ± √(b² - 4ac)) / (2a) from ax² + bx + c = 0 from scratch without looking at notes?",
+    transferApplication: "Optimizing projectile trajectories, structural parabolic arch spans, and business revenue-maximization curves.",
+    masteryAssessment: "Factor non-monic quadratics, complete the square to locate vertices, and classify discriminants across 5 WAEC/JAMB items.",
+    extensionActivity: "Express the sum and product of roots of 2x² - 7x + 4 = 0 without solving for the roots explicitly (Vieta's formulas).",
+    summaryRecap: "Quadratics solve via ac-factoring, completing the square a(x - h)² + k, or formula (-b ± √Δ)/(2a), with Δ classifying real vs complex roots.",
+    estimatedMinutes: 145
   },
 
   "skill-sine-cosine-rule": {

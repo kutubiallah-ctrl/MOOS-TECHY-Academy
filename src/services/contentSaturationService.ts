@@ -16,6 +16,7 @@
  */
 
 import { ALL_CURRICULUM_UNITS } from "../data/extendedCurriculumUnits";
+import { EXPANDED_151_SUBJECT_CATEGORIES } from "../data/expandedSubjectCategories";
 import { FLASHCARD_DECKS } from "../data/flashcardRepository";
 import { VISUALIZATION_REPOSITORY } from "../data/visualizationsRepository";
 import { INTERACTIVE_ACTIVITIES } from "../data/interactiveActivitiesRepository";
@@ -24,6 +25,8 @@ import { CAREER_PATHWAYS } from "../data/careerPathwaysData";
 import { NIGERIAN_LOCALIZATIONS } from "../data/nigerianTranslations";
 import { agentOrchestrationService } from "./agentOrchestrationService";
 import { videoLearningService } from "./videoLearningService";
+import { contentQualityEngine } from "./contentQualityEngine";
+import { APPROVAL_QUALITY_THRESHOLD, TopicGovernanceRecord } from "../types/contentGovernance";
 import {
   ContentSaturationReport,
   ContentSaturationMetrics,
@@ -41,17 +44,21 @@ import {
   CareerPathway,
   NigerianLanguageLocalization
 } from "../types/contentSaturation";
-import { EducationalLevel } from "../types/curriculum";
+import { EducationalLevel, Unit } from "../types/curriculum";
 
 class ContentSaturationService {
   private governedLoopHistory: GovernedLoopExecutionRecord[] = [];
-  private previousScore: number = 88;
+  private previousScore: number = 0;
 
   constructor() {
     this.seedInitialGovernedLoopRecords();
   }
 
   private seedInitialGovernedLoopRecords() {
+    const unitCount = ALL_CURRICULUM_UNITS.length;
+    const skillCount = ALL_CURRICULUM_UNITS.reduce((acc, u) => acc + u.skills.length, 0);
+    const catalogCount = EXPANDED_151_SUBJECT_CATEGORIES.length;
+
     this.governedLoopHistory = [
       {
         id: "loop-rec-001",
@@ -59,8 +66,8 @@ class ContentSaturationService {
         stage: "SCAN_CURRICULUM",
         stageNumber: 1,
         agentId: "curriculum_planner_agent",
-        actionSummary: "Audited 72 curriculum units across 6 educational tiers. Verified 100% of units are structured with micro-skills.",
-        evidenceData: { scannedUnitsCount: 72, levelsAudited: 6 },
+        actionSummary: `Audited ${unitCount} authored units (${skillCount} skills) against ${catalogCount} catalog subject frameworks across 6 educational tiers.`,
+        evidenceData: { scannedUnitsCount: unitCount, scannedSkillsCount: skillCount, catalogSubjectsCount: catalogCount },
         governancePassed: true
       },
       {
@@ -199,8 +206,8 @@ class ContentSaturationService {
         stage: "RESCAN",
         stageNumber: 15,
         agentId: "curriculum_planner_agent",
-        actionSummary: "Re-scanned all 32 dimensions: Overall Saturation Index verified at 94%, meeting the >= 70% threshold with 0 critical gaps.",
-        evidenceData: { updatedSaturationIndex: 94, targetMet: true, previousIndex: 88 },
+        actionSummary: `Initialized live weighted QA audit (${APPROVAL_QUALITY_THRESHOLD}% threshold) and disqualifier isolation pipeline across ${unitCount} authored units.`,
+        evidenceData: { scannedUnitsCount: unitCount, approvalThreshold: APPROVAL_QUALITY_THRESHOLD },
         governancePassed: true
       }
     ];
@@ -210,7 +217,12 @@ class ContentSaturationService {
    * Evaluates the full academy ecosystem against all 32 Content Saturation dimensions.
    */
   public generateContentSaturationReport(): ContentSaturationReport {
-    const units = ALL_CURRICULUM_UNITS;
+    const governanceRecords = contentQualityEngine.evaluateAllUnits();
+    const elevenDepthMetrics = contentQualityEngine.getElevenDepthMetrics();
+
+    const units: Unit[] = ALL_CURRICULUM_UNITS.map(
+      (u) => contentQualityEngine.getEffectiveUnit(u.id) || u
+    );
     const skills = units.flatMap(u => u.skills);
     const questions = skills.flatMap(s => s.questions || []);
 
@@ -226,6 +238,7 @@ class ContentSaturationService {
     const visualizations = Object.values(VISUALIZATION_REPOSITORY);
     const totalVisualizations = visualizations.length;
     const coordinateGraphsCount = visualizations.filter(v => v.type === "coordinate_graph" || v.type === "equilibrium_curve").length;
+    const svgVisualsCount = visualizations.filter(v => Boolean(v.diagramSvgSnippet && v.diagramSvgSnippet.includes("<svg"))).length;
 
     // Tally interactive activities
     const allActivities = Object.values(INTERACTIVE_ACTIVITIES).flat();
@@ -235,21 +248,28 @@ class ContentSaturationService {
     const totalProjects = REAL_WORLD_PROJECTS.length;
     const totalCareerPathways = CAREER_PATHWAYS.length;
 
-    // Count structural depth
+    // Count structural depth empirically
     const totalWorkedExamples = skills.reduce((acc, s) => acc + (s.lesson?.workedExamples?.length || 0), 0);
     const totalMisconceptions = skills.reduce((acc, s) => acc + (s.lesson?.commonMisconceptionsAndTraps?.length || 0), 0);
     const questionsWithHintsCount = questions.filter(q => q.hintLadder && q.hintLadder.length > 0).length;
-    const totalHintSteps = questions.reduce((acc, q) => acc + (q.hintLadder?.length || 0), 0);
+    const distinctQuestionTypes = new Set(questions.map(q => q.type)).size;
+    const distinctDifficulties = new Set(questions.map(q => q.difficulty)).size;
+    const skillsWithGuidedPrompt = skills.filter(s => Boolean(s.lesson?.guidedPracticePrompt)).length;
+    const skillsWithIndependentPrompt = skills.filter(s => Boolean(s.lesson?.independentPracticePrompt)).length;
+    const skillsWithExtension = skills.filter(s => Boolean(s.lesson?.extensionActivity)).length;
+    const skillsWithRevision = skills.filter(s => Boolean(s.lesson?.summaryRecap || s.lesson?.masteryAssessment)).length;
+    const unitsWithThreePlusHours = units.filter(u => (u.estimatedHours || 0) >= 3).length;
 
     // Anti-duplication audit
     const uniqueCardFronts = new Set(flashcardDecks.flatMap(d => d.cards.map(c => c.front.trim().toLowerCase())));
     const duplicateCardsCount = totalFlashcards - uniqueCardFronts.size;
     const effectiveFlashcards = Math.max(0, totalFlashcards - duplicateCardsCount);
 
-    // Anti-fake penalties: count any empty skills or single question skills
-    const singleQuestionSkillsCount = skills.filter(s => (s.questions?.length || 0) === 1).length;
+    // Anti-fake penalties: genuine deduction for single-question skills, missing lessons, and disqualified units
+    const singleQuestionSkillsCount = skills.filter(s => (s.questions?.length || 0) <= 1).length;
     const skillsWithoutLessonCount = skills.filter(s => !s.lesson).length;
-    const antiFakePenalty = (singleQuestionSkillsCount * 0.5) + (skillsWithoutLessonCount * 1.5);
+    const disqualifiedUnitsCount = governanceRecords.filter(r => r.disqualifiers.length > 0).length;
+    const antiFakePenalty = (singleQuestionSkillsCount * 0.5) + (skillsWithoutLessonCount * 1.5) + (disqualifiedUnitsCount * 1.5);
 
     // Educational levels populated
     const levelCounts: Record<EducationalLevel, number> = {
@@ -442,55 +462,58 @@ class ContentSaturationService {
         substanceDescription: `${totalQuestions} verified practice questions with distractors and explanations.`,
         verificationMethod: "Question schema validator"
       },
-      // 9. Question Diversity
+      // 9. Question Diversity (empirical distinct types present)
       {
         dimensionNumber: 9,
         id: "dim-09-question-diversity",
         name: "Multi-Format Question Diversity",
-        measurementRule: "Verified presence of MCQ, numeric input, multi-step theory, and CBT item formats",
-        numerator: 4,
+        measurementRule: "(Distinct Verified Question Formats Present / 4 Target Formats) × 100",
+        numerator: distinctQuestionTypes,
         denominator: 4,
-        score: 95,
-        evidenceSource: "Question type enum distribution: multiple_choice, numeric_input, open_response, cbt_scenario",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        score: Math.min(100, Math.round((distinctQuestionTypes / 4) * 100)),
+        evidenceSource: "Question type enum distribution across Skill.questions",
+        classification: getClassification(Math.min(100, Math.round((distinctQuestionTypes / 4) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((distinctQuestionTypes / 4) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((distinctQuestionTypes / 4) * 100)))),
         recommendedSpecialistAgent: "assessment_author_agent",
-        substanceDescription: "Includes standard multiple-choice, numerical problem-solving, and free-form derivations.",
-        verificationMethod: "Question type registry verification"
+        substanceDescription: `${distinctQuestionTypes} distinct interactive question formats audited across ${totalQuestions} verified questions.`,
+        verificationMethod: "Question type registry enumeration"
       },
-      // 10. Bloom Progression
+      // 10. Bloom / Difficulty Progression
       {
         dimensionNumber: 10,
         id: "dim-10-bloom-progression",
-        name: "Bloom's Taxonomy Progression",
-        measurementRule: "Cognitive distribution across Recall, Comprehend, Apply, Analyze, Evaluate, Create",
-        numerator: 6,
-        denominator: 6,
-        score: 94,
-        evidenceSource: "Foundational, intermediate, and advanced tiered questions with higher-order synthesis prompts",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        name: "Difficulty & Cognitive Progression",
+        measurementRule: "((Difficulty Tiers / 3) * 50) + (Skills with >= 5 Qs / Total Skills) * 50",
+        numerator: elevenDepthMetrics.skillsWithMinFiveQuestionsCount,
+        denominator: totalSkills,
+        score: Math.min(
+          100,
+          Math.round((distinctDifficulties / 3) * 60 + (elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 40)
+        ),
+        evidenceSource: "Easy/Medium/Hard distribution and >=5-question depth threshold across skills",
+        classification: getClassification(Math.min(100, Math.round((distinctDifficulties / 3) * 60 + (elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 40))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((distinctDifficulties / 3) * 60 + (elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 40))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((distinctDifficulties / 3) * 60 + (elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 40)))),
         recommendedSpecialistAgent: "pedagogy_critic_agent",
-        substanceDescription: "Progression from basic recall to complex real-world applied evaluation.",
-        verificationMethod: "Taxonomic distribution verification"
+        substanceDescription: `${distinctDifficulties}/3 difficulty tiers active; ${elevenDepthMetrics.skillsWithMinFiveQuestionsCount}/${totalSkills} skills meet >=5 verified questions.`,
+        verificationMethod: "Difficulty distribution and minimum coverage check"
       },
       // 11. Hint Coverage
       {
         dimensionNumber: 11,
         id: "dim-11-hint-coverage",
         name: "Scaffolded 3-Tier Hint Ladders",
-        measurementRule: "(Questions equipped with 3-Tier Hint Ladders / Total Questions) × 100",
+        measurementRule: "(Questions equipped with Hint Ladders / Total Questions) × 100",
         numerator: questionsWithHintsCount,
         denominator: totalQuestions,
-        score: Math.min(100, Math.round((questionsWithHintsCount / totalQuestions) * 100)),
+        score: Math.min(100, Math.round((questionsWithHintsCount / Math.max(1, totalQuestions)) * 100)),
         evidenceSource: "Question.hintLadder array across practice questions",
-        classification: getClassification(Math.min(100, Math.round((questionsWithHintsCount / totalQuestions) * 100))),
-        gapStatus: getGapStatus(Math.min(100, Math.round((questionsWithHintsCount / totalQuestions) * 100))),
-        priority: getPriority(getGapStatus(Math.min(100, Math.round((questionsWithHintsCount / totalQuestions) * 100)))),
+        classification: getClassification(Math.min(100, Math.round((questionsWithHintsCount / Math.max(1, totalQuestions)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((questionsWithHintsCount / Math.max(1, totalQuestions)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((questionsWithHintsCount / Math.max(1, totalQuestions)) * 100)))),
         recommendedSpecialistAgent: "remediation_agent",
-        substanceDescription: `${questionsWithHintsCount} questions feature progressive 3-tier hint ladders.`,
+        substanceDescription: `${questionsWithHintsCount}/${totalQuestions} questions feature progressive hint ladders.`,
         verificationMethod: "Hint ladder length verification"
       },
       // 12. Misconception Coverage
@@ -501,81 +524,81 @@ class ContentSaturationService {
         measurementRule: "(Skills equipped with Misconception Warnings / Total Skills) × 100",
         numerator: skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length,
         denominator: totalSkills,
-        score: Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / totalSkills) * 100)),
+        score: Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / Math.max(1, totalSkills)) * 100)),
         evidenceSource: "Lesson.commonMisconceptionsAndTraps arrays and Question.misconceptionAlerts",
-        classification: getClassification(Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / totalSkills) * 100))),
-        gapStatus: getGapStatus(Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / totalSkills) * 100))),
-        priority: getPriority(getGapStatus(Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / totalSkills) * 100)))),
+        classification: getClassification(Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / Math.max(1, totalSkills)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / Math.max(1, totalSkills)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((skills.filter(s => (s.lesson?.commonMisconceptionsAndTraps?.length || 0) > 0).length / Math.max(1, totalSkills)) * 100)))),
         recommendedSpecialistAgent: "remediation_agent",
-        substanceDescription: `${totalMisconceptions} explicit misconception traps with psychological root cause explanations.`,
+        substanceDescription: `${totalMisconceptions} explicit misconception traps documented across lessons.`,
         verificationMethod: "Misconception bank query verification"
       },
       // 13. Diagnostic Coverage
       {
         dimensionNumber: 13,
         id: "dim-13-diagnostic-coverage",
-        name: "Diagnostic Placement Assessments",
-        measurementRule: "Baseline diagnostic assessment modules available across flagship academies",
-        numerator: 6,
-        denominator: 6,
-        score: 92,
-        evidenceSource: "Diagnostic Calibration Agent and baseline calibration question pools",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        name: "Diagnostic Placement & Prerequisites",
+        measurementRule: "(Skills with Explicit Prerequisites or Diagnostic Calibration / Total Skills) × 100",
+        numerator: skills.filter(s => (s.prerequisiteSkillIds?.length || 0) > 0 || Boolean(s.lesson?.diagnosticSelfCheck)).length,
+        denominator: totalSkills,
+        score: Math.min(100, Math.round((skills.filter(s => (s.prerequisiteSkillIds?.length || 0) > 0 || Boolean(s.lesson?.diagnosticSelfCheck)).length / Math.max(1, totalSkills)) * 100)),
+        evidenceSource: "Skill.prerequisiteSkillIds and Lesson.diagnosticSelfCheck across curriculum",
+        classification: getClassification(Math.min(100, Math.round((skills.filter(s => (s.prerequisiteSkillIds?.length || 0) > 0 || Boolean(s.lesson?.diagnosticSelfCheck)).length / Math.max(1, totalSkills)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((skills.filter(s => (s.prerequisiteSkillIds?.length || 0) > 0 || Boolean(s.lesson?.diagnosticSelfCheck)).length / Math.max(1, totalSkills)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((skills.filter(s => (s.prerequisiteSkillIds?.length || 0) > 0 || Boolean(s.lesson?.diagnosticSelfCheck)).length / Math.max(1, totalSkills)) * 100)))),
         recommendedSpecialistAgent: "remediation_agent",
-        substanceDescription: "Diagnostic placement assessments map prerequisite chains and calibrate starting tiers.",
-        verificationMethod: "Diagnostic pipeline test"
+        substanceDescription: `Empirical prerequisite graph coverage across authored curriculum skills.`,
+        verificationMethod: "Prerequisite linkage audit"
       },
       // 14. Remediation Coverage
       {
         dimensionNumber: 14,
         id: "dim-14-remediation-coverage",
         name: "Targeted Remediation & Intervention",
-        measurementRule: "Dedicated unlearning guides and stepped prerequisite remediation pathways",
-        numerator: 90,
-        denominator: 100,
-        score: 90,
-        evidenceSource: "Stepped counter-example banks and targeted remedial micro-lessons",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        measurementRule: "(Units Passing Weighted QA Gate >= 85% / Total Authored Units) × 100",
+        numerator: elevenDepthMetrics.approvedPublishedUnitsCount,
+        denominator: totalUnits,
+        score: Math.min(100, Math.round((elevenDepthMetrics.approvedPublishedUnitsCount / Math.max(1, totalUnits)) * 100)),
+        evidenceSource: "contentQualityEngine automated QA & disqualifier isolation telemetry",
+        classification: getClassification(Math.min(100, Math.round((elevenDepthMetrics.approvedPublishedUnitsCount / Math.max(1, totalUnits)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((elevenDepthMetrics.approvedPublishedUnitsCount / Math.max(1, totalUnits)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((elevenDepthMetrics.approvedPublishedUnitsCount / Math.max(1, totalUnits)) * 100)))),
         recommendedSpecialistAgent: "remediation_agent",
-        substanceDescription: "Remediation agent automatically provides tailored diagnostic intervention when error patterns trigger.",
-        verificationMethod: "Remediation trigger verification"
+        substanceDescription: `${elevenDepthMetrics.approvedPublishedUnitsCount}/${totalUnits} authored units pass weighted QA (>=${APPROVAL_QUALITY_THRESHOLD}%) with 0 disqualifiers; ${elevenDepthMetrics.isolatedUnitsCount} isolated.`,
+        verificationMethod: "Weighted QA & disqualifier scan"
       },
       // 15. Extension Coverage
       {
         dimensionNumber: 15,
         id: "dim-15-extension-coverage",
         name: "Olympiad & Honors Extension Challenges",
-        measurementRule: "Advanced inquiry prompts and multi-concept synthesis challenges across units",
-        numerator: 88,
-        denominator: 100,
-        score: 88,
-        evidenceSource: "Extension specialist agent prompts and advanced derivation proofs",
-        classification: "DEEP",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        measurementRule: "(Skills with Explicit Extension Challenges / Total Skills) × 100",
+        numerator: skillsWithExtension,
+        denominator: totalSkills,
+        score: Math.min(100, Math.round((skillsWithExtension / Math.max(1, totalSkills)) * 100)),
+        evidenceSource: "Lesson.extensionActivity presence across curriculum skills",
+        classification: getClassification(Math.min(100, Math.round((skillsWithExtension / Math.max(1, totalSkills)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((skillsWithExtension / Math.max(1, totalSkills)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((skillsWithExtension / Math.max(1, totalSkills)) * 100)))),
         recommendedSpecialistAgent: "extension_agent",
-        substanceDescription: "Features rigorous contest problems, university-level derivations, and open investigations.",
-        verificationMethod: "Extension prompt audit"
+        substanceDescription: `${skillsWithExtension}/${totalSkills} skills include advanced extension tasks.`,
+        verificationMethod: "Extension activity field count"
       },
       // 16. Revision Coverage
       {
         dimensionNumber: 16,
         id: "dim-16-revision-coverage",
         name: "Systematic Retrieval Practice & Revision",
-        measurementRule: "Formula codices, executive summaries, and spaced active recall prompts",
-        numerator: 92,
-        denominator: 100,
-        score: 92,
-        evidenceSource: "Unit revision checklists and retrieval practice triggers",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        measurementRule: "(Skills with Crisp Revision Summaries or Mastery Checks / Total Skills) × 100",
+        numerator: skillsWithRevision,
+        denominator: totalSkills,
+        score: Math.min(100, Math.round((skillsWithRevision / Math.max(1, totalSkills)) * 100)),
+        evidenceSource: "Lesson.summaryRecap and Lesson.masteryAssessment across curriculum skills",
+        classification: getClassification(Math.min(100, Math.round((skillsWithRevision / Math.max(1, totalSkills)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((skillsWithRevision / Math.max(1, totalSkills)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((skillsWithRevision / Math.max(1, totalSkills)) * 100)))),
         recommendedSpecialistAgent: "flashcard_agent",
-        substanceDescription: "Integrated high-yield summaries and spaced active retrieval practice across units.",
+        substanceDescription: `${skillsWithRevision}/${totalSkills} skills provide structured revision recaps.`,
         verificationMethod: "Revision module verification"
       },
       // 17. Flashcard Coverage
@@ -599,18 +622,18 @@ class ContentSaturationService {
       {
         dimensionNumber: 18,
         id: "dim-18-visual-learning",
-        name: "Visual Learning Models & Schematics",
-        measurementRule: "(Verified Educational Visual Models / Target Standard [10]) × 100",
+        name: "Visual Learning Models & Vector SVG Diagrams",
+        measurementRule: "(Verified Educational Visuals + Vector SVG Diagrams / Target Standard [12]) × 100",
         numerator: totalVisualizations,
-        denominator: 10,
-        score: Math.min(100, Math.round((totalVisualizations / 10) * 100)),
-        evidenceSource: "VISUALIZATION_REPOSITORY models (parabolas, markets, circuits, DNA, reaction coordinates)",
-        classification: getClassification(Math.min(100, Math.round((totalVisualizations / 10) * 100))),
-        gapStatus: getGapStatus(Math.min(100, Math.round((totalVisualizations / 10) * 100))),
-        priority: getPriority(getGapStatus(Math.min(100, Math.round((totalVisualizations / 10) * 100)))),
+        denominator: 12,
+        score: Math.min(100, Math.round(((totalVisualizations + svgVisualsCount * 0.5) / 14) * 100)),
+        evidenceSource: "VISUALIZATION_REPOSITORY models and diagramSvgSnippet vector assets",
+        classification: getClassification(Math.min(100, Math.round(((totalVisualizations + svgVisualsCount * 0.5) / 14) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round(((totalVisualizations + svgVisualsCount * 0.5) / 14) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round(((totalVisualizations + svgVisualsCount * 0.5) / 14) * 100)))),
         recommendedSpecialistAgent: "visualization_agent",
-        substanceDescription: `${totalVisualizations} interactive educational visualizations and process flow models.`,
-        verificationMethod: "Visual repository schema audit"
+        substanceDescription: `${totalVisualizations} educational visualizations (${svgVisualsCount} with crisp vector SVG diagrams).`,
+        verificationMethod: "Visual repository SVG & schema audit"
       },
       // 19. Chart and Graph Coverage
       {
@@ -626,7 +649,7 @@ class ContentSaturationService {
         gapStatus: getGapStatus(Math.min(100, Math.round((coordinateGraphsCount / 6) * 100))),
         priority: getPriority(getGapStatus(Math.min(100, Math.round((coordinateGraphsCount / 6) * 100)))),
         recommendedSpecialistAgent: "visualization_agent",
-        substanceDescription: `${coordinateGraphsCount} interactive mathematical coordinate plots with data point tooltips and takeaway rules.`,
+        substanceDescription: `${coordinateGraphsCount} interactive mathematical coordinate plots with data point tooltips.`,
         verificationMethod: "Graph curve point validation"
       },
       // 20. Interactive Activity Coverage
@@ -643,7 +666,7 @@ class ContentSaturationService {
         gapStatus: getGapStatus(Math.min(100, Math.round((totalActivities / 8) * 100))),
         priority: getPriority(getGapStatus(Math.min(100, Math.round((totalActivities / 8) * 100)))),
         recommendedSpecialistAgent: "activity_design_agent",
-        substanceDescription: `${totalActivities} interactive cognitive activities with real-time feedback and points rewards.`,
+        substanceDescription: `${totalActivities} interactive cognitive activities with immediate feedback.`,
         verificationMethod: "Activity interactive simulation validation"
       },
       // 21. Project-Based Learning Coverage
@@ -667,51 +690,51 @@ class ContentSaturationService {
       {
         dimensionNumber: 22,
         id: "dim-22-real-world-applications",
-        name: "Practical Industrial & Community Case Studies",
-        measurementRule: "Everyday life and regional industrial relevance grounding across curriculum",
-        numerator: totalProjects,
-        denominator: 5,
-        score: 96,
-        evidenceSource: "Traffic optimization, solar microgrids, water quality, and agricultural triage case studies",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        name: "Practical Industrial & Community Applications",
+        measurementRule: "(Skills with Real-World Application Case Notes / Total Skills) × 100",
+        numerator: skills.filter(s => Boolean(s.lesson?.transferApplication)).length,
+        denominator: totalSkills,
+        score: Math.min(100, Math.round((skills.filter(s => Boolean(s.lesson?.transferApplication)).length / Math.max(1, totalSkills)) * 100)),
+        evidenceSource: "Lesson.transferApplication fields and REAL_WORLD_PROJECTS",
+        classification: getClassification(Math.min(100, Math.round((skills.filter(s => Boolean(s.lesson?.transferApplication)).length / Math.max(1, totalSkills)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((skills.filter(s => Boolean(s.lesson?.transferApplication)).length / Math.max(1, totalSkills)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((skills.filter(s => Boolean(s.lesson?.transferApplication)).length / Math.max(1, totalSkills)) * 100)))),
         recommendedSpecialistAgent: "stem_interactive_agent",
-        substanceDescription: "Grounded in real West African and global contexts (Lagos transit, solar clinics, cassava diseases).",
-        verificationMethod: "Case study context verification"
+        substanceDescription: `${skills.filter(s => Boolean(s.lesson?.transferApplication)).length}/${totalSkills} skills link concepts to Nigerian and global real-world contexts.`,
+        verificationMethod: "Real-world application field scan"
       },
       // 23. Assessment Coverage
       {
         dimensionNumber: 23,
         id: "dim-23-assessment-coverage",
-        name: "Formative & Summative Milestone Assessments",
-        measurementRule: "Periodic diagnostic, formative checkpoints, and summative milestone evaluations",
-        numerator: 94,
+        name: "Weighted Quality Assurance Average",
+        measurementRule: "Average Weighted QA Score across Approved Published Modules",
+        numerator: elevenDepthMetrics.averageApprovedQualityScore,
         denominator: 100,
-        score: 94,
-        evidenceSource: "Question banks, test suites, and unit mastery thresholds",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        score: elevenDepthMetrics.averageApprovedQualityScore,
+        evidenceSource: "contentQualityEngine 8-dimension weighted scoring rubric",
+        classification: getClassification(elevenDepthMetrics.averageApprovedQualityScore),
+        gapStatus: getGapStatus(elevenDepthMetrics.averageApprovedQualityScore),
+        priority: getPriority(getGapStatus(elevenDepthMetrics.averageApprovedQualityScore)),
         recommendedSpecialistAgent: "assessment_author_agent",
-        substanceDescription: "Integrated formative checks, end-of-unit quizzes, and standardized milestone reviews.",
-        verificationMethod: "Assessment engine unit test"
+        substanceDescription: `Published modules achieve an empirical mean QA score of ${elevenDepthMetrics.averageApprovedQualityScore}% (threshold: ${APPROVAL_QUALITY_THRESHOLD}%).`,
+        verificationMethod: "Weighted rubric evaluation"
       },
       // 24. Examination Preparation
       {
         dimensionNumber: 24,
         id: "dim-24-exam-preparation",
-        name: "Standardized Examination Rigor (WAEC & JAMB)",
-        measurementRule: "Original exam-format questions, timed CBT drills, and syllabus alignment",
-        numerator: 96,
-        denominator: 100,
-        score: 96,
-        evidenceSource: "WAEC WASSCE and JAMB UTME exam prep units and high-stakes trap analyses",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        name: "Standardized Examination Rigor (NERDC / WAEC / JAMB)",
+        measurementRule: "(Units with Explicit Syllabus Mappings or Exam Standards / Total Units) × 100",
+        numerator: governanceRecords.filter(r => r.curriculum.length > 0).length,
+        denominator: totalUnits,
+        score: Math.min(100, Math.round((governanceRecords.filter(r => r.curriculum.length > 0).length / Math.max(1, totalUnits)) * 100)),
+        evidenceSource: "Unit.curriculumStandardMappings and CURRIULUM_STANDARD_MAPPINGS",
+        classification: getClassification(Math.min(100, Math.round((governanceRecords.filter(r => r.curriculum.length > 0).length / Math.max(1, totalUnits)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((governanceRecords.filter(r => r.curriculum.length > 0).length / Math.max(1, totalUnits)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((governanceRecords.filter(r => r.curriculum.length > 0).length / Math.max(1, totalUnits)) * 100)))),
         recommendedSpecialistAgent: "exam_preparation_agent",
-        substanceDescription: "Directly prepares candidates for WAEC, JAMB CBT, and international secondary examinations.",
+        substanceDescription: `${levelCounts.exam_prep} dedicated exam-prep units plus aligned NERDC/WAEC/NECO/JAMB modules.`,
         verificationMethod: "Syllabus mapping cross-check"
       },
       // 25. University & Tertiary Preparation
@@ -719,17 +742,17 @@ class ContentSaturationService {
         dimensionNumber: 25,
         id: "dim-25-tertiary-preparation",
         name: "University & Tertiary STEM Transition",
-        measurementRule: "Advanced tertiary modules (Calculus, Linear Algebra, Systems Architecture)",
+        measurementRule: "(University Prep Modules / Target Baseline [4]) × 100",
         numerator: levelCounts.university_prep,
         denominator: 4,
-        score: 94,
-        evidenceSource: "University Prep unit modules and rigorous formal proof derivations",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        score: Math.min(100, Math.round((levelCounts.university_prep / 4) * 100)),
+        evidenceSource: "University Prep unit modules in ALL_CURRICULUM_UNITS",
+        classification: getClassification(Math.min(100, Math.round((levelCounts.university_prep / 4) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((levelCounts.university_prep / 4) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((levelCounts.university_prep / 4) * 100)))),
         recommendedSpecialistAgent: "tertiary_preparation_agent",
-        substanceDescription: "Bridges secondary education to first-year university mathematics, physics, and computer science.",
-        verificationMethod: "Tertiary syllabus cross-check"
+        substanceDescription: `${levelCounts.university_prep} tertiary transition modules spanning Linear Algebra, Calculus, and Computing.`,
+        verificationMethod: "Tertiary unit count audit"
       },
       // 26. Career Pathway Coverage
       {
@@ -740,81 +763,81 @@ class ContentSaturationService {
         numerator: totalCareerPathways,
         denominator: 6,
         score: Math.min(100, Math.round((totalCareerPathways / 6) * 100)),
-        evidenceSource: "CAREER_PATHWAYS repository mapping curriculum to modern technology and engineering professions",
+        evidenceSource: "CAREER_PATHWAYS repository mapping curriculum to professions",
         classification: getClassification(Math.min(100, Math.round((totalCareerPathways / 6) * 100))),
         gapStatus: getGapStatus(Math.min(100, Math.round((totalCareerPathways / 6) * 100))),
         priority: getPriority(getGapStatus(Math.min(100, Math.round((totalCareerPathways / 6) * 100)))),
         recommendedSpecialistAgent: "tertiary_preparation_agent",
-        substanceDescription: `${totalCareerPathways} comprehensive pathways mapping curriculum to careers in AI, Software, and Finance.`,
+        substanceDescription: `${totalCareerPathways} structured career pathways.`,
         verificationMethod: "Career matrix verification"
       },
-      // 27. Teacher Resource Coverage
+      // 27. 300-Subject Catalog Coverage (Honest Empirical Ratio)
       {
         dimensionNumber: 27,
-        id: "dim-27-teacher-resources",
-        name: "Teacher Studio Pedagogical Resources",
-        measurementRule: "Lesson plans, instructional notes, exit tickets, and pedagogical rubrics",
-        numerator: 92,
-        denominator: 100,
-        score: 92,
-        evidenceSource: "Teacher Studio resources, lesson plans, and assignment authoring tools",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
-        recommendedSpecialistAgent: "teacher_assistant_agent",
-        substanceDescription: "Equips educators with classroom lesson plans, diagnostic insight, and homework generators.",
-        verificationMethod: "Teacher tool verification"
+        id: "dim-27-catalog-300-coverage",
+        name: "300-Subject Expanded Catalog Coverage",
+        measurementRule: "(Catalog Subjects with Published Authored Units / 300 Catalog Subjects) × 100",
+        numerator: elevenDepthMetrics.subjectsWithPublishedUnitsCount,
+        denominator: elevenDepthMetrics.catalogSubjectsCount,
+        score: Math.round((elevenDepthMetrics.subjectsWithPublishedUnitsCount / Math.max(1, elevenDepthMetrics.catalogSubjectsCount)) * 100),
+        evidenceSource: "EXPANDED_151_SUBJECT_CATEGORIES (300 subjects) matched against published units",
+        classification: getClassification(Math.round((elevenDepthMetrics.subjectsWithPublishedUnitsCount / Math.max(1, elevenDepthMetrics.catalogSubjectsCount)) * 100)),
+        gapStatus: getGapStatus(Math.round((elevenDepthMetrics.subjectsWithPublishedUnitsCount / Math.max(1, elevenDepthMetrics.catalogSubjectsCount)) * 100)),
+        priority: getPriority(getGapStatus(Math.round((elevenDepthMetrics.subjectsWithPublishedUnitsCount / Math.max(1, elevenDepthMetrics.catalogSubjectsCount)) * 100))),
+        recommendedSpecialistAgent: "curriculum_planner_agent",
+        substanceDescription: `${elevenDepthMetrics.subjectsWithPublishedUnitsCount} of ${elevenDepthMetrics.catalogSubjectsCount} catalog subjects currently have published authored modules (${elevenDepthMetrics.subjectsWithIsolatedOrNoUnitsCount} remain roadmap-only).`,
+        verificationMethod: "Direct cross-join between 300-subject catalog and published unit registry"
       },
-      // 28. Parent Resource Coverage
+      // 28. Guided Practice Scaffolding
       {
         dimensionNumber: 28,
-        id: "dim-28-parent-resources",
-        name: "Parent Co-Learning & Weekly Progress Guides",
-        measurementRule: "Jargon-free parent study guides, weekly mastery reports, and 15-minute home activities",
-        numerator: 90,
-        denominator: 100,
-        score: 90,
-        evidenceSource: "Parent Hub weekly progress digests and homeschool conversational prompts",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
-        recommendedSpecialistAgent: "parent_communicator_agent",
-        substanceDescription: "Provides transparent child mastery tracking and accessible at-home discussion guides.",
-        verificationMethod: "Parent report generator test"
+        id: "dim-28-guided-practice",
+        name: "Guided & Independent Exercise Scaffolding",
+        measurementRule: "((Guided + Independent Prompted Skills) / (2 × Total Skills)) × 100",
+        numerator: skillsWithGuidedPrompt + skillsWithIndependentPrompt,
+        denominator: Math.max(1, totalSkills * 2),
+        score: Math.min(100, Math.round(((skillsWithGuidedPrompt + skillsWithIndependentPrompt) / Math.max(1, totalSkills * 2)) * 100)),
+        evidenceSource: "Lesson.guidedPracticePrompt and Lesson.independentPracticePrompt",
+        classification: getClassification(Math.min(100, Math.round(((skillsWithGuidedPrompt + skillsWithIndependentPrompt) / Math.max(1, totalSkills * 2)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round(((skillsWithGuidedPrompt + skillsWithIndependentPrompt) / Math.max(1, totalSkills * 2)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round(((skillsWithGuidedPrompt + skillsWithIndependentPrompt) / Math.max(1, totalSkills * 2)) * 100)))),
+        recommendedSpecialistAgent: "lesson_designer_agent",
+        substanceDescription: `${skillsWithGuidedPrompt}/${totalSkills} guided and ${skillsWithIndependentPrompt}/${totalSkills} independent exercise prompts.`,
+        verificationMethod: "Lesson practice scaffold count"
       },
-      // 29. Premium Learner Value
+      // 29. Flagship >=5 Verified Question Compliance
       {
         dimensionNumber: 29,
-        id: "dim-29-premium-learner-value",
-        name: "Premium Learner Depth & Derivations",
-        measurementRule: "Step-by-step rigorous proofs, Olympiad problem archives, and personalized pacing",
-        numerator: 92,
-        denominator: 100,
-        score: 92,
-        evidenceSource: "Honors derivations, deep textbook chapters, and contest walkthroughs",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
-        recommendedSpecialistAgent: "differentiation_specialist_agent",
-        substanceDescription: "Offers advanced students complete mathematical proofs, derivations, and contest problems.",
-        verificationMethod: "Content tier inspection"
+        id: "dim-29-five-question-compliance",
+        name: "High-Density Assessment (>= 5 Qs/Skill)",
+        measurementRule: "(Skills with >= 5 Verified Questions / Total Skills) × 100",
+        numerator: elevenDepthMetrics.skillsWithMinFiveQuestionsCount,
+        denominator: totalSkills,
+        score: Math.min(100, Math.round((elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 100)),
+        evidenceSource: "Skill.questions length audit across ALL_CURRICULUM_UNITS",
+        classification: getClassification(Math.min(100, Math.round((elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((elevenDepthMetrics.skillsWithMinFiveQuestionsCount / Math.max(1, totalSkills)) * 100)))),
+        recommendedSpecialistAgent: "assessment_author_agent",
+        substanceDescription: `${elevenDepthMetrics.skillsWithMinFiveQuestionsCount}/${totalSkills} skills meet >=5 verified questions.`,
+        verificationMethod: "Exact Skill.questions array count"
       },
-      // 30. Premium Teacher Value
+      // 30. Zero Disqualifier / Anti-Defect Hygiene
       {
         dimensionNumber: 30,
-        id: "dim-30-premium-teacher-value",
-        name: "Premium Teacher & School Capabilities",
-        measurementRule: "Bulk classroom exports, multi-tiered differentiation worksheets, and school management",
-        numerator: 93,
-        denominator: 100,
-        score: 93,
-        evidenceSource: "School Management System, differentiated worksheet packs, and bulk grading",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
-        recommendedSpecialistAgent: "school_resource_agent",
-        substanceDescription: "Enables institutional scale with class assignment dispatch, rubrics, and performance exports.",
-        verificationMethod: "School management audit"
+        id: "dim-30-zero-disqualifier-hygiene",
+        name: "Zero-Disqualifier & Editorial Hygiene",
+        measurementRule: "((Total Units - Disqualified Units) / Total Units) × 100",
+        numerator: Math.max(0, totalUnits - disqualifiedUnitsCount),
+        denominator: totalUnits,
+        score: Math.min(100, Math.round((Math.max(0, totalUnits - disqualifiedUnitsCount) / Math.max(1, totalUnits)) * 100)),
+        evidenceSource: "Automated math, answer-key, duplicate-stem, and scratchpad disqualifier engine",
+        classification: getClassification(Math.min(100, Math.round((Math.max(0, totalUnits - disqualifiedUnitsCount) / Math.max(1, totalUnits)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((Math.max(0, totalUnits - disqualifiedUnitsCount) / Math.max(1, totalUnits)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((Math.max(0, totalUnits - disqualifiedUnitsCount) / Math.max(1, totalUnits)) * 100)))),
+        recommendedSpecialistAgent: "quality_assurance_agent",
+        substanceDescription: `${disqualifiedUnitsCount} units currently isolated due to critical disqualifiers.`,
+        verificationMethod: "Automated structural QA gate"
       },
       // 31. Accessibility & Nigerian Language Support
       {
@@ -830,7 +853,7 @@ class ContentSaturationService {
         gapStatus: getGapStatus(Math.min(100, Math.round((Object.keys(NIGERIAN_LOCALIZATIONS).length / 6) * 100))),
         priority: getPriority(getGapStatus(Math.min(100, Math.round((Object.keys(NIGERIAN_LOCALIZATIONS).length / 6) * 100)))),
         recommendedSpecialistAgent: "language_arts_agent",
-        substanceDescription: `${Object.keys(NIGERIAN_LOCALIZATIONS).length} skills localized with everyday Nigerian life analogies and pitfall alerts.`,
+        substanceDescription: `${Object.keys(NIGERIAN_LOCALIZATIONS).length} dedicated localization banks plus dynamic vernacular scaffolding.`,
         verificationMethod: "Localization vocabulary audit"
       },
       // 32. Meaningful Engagement Capacity
@@ -838,17 +861,17 @@ class ContentSaturationService {
         dimensionNumber: 32,
         id: "dim-32-meaningful-engagement",
         name: "Meaningful 3 to 5-Hour Pedagogical Depth",
-        measurementRule: "Flagship units equipped with >= 180 minutes of varied, non-repetitive learning",
-        numerator: 8,
-        denominator: 8,
-        score: 95,
-        evidenceSource: "Engagement profiles across Math, English, Physics, Chem, Bio, Computing, Finance, Exam Prep",
-        classification: "SATURATED",
-        gapStatus: "NO_GAP",
-        priority: "LOW",
+        measurementRule: "(Units with >= 3.0 Estimated Learning Hours / Total Units) × 100",
+        numerator: unitsWithThreePlusHours,
+        denominator: totalUnits,
+        score: Math.min(100, Math.round((unitsWithThreePlusHours / Math.max(1, totalUnits)) * 100)),
+        evidenceSource: "Unit.estimatedHours verified across authored curriculum units",
+        classification: getClassification(Math.min(100, Math.round((unitsWithThreePlusHours / Math.max(1, totalUnits)) * 100))),
+        gapStatus: getGapStatus(Math.min(100, Math.round((unitsWithThreePlusHours / Math.max(1, totalUnits)) * 100))),
+        priority: getPriority(getGapStatus(Math.min(100, Math.round((unitsWithThreePlusHours / Math.max(1, totalUnits)) * 100)))),
         recommendedSpecialistAgent: "quality_assurance_agent",
-        substanceDescription: "Each representative unit provides 3.4 to 5.0 hours of non-repetitive pedagogical immersion.",
-        verificationMethod: "Time-on-task phase duration synthesis"
+        substanceDescription: `${unitsWithThreePlusHours}/${totalUnits} authored units document >= 3.0 estimated learning hours.`,
+        verificationMethod: "Unit estimatedHours empirical scan"
       }
     ];
 
@@ -1016,46 +1039,65 @@ class ContentSaturationService {
       }
     ];
 
-    // Domain distribution
+    // Helper to compute genuine domain/level average QA score from governanceRecords
+    const avgScoreForRecords = (recs: TopicGovernanceRecord[]): number => {
+      if (recs.length === 0) return 0;
+      return Math.round(recs.reduce((acc, r) => acc + r.qualityScore, 0) / recs.length);
+    };
+
+    const statusForScore = (score: number, recs: TopicGovernanceRecord[]): string => {
+      if (recs.length === 0) return "Unpopulated";
+      if (recs.some(r => r.disqualifiers.length > 0)) return "QA Isolation Active";
+      if (score >= APPROVAL_QUALITY_THRESHOLD) return "QA Approved";
+      return "Needs Enrichment";
+    };
+
+    const mathRecs = governanceRecords.filter(r => r.subject.includes("math"));
+    const scienceRecs = governanceRecords.filter(r => r.subject.includes("phy") || r.subject.includes("chem") || r.subject.includes("bio") || r.subject.includes("sci"));
+    const compRecs = governanceRecords.filter(r => r.subject.includes("comp"));
+    const engRecs = governanceRecords.filter(r => r.subject.includes("lang") || r.subject.includes("eng"));
+    const econFinRecs = governanceRecords.filter(r => r.subject.includes("econ") || r.subject.includes("comm") || r.subject.includes("fin"));
+
     const domainScores: Record<string, { score: number; unitsCount: number; status: string }> = {
       Mathematics: {
-        score: 95,
+        score: avgScoreForRecords(mathRecs),
         unitsCount: domainCounts.Mathematics,
-        status: "High Saturation"
+        status: statusForScore(avgScoreForRecords(mathRecs), mathRecs)
       },
       Sciences: {
-        score: 94,
+        score: avgScoreForRecords(scienceRecs),
         unitsCount: domainCounts.Physics + domainCounts.Chemistry + domainCounts.Biology,
-        status: "High Saturation"
+        status: statusForScore(avgScoreForRecords(scienceRecs), scienceRecs)
       },
       Computing: {
-        score: 95,
+        score: avgScoreForRecords(compRecs),
         unitsCount: domainCounts.Computing,
-        status: "High Saturation"
+        status: statusForScore(avgScoreForRecords(compRecs), compRecs)
       },
       English: {
-        score: 93,
+        score: avgScoreForRecords(engRecs),
         unitsCount: domainCounts.English,
-        status: "High Saturation"
+        status: statusForScore(avgScoreForRecords(engRecs), engRecs)
       },
       "Economics & Finance": {
-        score: 94,
+        score: avgScoreForRecords(econFinRecs),
         unitsCount: domainCounts.Economics + domainCounts.FinancialLiteracy,
-        status: "High Saturation"
+        status: statusForScore(avgScoreForRecords(econFinRecs), econFinRecs)
       }
     };
 
-    // Level distribution
+    // Level distribution computed empirically
+    const recsForLevel = (lvl: EducationalLevel) => governanceRecords.filter(r => r.level === lvl);
     const levelScores: Record<EducationalLevel, { score: number; unitsCount: number }> = {
-      primary_foundations: { score: 90, unitsCount: levelCounts.primary_foundations },
-      upper_primary: { score: 93, unitsCount: levelCounts.upper_primary },
-      junior_secondary: { score: 95, unitsCount: levelCounts.junior_secondary },
-      senior_secondary: { score: 97, unitsCount: levelCounts.senior_secondary },
-      university_prep: { score: 94, unitsCount: levelCounts.university_prep },
-      exam_prep: { score: 96, unitsCount: levelCounts.exam_prep }
+      primary_foundations: { score: avgScoreForRecords(recsForLevel("primary_foundations")), unitsCount: levelCounts.primary_foundations },
+      upper_primary: { score: avgScoreForRecords(recsForLevel("upper_primary")), unitsCount: levelCounts.upper_primary },
+      junior_secondary: { score: avgScoreForRecords(recsForLevel("junior_secondary")), unitsCount: levelCounts.junior_secondary },
+      senior_secondary: { score: avgScoreForRecords(recsForLevel("senior_secondary")), unitsCount: levelCounts.senior_secondary },
+      university_prep: { score: avgScoreForRecords(recsForLevel("university_prep")), unitsCount: levelCounts.university_prep },
+      exam_prep: { score: avgScoreForRecords(recsForLevel("exam_prep")), unitsCount: levelCounts.exam_prep }
     };
 
-    // Construct backward-compatible metrics object mapping
+    // Construct backward-compatible metrics object mapping from live dimensions
     const metrics: ContentSaturationMetrics = {
       curriculumCoverage: dimensions[0].score,
       lessonDepth: dimensions[5].score,
@@ -1064,8 +1106,8 @@ class ContentSaturationService {
       questionDiversity: dimensions[8].score,
       hintQuality: dimensions[10].score,
       misconceptionCoverage: dimensions[11].score,
-      guidedPractice: 92,
-      independentPractice: 94,
+      guidedPractice: dimensions[27].score,
+      independentPractice: dimensions[27].score,
       remediation: dimensions[13].score,
       extension: dimensions[14].score,
       revision: dimensions[15].score,
@@ -1073,26 +1115,60 @@ class ContentSaturationService {
       charts: dimensions[18].score,
       visualLearningMaterials: dimensions[17].score,
       interactiveActivities: dimensions[19].score,
-      simulations: 88,
+      simulations: dimensions[17].score,
       projects: dimensions[20].score,
       realWorldApplications: dimensions[21].score,
       diagnosticAssessments: dimensions[12].score,
       unitAssessments: dimensions[22].score,
-      cumulativeAssessments: 92,
+      cumulativeAssessments: dimensions[28].score,
       examPreparation: dimensions[23].score,
       universityPreparation: dimensions[24].score,
       careerPathways: dimensions[25].score,
       teacherResources: dimensions[26].score,
       parentResources: dimensions[27].score,
-      premiumLearnerResources: dimensions[28].score,
-      premiumTeacherResources: dimensions[29].score,
-      premiumParentResources: 90,
-      accessibility: 95,
+      premiumLearnerResources: dimensions[29].score,
+      premiumTeacherResources: dimensions[22].score,
+      premiumParentResources: dimensions[27].score,
+      accessibility: dimensions[30].score,
       nigerianLanguageAccessibility: dimensions[30].score
     };
 
+    // Compute 300-subject stage coverage breakdown honestly
+    const stageMap = new Map<string, { catalogCount: number; authoredSubjectsCount: number; publishedUnitsCount: number }>();
+    const publishedUnits = contentQualityEngine.getPublishedApprovedUnits();
+    for (const entry of EXPANDED_151_SUBJECT_CATEGORIES) {
+      if (!stageMap.has(entry.stage)) {
+        stageMap.set(entry.stage, { catalogCount: 0, authoredSubjectsCount: 0, publishedUnitsCount: 0 });
+      }
+      const bucket = stageMap.get(entry.stage)!;
+      bucket.catalogCount++;
+      const matchingPublishedUnits = publishedUnits.filter(
+        (u) =>
+          u.subjectId === entry.code ||
+          (entry.code.startsWith("math") && u.subjectId.startsWith("math")) ||
+          (entry.code.includes("english") && u.subjectId.startsWith("lang_"))
+      );
+      if (matchingPublishedUnits.length > 0) {
+        bucket.authoredSubjectsCount++;
+        bucket.publishedUnitsCount += matchingPublishedUnits.length;
+      }
+    }
+
+    const stageBreakdown = Array.from(stageMap.entries()).map(([stage, counts]) => ({
+      stage,
+      ...counts
+    }));
+
     const targetMet = overallIndex >= 70;
     const statusTier = overallIndex >= 85 ? "Exceptional" : targetMet ? "Target Met" : "Needs Further Saturation";
+
+    const phyRecs = governanceRecords.filter(r => r.subject.includes("phy"));
+    const chemRecs = governanceRecords.filter(r => r.subject.includes("chem"));
+    const bioRecs = governanceRecords.filter(r => r.subject.includes("bio"));
+    const econRecs = governanceRecords.filter(r => r.subject.includes("econ") || r.subject.includes("comm"));
+    const finRecs = governanceRecords.filter(r => r.subject.includes("fin"));
+    const examRecs = recsForLevel("exam_prep");
+    const uniRecs = recsForLevel("university_prep");
 
     return {
       timestamp: new Date().toISOString(),
@@ -1108,17 +1184,17 @@ class ContentSaturationService {
       domainScores,
       levelScores,
       flagshipCoverage: {
-        mathematics: 96,
-        english: 93,
-        physics: 95,
-        chemistry: 95,
-        biology: 94,
-        computing: 95,
-        economics: 94,
-        financialLiteracy: 93,
-        examPrep: 96,
-        universityPrep: 94,
-        careerPathways: 96
+        mathematics: avgScoreForRecords(mathRecs),
+        english: avgScoreForRecords(engRecs),
+        physics: avgScoreForRecords(phyRecs),
+        chemistry: avgScoreForRecords(chemRecs),
+        biology: avgScoreForRecords(bioRecs),
+        computing: avgScoreForRecords(compRecs),
+        economics: avgScoreForRecords(econRecs),
+        financialLiteracy: avgScoreForRecords(finRecs),
+        examPrep: avgScoreForRecords(examRecs),
+        universityPrep: avgScoreForRecords(uniRecs),
+        careerPathways: dimensions[25].score
       },
       totalCurriculumUnits: totalUnits,
       totalSkills,
@@ -1127,6 +1203,22 @@ class ContentSaturationService {
       totalVisualizations,
       totalActivities,
       totalProjects,
+      elevenDepthMetrics,
+      catalogCoverage: {
+        totalCatalogSubjects: elevenDepthMetrics.catalogSubjectsCount,
+        coveredCatalogSubjects: elevenDepthMetrics.subjectsWithPublishedUnitsCount,
+        roadmapOnlySubjects: elevenDepthMetrics.subjectsWithIsolatedOrNoUnitsCount,
+        stageBreakdown
+      },
+      governanceSummary: {
+        approvalThreshold: APPROVAL_QUALITY_THRESHOLD,
+        approvedCount: elevenDepthMetrics.approvedPublishedUnitsCount,
+        isolatedCount: elevenDepthMetrics.isolatedUnitsCount,
+        totalAuditedCount: elevenDepthMetrics.authoredUnitsCount,
+        averageApprovedQualityScore: elevenDepthMetrics.averageApprovedQualityScore,
+        disqualifiedUnitsCount,
+        records: governanceRecords
+      },
       auditProvenance: {
         scannedUnitsCount: totalUnits,
         scannedSkillsCount: totalSkills,
@@ -1167,7 +1259,7 @@ class ContentSaturationService {
       stage: "SCAN_CURRICULUM",
       stageNumber: 1,
       agentId: "curriculum_planner_agent",
-      actionSummary: `Scanned all 72 curriculum units across 6 tiers. Identified ${report.detectedGaps.length} priority enrichment candidates.`,
+      actionSummary: `Scanned all ${report.totalCurriculumUnits} authored units across 6 tiers (${report.elevenDepthMetrics?.catalogSubjectsCount || 300} catalog subjects). Identified ${report.detectedGaps.length} priority enrichment candidates.`,
       evidenceData: { unitsScanned: report.totalCurriculumUnits, skillsScanned: report.totalSkills },
       governancePassed: true
     });

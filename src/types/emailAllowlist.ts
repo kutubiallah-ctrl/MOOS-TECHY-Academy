@@ -1,16 +1,8 @@
 /**
- * MOOS TECHY ACADEMY — ACCESS CONTROL & ALLOWLIST TYPES
- * 
- * TASK: PIVOT DIRECTIVE — PUBLIC SIGN-UP WITH AUTO-ELEVATED OWNER EMAILS
- * 
- * Access Model:
- * 1. Public Sign-Up: Every user apart from the two designated owners must sign up
- *    (email + password, with email verification) before access is granted.
- * 2. Auto-Elevated Owner Emails: The two designated owner emails (kutubiallah@gmail.com
- *    and osomarufdamilare@gmail.com) are automatically recognized and elevated to full
- *    owner/admin access upon entry without requiring manual allowlist insertion.
- * 3. Premium Welcome: Unauthenticated/unregistered users see only the welcome/auth screen.
- * 4. Allowlist Manager: Repurposed as owner inspection & management tool.
+ * MOOS ACADEMY — ACCESS CONTROL & ALLOWLIST TYPES
+ *
+ * Strictly role-typed authentication contracts for client and server boundaries.
+ * Zero owner emails or cryptographic secrets are stored in client-side source files.
  */
 
 export type AllowlistStatus = "ENABLED" | "DISABLED" | "REVOKED";
@@ -24,11 +16,21 @@ export interface AllowlistEntry {
   role: AllowlistRole;
   fullName?: string;
   isEmailVerified?: boolean;
-  insertedBy: string; // Owner email or "SELF_PUBLIC_REGISTRATION"
+  insertedBy: string;
   insertedAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
   notes?: string;
-  passwordHash?: string;
+}
+
+export interface VerifiedAuthSession {
+  email: string;
+  role: AllowlistRole;
+  fullName: string;
+  isOwner: boolean;
+  isAdminOrOwner: boolean;
+  authProvider: "password" | "firebase";
+  issuedAt: number;
+  expiresAt: number;
 }
 
 export interface GateVerificationResult {
@@ -40,13 +42,15 @@ export interface GateVerificationResult {
     | "BLOCKED_DISABLED"
     | "BLOCKED_REVOKED"
     | "INVALID_EMAIL"
+    | "INVALID_CREDENTIALS"
     | "VERIFICATION_REQUIRED";
   email: string;
   message: string;
   verifiedAt: string;
   entry?: AllowlistEntry;
-  serverVerificationToken?: string; // Cryptographic HMAC proof from server
+  serverVerificationToken?: string;
   isOwnerAutoElevated?: boolean;
+  session?: VerifiedAuthSession;
 }
 
 export interface AllowlistOperationResult {
@@ -55,18 +59,19 @@ export interface AllowlistOperationResult {
   entry?: AllowlistEntry;
   entries?: AllowlistEntry[];
   serverVerificationToken?: string;
+  session?: VerifiedAuthSession;
 }
 
 export interface PublicSignUpRequest {
   fullName: string;
   email: string;
-  password?: string;
-  role?: AllowlistRole;
+  password: string;
+  role?: "learner" | "teacher" | AllowlistRole;
   targetLevel?: string;
   notes?: string;
 }
 
 export interface PublicSignInRequest {
   email: string;
-  password?: string;
+  password: string;
 }

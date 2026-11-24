@@ -29,6 +29,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { contentSaturationService } from "../services/contentSaturationService";
+import { contentQualityEngine } from "../services/contentQualityEngine";
 import { AGENT_REGISTRY } from "../services/agentOrchestrationService";
 import {
   FlashcardDeck,
@@ -40,6 +41,7 @@ import {
   SupportedLanguage,
   SUPPORTED_LANGUAGES
 } from "../types/contentSaturation";
+import { PublicationStatus } from "../types/contentGovernance";
 
 interface ContentSaturationExplorerProps {
   onSelectSkillId?: (skillId: string) => void;
@@ -51,15 +53,20 @@ export const ContentSaturationExplorer: React.FC<ContentSaturationExplorerProps>
   const [activeTab, setActiveTab] = useState<
     "overview" | "flashcards" | "visualizations" | "activities" | "projects" | "careers" | "vernacular" | "governance"
   >("overview");
+  const [governanceTick, setGovernanceTick] = useState(0);
+  const [governanceFeedback, setGovernanceFeedback] = useState<string | null>(null);
+  const [govFilter, setGovFilter] = useState<"all" | "isolated" | "published">("all");
 
-  // Content Service Data
-  const report = contentSaturationService.generateContentSaturationReport();
+  // Content Service Data (re-evaluated when governanceTick changes)
+  const report = React.useMemo(() => contentSaturationService.generateContentSaturationReport(), [governanceTick]);
   const flashcardDecks = contentSaturationService.getAllFlashcardDecks();
   const visualizations = contentSaturationService.getAllVisualizations();
   const activities = contentSaturationService.getAllInteractiveActivities();
   const projects = contentSaturationService.getRealWorldProjects();
   const careers = contentSaturationService.getCareerPathways();
   const agentRegistry = Object.values(AGENT_REGISTRY);
+  const depth = report.elevenDepthMetrics;
+  const govSummary = report.governanceSummary;
 
   // Flashcards state
   const [selectedDeckId, setSelectedDeckId] = useState<string>(flashcardDecks[0]?.id || "");
@@ -117,23 +124,23 @@ export const ContentSaturationExplorer: React.FC<ContentSaturationExplorerProps>
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              32-Dimension Content Saturation & Pedagogical Depth
+              Internal Content Governance & Empirical Saturation Studio
             </h1>
             <p className="text-sm text-indigo-200/80 max-w-2xl leading-relaxed">
-              Empirical verification of MOOS Academy's comprehensive curriculum richness: 76 Units, 23 Specialist Agents, Active Recall Flashcards, Interactive Visualizations, Error Detectors, Real-World Projects, and Multi-Language Nigerian Localizations.
+              Live audit across {report.totalCurriculumUnits} authored units ({report.totalSkills} skills, {report.totalQuestions} questions) against {depth?.catalogSubjectsCount || 300} catalog subjects, enforced by the ≥ {govSummary?.approvalThreshold || 85}% Weighted QA Gate & learner production isolation.
             </p>
           </div>
 
           <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-xs shrink-0">
             <div className="text-center">
               <div className="text-3xl sm:text-4xl font-black text-emerald-400">
-                {report.overallIndex}%
+                {govSummary?.averageApprovedQualityScore ?? report.overallIndex}%
               </div>
               <div className="text-[11px] font-bold text-indigo-200 uppercase tracking-wider mt-0.5">
-                Overall Saturation Index
+                Mean Approved QA Score
               </div>
               <div className="text-[10px] text-emerald-300/80 mt-1">
-                Target ≥ 70% (Verified: {report.overallIndex}%)
+                32-Dim Index: {report.overallIndex}% ({govSummary?.approvedCount ?? 0}/{govSummary?.totalAuditedCount ?? report.totalCurriculumUnits} Published)
               </div>
             </div>
           </div>
@@ -142,32 +149,32 @@ export const ContentSaturationExplorer: React.FC<ContentSaturationExplorerProps>
         {/* Quick Numbers Bar */}
         <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
           <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-            <div className="text-lg font-extrabold text-white">{report.totalCurriculumUnits}</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Curriculum Units</div>
+            <div className="text-lg font-extrabold text-white">{depth?.catalogSubjectsCount ?? 300}</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Catalog Subjects</div>
+          </div>
+          <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+            <div className="text-lg font-extrabold text-emerald-300">{govSummary?.approvedCount ?? 0}</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Published Units</div>
+          </div>
+          <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+            <div className="text-lg font-extrabold text-amber-300">{govSummary?.isolatedCount ?? 0}</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Isolated Units</div>
           </div>
           <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
             <div className="text-lg font-extrabold text-white">{report.totalSkills}</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Mastery Skills</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Authored Skills</div>
           </div>
           <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-            <div className="text-lg font-extrabold text-white">{report.totalQuestions}+</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Practice Items</div>
+            <div className="text-lg font-extrabold text-indigo-300">{report.totalQuestions}</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Verified Items</div>
           </div>
           <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-            <div className="text-lg font-extrabold text-indigo-300">{report.totalFlashcards}</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Active Flashcards</div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-            <div className="text-lg font-extrabold text-emerald-300">{report.totalVisualizations}</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Visualizations</div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-            <div className="text-lg font-extrabold text-amber-300">{report.totalActivities}</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Interactive Tasks</div>
+            <div className="text-lg font-extrabold text-sky-300">{depth?.totalSvgVisualizations ?? 0}</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Vector SVGs</div>
           </div>
           <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 col-span-2 sm:col-span-1">
-            <div className="text-lg font-extrabold text-sky-300">23</div>
-            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Specialist Agents</div>
+            <div className="text-lg font-extrabold text-emerald-300">{depth?.skillsWithMinFiveQuestionsCount ?? 0}</div>
+            <div className="text-[10px] text-indigo-200 uppercase tracking-wider">Skills ≥ 5 Qs</div>
           </div>
         </div>
       </div>
@@ -279,9 +286,72 @@ export const ContentSaturationExplorer: React.FC<ContentSaturationExplorerProps>
         </button>
       </div>
 
-      {/* TAB 1: 32-DIMENSION METRICS OVERVIEW */}
+      {/* TAB 1: 11 DEPTH METRICS, 300-SUBJECT COVERAGE & 32-DIM AUDIT */}
       {activeTab === "overview" && (
         <div className="space-y-6">
+          {/* 11 Genuine Educational Depth Metrics */}
+          {depth && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span>11 Empirical Educational Depth Metrics (No Synthetic Multipliers)</span>
+                </h3>
+                <span className="text-[11px] font-mono text-slate-500">
+                  Anti-Fake Penalties Applied: {report.auditProvenance.antiFakePenaltiesApplied}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {[
+                  { label: "300-Subject Catalog", value: depth.catalogSubjectsCount },
+                  { label: "Subjects w/ Published Units", value: depth.subjectsWithPublishedUnitsCount },
+                  { label: "Subjects Roadmap / Isolated", value: depth.subjectsWithIsolatedOrNoUnitsCount },
+                  { label: "Authored Units", value: depth.authoredUnitsCount },
+                  { label: "Published & QA Approved", value: depth.approvedPublishedUnitsCount },
+                  { label: "Isolated From Learners", value: depth.isolatedUnitsCount },
+                  { label: "Authored Micro-Skills", value: depth.skillsCount },
+                  { label: "Skills w/ ≥ 5 Questions", value: depth.skillsWithMinFiveQuestionsCount },
+                  { label: "Verified Practice Questions", value: depth.totalVerifiedQuestions },
+                  { label: "Worked Derivations", value: depth.totalWorkedExamples },
+                  { label: "Vector SVG Diagrams", value: depth.totalSvgVisualizations }
+                ].map((item) => (
+                  <div key={item.label} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70">
+                    <div className="text-xl font-black text-slate-900">{item.value}</div>
+                    <div className="text-[11px] font-semibold text-slate-600 mt-0.5">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 300-Subject Catalog Stage Coverage Breakdown */}
+          {report.catalogCoverage && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Compass className="h-4 w-4 text-indigo-600" />
+                  <span>Expanded 300-Subject Catalog Coverage vs Planned Roadmap</span>
+                </h3>
+                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+                  {report.catalogCoverage.coveredCatalogSubjects}/{report.catalogCoverage.totalCatalogSubjects} Covered · {report.catalogCoverage.roadmapOnlySubjects} Roadmap
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {report.catalogCoverage.stageBreakdown.map((st) => (
+                  <div key={st.stage} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                    <div className="text-xs font-bold text-slate-900">{st.stage}</div>
+                    <div className="text-xs text-slate-600">
+                      Catalog Subjects: <strong>{st.catalogCount}</strong>
+                    </div>
+                    <div className="text-[11px] text-emerald-700 font-semibold">
+                      {st.authoredSubjectsCount} covered ({st.publishedUnitsCount} published units)
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(report.metrics).map(([key, value]) => {
               const formattedKey = key
@@ -521,6 +591,19 @@ export const ContentSaturationExplorer: React.FC<ContentSaturationExplorerProps>
                   {activeViz.caption}
                 </p>
               </div>
+
+              {/* Embedded Vector SVG Diagram */}
+              {activeViz.diagramSvgSnippet && (
+                <div className="p-4 rounded-2xl border border-indigo-200/80 bg-white space-y-2">
+                  <div className="text-xs font-bold text-indigo-900 uppercase tracking-wider">
+                    Verified Vector SVG Pedagogical Diagram
+                  </div>
+                  <div
+                    className="w-full overflow-x-auto flex justify-center rounded-xl bg-slate-50 p-3 border border-slate-200"
+                    dangerouslySetInnerHTML={{ __html: activeViz.diagramSvgSnippet }}
+                  />
+                </div>
+              )}
 
               {/* Data Points Visual Grid */}
               {activeViz.dataPoints && (
@@ -906,9 +989,154 @@ export const ContentSaturationExplorer: React.FC<ContentSaturationExplorerProps>
         </div>
       )}
 
-      {/* TAB 8: 23-SPECIALIST AUDIT & GOVERNANCE */}
+      {/* TAB 8: WEIGHTED QA, ISOLATION, VERSION ROLLBACK & 23-SPECIALIST AUDIT */}
       {activeTab === "governance" && (
         <div className="space-y-6">
+          {/* Weighted QA Audit & Rollback Console */}
+          {govSummary && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Weighted QA Gate (≥ {govSummary.approvalThreshold}% Threshold) & Production Isolation
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Modules failing mathematical/answer checks, containing scratchpad leaks, or scoring below {govSummary.approvalThreshold}% are isolated from learners.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(["all", "isolated", "published"] as const).map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setGovFilter(f)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
+                        govFilter === f
+                          ? "bg-indigo-600 text-white border-indigo-700"
+                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      {f === "all"
+                        ? `All (${govSummary.totalAuditedCount})`
+                        : f === "isolated"
+                        ? `Isolated (${govSummary.isolatedCount})`
+                        : `Published (${govSummary.approvedCount})`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {governanceFeedback && (
+                <div className="p-3 rounded-xl border border-indigo-200 bg-indigo-50 text-xs font-semibold text-indigo-900">
+                  {governanceFeedback}
+                </div>
+              )}
+
+              <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                {govSummary.records
+                  .filter((rec) =>
+                    govFilter === "isolated"
+                      ? !rec.approvedForLearnerProduction
+                      : govFilter === "published"
+                      ? rec.approvedForLearnerProduction
+                      : true
+                  )
+                  .slice(0, 35)
+                  .map((rec) => (
+                    <div
+                      key={rec.unitId}
+                      className={`p-4 rounded-xl border space-y-2 ${
+                        rec.approvedForLearnerProduction
+                          ? "border-slate-200 bg-slate-50/50"
+                          : "border-rose-200 bg-rose-50/40"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <div className="text-xs font-bold text-slate-900">
+                            {rec.title} <span className="font-mono text-slate-400">({rec.unitId})</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            v{rec.version} · {rec.subject} · {rec.assessmentCoverage.skillsCount} skills · {rec.assessmentCoverage.totalQuestions} Qs · {rec.curriculumScope}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
+                              rec.qualityScore >= govSummary.approvalThreshold && rec.disqualifiers.length === 0
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-rose-100 text-rose-800"
+                            }`}
+                          >
+                            QA {rec.qualityScore}%
+                          </span>
+                          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-200 text-slate-800">
+                            {rec.publicationStatus}
+                          </span>
+                        </div>
+                      </div>
+
+                      {rec.disqualifiers.length > 0 && (
+                        <div className="p-2.5 rounded-lg bg-rose-100/70 border border-rose-200 text-[11px] text-rose-900 space-y-1">
+                          <div className="font-bold flex items-center gap-1">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            Automatic Disqualifiers ({rec.disqualifiers.length}):
+                          </div>
+                          {rec.disqualifiers.slice(0, 3).map((dq, idx) => (
+                            <div key={idx} className="font-mono text-[10px]">
+                              [{dq.code}] {dq.message}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px]">
+                        <span className="text-slate-500">
+                          Revisions recorded: {rec.revisionHistory.length}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {(["flagged", "published"] as PublicationStatus[]).map((target) => (
+                            <button
+                              key={target}
+                              type="button"
+                              onClick={() => {
+                                const res = contentQualityEngine.transitionPublicationStatus(
+                                  rec.unitId,
+                                  target,
+                                  "internal-admin",
+                                  `Manual governance trigger to ${target}`
+                                );
+                                setGovernanceFeedback(res.message);
+                                setGovernanceTick((t) => t + 1);
+                              }}
+                              className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold transition"
+                            >
+                              Set {target}
+                            </button>
+                          ))}
+                          {rec.revisionHistory.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const prev = rec.revisionHistory[rec.revisionHistory.length - 2];
+                                const res = contentQualityEngine.rollbackToVersion(rec.unitId, prev.version, "internal-admin");
+                                setGovernanceFeedback(res.message);
+                                setGovernanceTick((t) => t + 1);
+                              }}
+                              className="px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold transition flex items-center gap-1"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              Rollback v{rec.revisionHistory[rec.revisionHistory.length - 2].version}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>

@@ -545,7 +545,7 @@ export const MATHEMATICS_UNITS: Unit[] = [
             type: "multiple_choice",
             questionText: "Find the value of y that satisfies:",
             mathExpression: "\\frac{y + 3}{4} = \\frac{2y - 1}{5}",
-            options: ["y = 6.33", "y = 6", "y = 6.33", "y = 6.33", "y = \\frac{19}{3}"],
+            options: ["y = \\frac{19}{3}", "y = 6", "y = 7", "y = -\\frac{19}{3}"],
             correctAnswer: "y = \\frac{19}{3}",
             explanation: "Cross-multiply: 5(y + 3) = 4(2y - 1) => 5y + 15 = 8y - 4 => 15 + 4 = 8y - 5y => 19 = 3y => y = 19/3 (or 6 1/3).",
             hintLadder: [

@@ -28,6 +28,8 @@ import {
   CountryCurriculumProfile,
   getCountryProfile
 } from "../data/countryCurriculumRegistry";
+import { contentQualityEngine } from "./contentQualityEngine";
+import { TopicGovernanceRecord } from "../types/contentGovernance";
 
 export interface ICurriculumService {
   getDomains(): LearningDomain[];
@@ -61,6 +63,10 @@ export interface ICurriculumService {
   getCurriculumVersions(): import("../types/curriculum").CurriculumVersionRecord[];
   registerCurriculumVersion(record: import("../types/curriculum").CurriculumVersionRecord): { success: boolean; message: string };
   verifyPathwayIsolation(): { isolated: boolean; pathwaysCount: number; errors: string[] };
+  getVerifiedPublishedUnits(subjectId?: string, level?: EducationalLevel): Unit[];
+  getLocalizedPublishedUnits(countryCode?: string, subjectId?: string, level?: EducationalLevel): Unit[];
+  getIsolatedUnapprovedUnits(): TopicGovernanceRecord[];
+  getUnitGovernanceRecord(unitId: string): TopicGovernanceRecord | undefined;
 }
 
 class CurriculumService implements ICurriculumService {
@@ -96,7 +102,33 @@ class CurriculumService implements ICurriculumService {
   }
 
   public getUnitById(unitId: string): Unit | undefined {
-    return ALL_CURRICULUM_UNITS.find((u) => u.id === unitId);
+    return contentQualityEngine.getEffectiveUnit(unitId, ALL_CURRICULUM_UNITS);
+  }
+
+  public getVerifiedPublishedUnits(subjectId?: string, level?: EducationalLevel): Unit[] {
+    return contentQualityEngine.getPublishedApprovedUnits(ALL_CURRICULUM_UNITS).filter((u) => {
+      const matchSubject = !subjectId || subjectId === "all" || u.subjectId === subjectId;
+      const matchLevel = !level || u.level === level;
+      return matchSubject && matchLevel;
+    });
+  }
+
+  public getLocalizedPublishedUnits(
+    countryCode: string = "NG",
+    subjectId?: string,
+    level?: EducationalLevel
+  ): Unit[] {
+    return this.getVerifiedPublishedUnits(subjectId, level).map((u) =>
+      this.getLocalizedUnit(u, countryCode)
+    );
+  }
+
+  public getIsolatedUnapprovedUnits(): TopicGovernanceRecord[] {
+    return contentQualityEngine.getIsolatedUnits(ALL_CURRICULUM_UNITS);
+  }
+
+  public getUnitGovernanceRecord(unitId: string): TopicGovernanceRecord | undefined {
+    return contentQualityEngine.getGovernanceRecord(unitId, ALL_CURRICULUM_UNITS);
   }
 
   public getSkillById(skillId: string): Skill | undefined {

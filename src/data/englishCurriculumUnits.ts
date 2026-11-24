@@ -10,6 +10,9 @@ export const LANGUAGE_ENGLISH_UNITS: Unit[] = [
     description: "Subject-verb agreement rules, correlative conjunctions, parenthetical structures, subjunctive mood, and complex conditional sentences.",
     order: 1,
     category: "core",
+    estimatedHours: 3.8,
+    curriculumStandardMappings: ["NERDC_SSS_ENGLISH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-eng-concord",
@@ -24,6 +27,7 @@ export const LANGUAGE_ENGLISH_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-pri-grammar-nouns-verbs"],
         questions: [
           {
             id: "q-eng-concord-1",
@@ -79,6 +83,42 @@ export const LANGUAGE_ENGLISH_UNITS: Unit[] = [
             ],
             skillId: "skill-eng-concord",
             difficulty: "easy"
+          },
+          {
+            id: "q-eng-concord-4",
+            type: "multiple_choice",
+            questionText: "Select the grammatically standard verb form:\n'Every one of the scholarship applicants ______ required to verify original transcripts before Friday.'",
+            options: ["is", "are", "were", "have been"],
+            correctAnswer: "is",
+            explanation: "Distributive indefinite pronouns ('every one', 'each', 'nobody', 'everyone') are grammatically singular regardless of plural nouns inside the prepositional phrase ('of the scholarship applicants'). Thus singular 'is' is mandatory.",
+            hintLadder: [
+              "Separate the prepositional phrase 'of the scholarship applicants' from the head pronoun.",
+              "'Every one' treats candidates individually (distributive singular).",
+              "Pair the singular head pronoun with the singular verb 'is'."
+            ],
+            misconceptionAlerts: [
+              { trigger: "are", note: "'applicants' sits inside 'of the scholarship applicants', so it cannot control verb agreement." }
+            ],
+            skillId: "skill-eng-concord",
+            difficulty: "medium"
+          },
+          {
+            id: "q-eng-concord-5",
+            type: "multiple_choice",
+            questionText: "Complete the formal statement accurately:\n'The jury ______ divided in their individual assessments of the forensic timeline.'",
+            options: ["are", "is", "has", "was being"],
+            correctAnswer: "are",
+            explanation: "Under notional concord, collective nouns ('jury', 'committee', 'panel') take a plural verb when members explicitly act as separate individuals—signaled here by 'divided' and the plural pronoun 'their'.",
+            hintLadder: [
+              "Notice the cue words 'divided' and 'their individual assessments'.",
+              "When members act separately rather than as a single monolith, notional concord triggers plural agreement.",
+              "Choose the plural verb 'are'."
+            ],
+            misconceptionAlerts: [
+              { trigger: "is", note: "'is' fits unitary action ('The jury is unanimous'), but 'divided in their individual assessments' signals plural members." }
+            ],
+            skillId: "skill-eng-concord",
+            difficulty: "hard"
           }
         ]
       },
@@ -95,6 +135,7 @@ export const LANGUAGE_ENGLISH_UNITS: Unit[] = [
         ],
         difficulty: "advanced",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-eng-concord"],
         questions: [
           {
             id: "q-eng-cond-1",
@@ -154,6 +195,42 @@ export const LANGUAGE_ENGLISH_UNITS: Unit[] = [
             ],
             skillId: "skill-eng-tenses-conditionals",
             difficulty: "easy"
+          },
+          {
+            id: "q-eng-cond-4",
+            type: "multiple_choice",
+            questionText: "Select the standard Second Conditional counterfactual verb form:\n'If our laboratory ______ equipped with an electron microscope, we could inspect viral capsids directly.'",
+            options: ["were", "was", "is", "had been"],
+            correctAnswer: "were",
+            explanation: "In counterfactual Type 2 Conditionals ('If...'), standard formal grammar uses the past subjunctive 'were' for all subjects (including singular 'laboratory'), paired with 'could/would + base verb' in the main clause.",
+            hintLadder: [
+              "Look at the main clause: 'could inspect' signals a present unreal (Type 2) condition.",
+              "Formal counterfactual clauses require 'were' rather than indicative 'was'.",
+              "Select 'were'."
+            ],
+            misconceptionAlerts: [
+              { trigger: "had been", note: "'had been' triggers a Type 3 past conditional requiring 'could have inspected' in the result clause." }
+            ],
+            skillId: "skill-eng-tenses-conditionals",
+            difficulty: "medium"
+          },
+          {
+            id: "q-eng-cond-5",
+            type: "multiple_choice",
+            questionText: "Complete the Inverted Third Conditional sentence (formal register without 'if'):\n'______ the chief meteorologist issued the flood alert earlier, residents would have evacuated safely.'",
+            options: ["Had", "If", "Were", "Should"],
+            correctAnswer: "Had",
+            explanation: "Formal literary inversion deletes 'if' and fronts the Past Perfect auxiliary 'Had' before the subject ('Had the chief meteorologist issued...'), preserving Third Conditional syntax.",
+            hintLadder: [
+              "Notice the missing 'if' before 'the chief meteorologist issued' and the result 'would have evacuated'.",
+              "Third conditional subject-auxiliary inversion replaces 'If ... had' with fronted 'Had ...'.",
+              "Select 'Had'."
+            ],
+            misconceptionAlerts: [
+              { trigger: "If", note: "'If the chief meteorologist issued' leaves a Simple Past verb, which conflicts with 'would have evacuated'." }
+            ],
+            skillId: "skill-eng-tenses-conditionals",
+            difficulty: "hard"
           }
         ]
       }

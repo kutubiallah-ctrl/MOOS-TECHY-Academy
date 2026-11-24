@@ -373,27 +373,19 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                   Curriculum Mastery Heatmap
                 </h3>
                 <span className="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">
-                  All 76 Units
+                  All {overallStats.totalUnits} Units
                 </span>
-                {onOpenSaturationStudio ? (
+                {onOpenSaturationStudio && (
                   <button
                     type="button"
                     onClick={onOpenSaturationStudio}
-                    title="Explore 32-Dimension Pedagogical & Content Saturation Index"
+                    title="Open Internal Content Saturation & QA Dashboard"
                     className="text-[10px] font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200 cursor-pointer"
                   >
                     <Sparkles className="h-3 w-3 text-emerald-600" />
-                    32-Dim Saturation: {saturationReport.overallIndex}% ({saturationReport.statusTier})
+                    Content Depth: {saturationReport.overallIndex}% ({saturationReport.statusTier})
                     <ArrowRight className="h-2.5 w-2.5 text-emerald-600" />
                   </button>
-                ) : (
-                  <span
-                    title="32-Dimension Pedagogical & Content Saturation Index"
-                    className="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200"
-                  >
-                    <Sparkles className="h-3 w-3 text-emerald-600" />
-                    32-Dim Saturation: {saturationReport.overallIndex}% ({saturationReport.statusTier})
-                  </span>
                 )}
               </div>
               <p className="text-xs text-slate-500">
@@ -462,7 +454,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
               {overallStats.overallPercentage}%
             </span>
             <span className="text-xs text-indigo-700 font-semibold">
-              of 7,600 pts
+              of {(overallStats.totalUnits * 100).toLocaleString()} pts
             </span>
           </div>
         </div>
@@ -705,7 +697,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             }}
             className="mt-2 px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition"
           >
-            Show All 76 Units
+            Show All {allUnits.length} Units
           </button>
         </div>
       ) : viewMode === "grid" ? (

@@ -29,6 +29,10 @@ service cloud.firestore {
       return isAcademyOwner();
     }
 
+    function isAllowedSelfRole(roleValue) {
+      return roleValue == "learner" || roleValue == "teacher";
+    }
+
     // DEFAULT DENY CATCH-ALL
     match /{document=**} {
       allow read, write: if false;
@@ -43,22 +47,26 @@ service cloud.firestore {
     }
 
     // --------------------------------------------------------------------------
-    // USERS COLLECTION (PII ISOLATION & IDENTITY RESTRICTION)
+    // USERS COLLECTION (PII ISOLATION & STRICT ROLE ESCALATION PREVENTION)
     // --------------------------------------------------------------------------
     match /users/{userId} {
       // PII Protection: users may only read their own user record; no blanket public reads
       allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
       allow list: if isAdmin();
-      
-      // Any visitor may create an account with email + password (email verification flow unchanged)
+
+      // Signed-in users may create only their own record with non-privileged roles ('learner' or 'teacher'),
+      // or an authenticated Academy Owner may provision any account record.
       allow create: if isValidId(userId) && (
-        isOwner(userId) ||
-        !isSignedIn() ||
-        isAdmin()
+        isAdmin() ||
+        (isOwner(userId) && isAllowedSelfRole(request.resource.data.role))
       );
-        
-      allow update: if (isOwner(userId) || isAdmin()) && isValidId(userId);
-        
+
+      // Users cannot escalate their own role to 'admin' or 'owner'
+      allow update: if isValidId(userId) && (
+        isAdmin() ||
+        (isOwner(userId) && request.resource.data.role == resource.data.role)
+      );
+
       allow delete: if isAdmin() && isValidId(userId);
     }
 
@@ -91,7 +99,11 @@ service cloud.firestore {
         isAdmin()
       );
 
-      allow list: if isSignedIn();
+      allow list: if isSignedIn() && (
+        resource.data.lifecycleStatus in ['approved', 'published'] ||
+        resource.data.teacherId == request.auth.uid ||
+        isAdmin()
+      );
 
       allow create: if isSignedIn() && isValidId(materialId) &&
         request.resource.data.teacherId == request.auth.uid;
@@ -161,7 +173,9 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid || isAdmin()
       );
 
-      allow list: if isSignedIn();
+      allow list: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
 
       allow create: if isSignedIn() && isValidId(artifactId) &&
         request.resource.data.userId == request.auth.uid;
@@ -183,8 +197,11 @@ service cloud.firestore {
       allow get: if isAcademyOwner();
       allow list: if isAcademyOwner();
 
-      // Append-only audit record creation
-      allow create: if (isSignedIn() && isValidId(logId)) || isAcademyOwner();
+      // Append-only audit record creation restricted to signed-in owner actor or admin
+      allow create: if isValidId(logId) && (
+        isAcademyOwner() ||
+        (isSignedIn() && request.resource.data.actorUid == request.auth.uid)
+      );
 
       // Strict immutability: Audit logs cannot be modified or destroyed
       allow update: if false;
@@ -213,21 +230,29 @@ service cloud.firestore {
     }
 
     // --------------------------------------------------------------------------
-    // EMAIL ALLOWLIST (INSTITUTIONAL ACCESS GATE)
+    // EMAIL ALLOWLIST (INSTITUTIONAL ACCESS GATE — ZERO PUBLIC READ / ESCALATION)
     // --------------------------------------------------------------------------
     match /emailAllowlist/{emailDoc} {
-      // Verification status lookup
-      allow get: if true;
-      // Admin list is restricted to the two owner accounts; nothing else may read
+      // Restricted strictly to owners or authenticated user reading their own email doc
+      allow get: if isAcademyOwner() || (
+        isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        resource.data.email == request.auth.token.email
+      );
       allow list: if isAcademyOwner();
-      // Any visitor may create an account with email + password (email verification flow unchanged)
+
+      // Signed-in users may create only their own learner/teacher registration record
       allow create: if isValidId(emailDoc) && (
         isAcademyOwner() ||
-        request.resource.data.insertedBy == "SELF_PUBLIC_REGISTRATION" ||
-        !isSignedIn() ||
-        (isSignedIn() && request.resource.data.email == request.auth.token.email)
+        (
+          isSignedIn() &&
+          request.auth.token.email_verified == true &&
+          request.resource.data.email == request.auth.token.email &&
+          isAllowedSelfRole(request.resource.data.role)
+        )
       );
-      // Admin/owner collections are writable only by the two owner accounts
+
+      // Admin/owner collections are writable only by the two verified owner accounts
       allow update, delete: if isAcademyOwner();
     }
   }

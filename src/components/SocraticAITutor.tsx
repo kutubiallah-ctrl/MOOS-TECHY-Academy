@@ -19,6 +19,7 @@ import {
 import { PracticeQuestion } from "../types/curriculum";
 import { useLearner } from "../context/LearnerContext";
 import { curriculumService } from "../services/curriculumService";
+import { emailAllowlistService } from "../services/emailAllowlistService";
 
 interface SocraticAITutorProps {
   currentQuestion?: PracticeQuestion | null;
@@ -92,7 +93,7 @@ export const SocraticAITutor: React.FC<SocraticAITutorProps> = ({
             const b64 = (reader.result as string).split(",")[1];
             const res = await fetch("/api/audio/transcribe", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: emailAllowlistService.getAuthHeaders(),
               body: JSON.stringify({ audioData: b64, mimeType: "audio/webm" })
             });
             const data = await res.json();

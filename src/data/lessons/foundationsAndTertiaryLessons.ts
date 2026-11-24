@@ -242,36 +242,6 @@ export const FOUNDATIONS_TERTIARY_LESSONS: Record<string, SkillLesson> = {
     summaryRecap: "Hexadecimal maps to 4-bit binary nibbles. XOR outputs 1 when inputs differ. SQL filters groups using HAVING, not WHERE."
   },
 
-  "skill-eng-tenses-conditionals": {
-    id: "les-eng-tenses-conditionals",
-    title: "Tense Consistency, Subjunctive Mood, & Conditional Sentences",
-    hookAndIntuition: "If you say 'If I was you...', you are grammatically expressing that you might actually have been that person! The English subjunctive mood requires 'If I WERE you' to signal an impossible, hypothetical condition.",
-    conceptualExplanation: "Tense consistency ensures logical chronological progression across sentences. (1) Tense Aspect Matrix: Simple, Continuous/Progressive (ongoing action), Perfect (completed action with present relevance), and Perfect Continuous. (2) The Four Conditional Structures: Zero Conditional (universal scientific truths: If + Present Simple, Present Simple, e.g. 'If you heat ice, it melts'); First Conditional (real, probable future: If + Present Simple, will + base verb, e.g. 'If it rains, we will stay indoors'); Second Conditional (unreal hypothetical present/future: If + Past Simple [were], would + base verb, e.g. 'If I won the lottery, I would build a hospital'); Third Conditional (unreal past counterfactual: If + Past Perfect, would have + past participle, e.g. 'If he had listened, he would not have failed'). (3) Subjunctive Mood: Expresses wishes, demands, and hypothetical conditions contrary to fact (e.g. 'I wish I were taller'; 'The board mandated that she submit the financial audit').",
-    keyTermsAndFormulas: [
-      { termOrSymbol: "Third Conditional: If + had [V3], would have [V3]", definition: "Hypothetical reflection on past actions that cannot be altered.", practicalExample: "If they had arrived earlier, they would have caught the train." },
-      { termOrSymbol: "Second Conditional: If + were, would [base verb]", definition: "Hypothetical condition in present/future contrary to current reality.", practicalExample: "If I were the Governor, I would invest heavily in technical colleges." },
-      { termOrSymbol: "Mandative Subjunctive", definition: "Use of base verb without third-person -s after verbs of command or necessity.", practicalExample: "It is essential that every applicant attend the interview (not 'attends')." }
-    ],
-    workedExamples: [
-      {
-        title: "Correcting Mixed Conditionals and Tense Inconsistencies",
-        problemStatement: "Correct the grammatical errors in: 'If Amina had studied diligently last term, she would pass the promotional examination with distinction.'",
-        steps: [
-          { stepNumber: 1, instruction: "Examine the 'if' condition clause.", reasoning: "'If Amina had studied diligently last term' is in the Past Perfect tense (referring to a completed event in the past)." },
-          { stepNumber: 2, instruction: "Identify the conditional form.", reasoning: "An unreal past condition requires the Third Conditional: If + Past Perfect, followed by 'would have + past participle' in the main clause." },
-          { stepNumber: 3, instruction: "Analyze the main clause.", reasoning: "'she would pass' is a Second Conditional result clause, creating an ungrammatical mismatch with the past perfect condition." },
-          { stepNumber: 4, instruction: "Formulate the correct grammatical sentence.", reasoning: "'If Amina had studied diligently last term, she would have passed the promotional examination with distinction.'" }
-        ],
-        takeawayRule: "Pair 'had + V3' strictly with 'would have + V3' when expressing past unfulfilled conditions."
-      }
-    ],
-    commonMisconceptionsAndTraps: [
-      { misconception: "Writing 'would of' instead of 'would have'.", whyItIsWrong: "'Would of' is a phonetic transcription error arising from spoken contraction 'would've'. 'Of' is a preposition, never a verb auxiliary!", correctCorrection: "Always write 'would have' or 'would've'." }
-    ],
-    guidedPracticePrompt: "Complete the sentence: 'Had I known about the road closure, I ________ (take) the expressway.'",
-    summaryRecap: "Tenses must maintain chronological logic. 2nd conditional uses 'were/would'; 3rd conditional uses 'had studied/would have passed'."
-  },
-
   "skill-eng-roots-affixes": {
     id: "les-eng-roots-affixes",
     title: "Morphemic Analysis: Greek/Latin Roots, Prefixes, & Suffix Transformations",

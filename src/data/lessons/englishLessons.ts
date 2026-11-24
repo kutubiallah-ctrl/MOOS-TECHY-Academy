@@ -4,31 +4,99 @@ export const ENGLISH_LESSONS: Record<string, SkillLesson> = {
   "skill-eng-concord": {
     id: "les-eng-concord",
     title: "Grammatical Concord & Subject-Verb Agreement Rules",
-    hookAndIntuition: "Why do we say 'The basket of fresh mangoes IS on the table' rather than 'ARE on the table'? Because in English grammar, verbs agree with the true grammatical subject head noun—not with the intervening words standing right next to the verb! Concord is the golden rule of grammatical harmony.",
-    conceptualExplanation: "Concord denotes the syntactic agreement between words in gender, number, case, or person. The foundational principle of Subject-Verb Concord states: a singular subject requires a singular verb (e.g. 'The student writes'), while a plural subject requires a plural verb ('The students write'). Major advanced concord rules tested in WAEC/NECO/JAMB and international examinations include: (1) Intervening Prepositional Phrases: modifying phrases (introduced by 'of', 'together with', 'as well as', 'in addition to') do not change the number of the head subject. (2) Rule of Proximity: when subjects are joined by 'either... or' or 'neither... nor', the verb agrees in number and person with the closest subject. (3) Indefinite Pronouns: pronouns such as 'each', 'every', 'everyone', 'neither', and 'either' are grammatically singular and take singular verbs. (4) Plural in Form but Singular in Meaning: disciplines ('mathematics', 'economics', 'physics'), diseases ('measles'), and news are singular. (5) Mathematical Expressions and Quantities: amounts of money, periods of time, and measurements thought of as a single unit take singular verbs (e.g. 'Fifty kilometers is a long distance').",
+    hookAndIntuition: "Why do standard editors write 'The principal, together with the senior teachers, IS attending' yet write 'Neither the prefect nor the delegates WERE convinced'? English concord is governed by hierarchical phrase structure rather than blind word adjacency—once you trace the head noun in the syntax tree, every verb choice becomes mechanically exact.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): Grammatical concord requires a finite verb to match the true grammatical subject in number and person. Five High-Yield Syntactic Rules: (1) Head-Noun Selection Across Modifiers: Prepositional ('of the imported fabrics') and parenthetical phrases ('together with', 'as well as', 'accompanied by') are subordinate modifiers and NEVER alter the number of the head subject. (2) Rule of Proximity (Correlative Conjunctions): With 'either...or' and 'neither...nor', the verb agrees strictly with the subject noun phrase closest to the verb slot. (3) Distributive Indefinite Pronouns: 'Each', 'every one', 'neither', 'anyone', and 'nobody' denote singular distribution and mandate singular verbs even before 'of + plural noun'. (4) Notional Collective Concord: Collective nouns ('jury', 'committee', 'herd') take singular verbs when acting as one unified body, but plural verbs when members act independently (signaled by cues such as 'divided' or 'their'). (5) Invariant Singular Nouns Ending in -s: Academic fields ('mathematics', 'physics'), news, and singular measurements take singular verbs. ADVANCED ENRICHMENT: Contrast grammatical vs notional concord in formal British/West African institutional style guides.",
+    conceptualModel: "Syntactic Subject-Percolation Tree: strip prepositional and comma-bound parenthetical branches before matching the head noun node to the finite verb.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Rule of Proximity", definition: "When correlated by 'either...or' / 'neither...nor', verb agrees with the subject adjacent to it.", practicalExample: "Neither the captain nor the sailors were saved (sailors is plural, closest to verb)." },
-      { termOrSymbol: "Parenthetical / Accompanying Phrases", definition: "'As well as', 'together with', 'accompanied by' do not make a singular subject plural.", practicalExample: "The President, accompanied by his ministers, is arriving today." },
-      { termOrSymbol: "Notional Concord", definition: "Collective nouns (team, committee, family) take singular verbs when acting as a unified entity, plural when individuals act separately.", practicalExample: "The jury has reached its verdict (unitary); The jury are divided in their opinions (individual members)." }
+      { termOrSymbol: "Head-Noun Percolation", definition: "Verb number is determined exclusively by the head noun of the Subject NP, ignoring embedded objects of prepositions.", practicalExample: "The quality [of the fabrics] HAS improved ('quality' is head noun, singular)." },
+      { termOrSymbol: "Rule of Proximity (Either/Or, Neither/Nor)", definition: "Verb agrees with the second, verb-adjacent correlative constituent.", practicalExample: "Neither the captain nor the sailors WERE saved ('sailors' is plural and nearest the verb)." },
+      { termOrSymbol: "Notional vs Grammatical Concord", definition: "Collective nouns trigger singular agreement as a single unit, plural when individuals diverge.", practicalExample: "The jury HAS reached its verdict vs The jury ARE divided in their opinions." }
     ],
     workedExamples: [
       {
-        title: "Dissecting Complex Intervening Modifiers in Subject-Verb Concord",
-        problemStatement: "Choose the grammatically correct verb and justify your choice:\n'The quality of the imported fabrics, as well as the craftsmanship of the local tailors, (has / have) impressed the judges.'",
+        title: "Worked Analysis 1: Bypassing Parenthetical & Prepositional Distractors",
+        problemStatement: "Determine the agreeing verb: 'The quality of the imported fabrics, as well as the craftsmanship of the tailors, (has / have) impressed the judges.'",
         steps: [
-          { stepNumber: 1, instruction: "Identify the true grammatical head subject.", reasoning: "The head subject of the sentence is the noun 'quality', which is an uncountable singular noun." },
-          { stepNumber: 2, instruction: "Analyze the intervening prepositional phrase 'of the imported fabrics'.", reasoning: "Prepositional phrases modify the noun but do not alter its grammatical number. 'Fabrics' is plural, but it is the object of the preposition 'of', not the subject." },
-          { stepNumber: 3, instruction: "Analyze the parenthetical phrase 'as well as the craftsmanship...'.", reasoning: "Expressions introduced by 'as well as' are additive parenthetical modifiers, not coordinating conjunctions (like 'and'). They do not create a compound plural subject." },
-          { stepNumber: 4, instruction: "Select the agreeing verb.", reasoning: "Since the true head subject 'quality' is singular, it requires the singular auxiliary verb 'has'. Full sentence: 'The quality ... has impressed the judges.'" }
+          { stepNumber: 1, instruction: "Bracket and isolate intervening prepositional modifiers.", reasoning: "'[of the imported fabrics]' modifies 'quality'; 'fabrics' is inside a prepositional phrase and cannot govern the verb." },
+          { stepNumber: 2, instruction: "Isolate additive parenthetical phrases.", reasoning: "'as well as the craftsmanship of the tailors' is parenthetical (non-coordinating), unlike 'and'." },
+          { stepNumber: 3, instruction: "Extract the bare Head Subject.", reasoning: "The sole head subject governing the clause is the uncountable singular noun 'quality'." },
+          { stepNumber: 4, instruction: "Bind the agreeing singular auxiliary verb.", reasoning: "Singular head 'quality' requires singular 'has' -> 'has impressed the judges'." }
         ],
-        takeawayRule: "Ignore intervening prepositional and parenthetical phrases when matching verbs to subject nouns."
+        takeawayRule: "Cross out 'of...' phrases and 'as well as / together with...' clauses mentally; match the verb directly to the surviving head noun."
+      },
+      {
+        title: "Worked Analysis 2: Proximity vs Distributive Indefinite Pronouns",
+        problemStatement: "Contrast: (A) 'Neither the head prefect nor the delegates (was/were) convinced.' vs (B) 'Every one of the delegates (was/were) briefed.'",
+        steps: [
+          { stepNumber: 1, instruction: "Identify the syntactic structure in Sentence A.", reasoning: "'Neither ... nor' links two coordinated subject slots ('the head prefect' [sg.] and 'the delegates' [pl.])." },
+          { stepNumber: 2, instruction: "Apply the Proximity Principle to Sentence A.", reasoning: "The constituent adjacent to the verb slot is plural 'delegates', requiring plural 'were'." },
+          { stepNumber: 3, instruction: "Identify the head pronoun in Sentence B.", reasoning: "In 'Every one of the delegates', the head word is distributive singular pronoun 'Every one', while 'of the delegates' is only a modifying PP." },
+          { stepNumber: 4, instruction: "Bind the agreeing singular verb in Sentence B.", reasoning: "Singular 'Every one' mandates singular 'was' -> 'Every one of the delegates was briefed'." }
+        ],
+        takeawayRule: "'Every one / each' locks singular concord regardless of what follows 'of', whereas 'either/neither ... or/nor' defers to the nearer noun."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Treating 'Everyone' or 'Each of the boys' as plural because it refers to many individuals.", whyItIsWrong: "Grammatically, 'everyone' and 'each' refer to items taken distributively one at a time. They are singular and strictly require singular verbs.", correctCorrection: "'Each of the contestants has a valid ticket', NOT 'have a valid ticket'." }
+      { misconception: "Attraction / Proximity Error before parenthetical commas ('The principal, together with the teachers, ARE...').", whyItIsWrong: "Commas mark a parenthetical modifier that does not compound the subject grammatically.", correctCorrection: "Match strictly to 'The principal' -> IS." },
+      { misconception: "Treating 'Every one of the applicants' as plural because 'applicants' is plural.", whyItIsWrong: "'Every one' individuates members one at a time and always takes a singular verb.", correctCorrection: "Write 'Every one of the applicants IS required'." }
     ],
-    guidedPracticePrompt: "Select the correct verb: 'Neither the headmaster nor the teachers (was / were) present at the assembly.'",
-    summaryRecap: "Verbs agree with head subjects. Proximity rule applies to either/or. Indefinite pronouns (each, everyone) take singular verbs."
+    guidedPracticePrompt: "Select and justify the verb: 'The dean, accompanied by three lecturers, (is / are) inspecting the physics laboratory.'",
+    independentPracticePrompt: "Construct two sentences illustrating notional concord with 'committee': one singular unitary action and one plural divided action.",
+    diagnosticSelfCheck: "Before choosing a verb, highlight only the single head word of your subject noun phrase.",
+    transferApplication: "Drafting unambiguous legal contracts, federal civil-service memos, and academic journal abstracts across West Africa.",
+    masteryAssessment: "Achieve >= 85% across 5 concordance, proximity, collective-noun, and indefinite-pronoun exam items.",
+    extensionActivity: "Compare formal British notional concord on collective nouns with stricter grammatical concord in American technical style manuals.",
+    summaryRecap: "Strip intervening prepositional and parenthetical phrases to reveal the head noun; apply proximity for either/or and neither/nor; enforce singular verbs for distributive pronouns.",
+    estimatedMinutes: 110
+  },
+
+  "skill-eng-tenses-conditionals": {
+    id: "les-eng-tenses-conditionals",
+    title: "Tense Consistency, Mandative Subjunctive Mood & Conditional Architectures",
+    hookAndIntuition: "Suppose a civil engineer writes: 'If the contractor had tested the concrete mix, the bridge would not collapse.' Did the bridge collapse in the past, or is it still standing today? Mixing conditional tense tiers scrambles historical causality. Exact verb morphology keeps timelines and hypothetical worlds crystal clear.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): Complex prose depends on strict temporal anchoring and mood control across four Conditional Structures and the Mandative Subjunctive: (1) Type 0 / Type 1 Real Conditionals: Type 0 (If + Present Simple, Present Simple) states universal scientific laws; Type 1 (If + Present Simple, will/can + base verb) expresses realistic future contingencies. (2) Type 2 Unreal Present Conditionals: (If + Simple Past / Subjunctive 'were', would/could + base verb) frames hypothetical situations contrary to present fact—formal prose uses 'were' across all subjects ('If I were...', 'If the lab were...'). (3) Type 3 Unreal Past Conditionals: (If + Past Perfect 'had + V-en', would/could have + V-en) expresses unfulfilled past causes and their unrealized past results. Formal Literary Inversion deletes 'if' and fronts 'Had': 'Had the team arrived earlier, they would have won.' (4) Chronological Sequence of Tenses: When two past events occur sequentially, the earlier completed action takes the Past Perfect ('had concluded') before the Simple Past anchor ('arrived'). (5) Mandative Subjunctive Mood: Verbs/adjectives of recommendation, demand, or necessity ('recommend that', 'insist that', 'it is imperative that') trigger the bare infinitive base verb regardless of subject number ('recommended that each candidate submit...').",
+    conceptualModel: "Temporal Timeline Matrix: maps Anterior Past (Past Perfect 'had done') -> Simple Past Anchor -> Present Counterfactual ('were') -> Real Future ('will').",
+    keyTermsAndFormulas: [
+      { termOrSymbol: "Type 3 Pattern: If + had + V-en, ... would have + V-en", definition: "Canonical grammar for unfulfilled past hypotheticals.", practicalExample: "If they had calibrated the sensor, the fault would have been avoided." },
+      { termOrSymbol: "Mandative Subjunctive: Verb of Demand + that + Subject + Bare Infinitive", definition: "Drops third-person -s and tense inflections after recommend/insist/suggest/vital.", practicalExample: "The board insisted that the treasurer submit (NOT submits) the audit report." },
+      { termOrSymbol: "Inverted Conditional: Had + Subject + V-en...", definition: "Formal omission of 'if' accompanied by subject-auxiliary inversion.", practicalExample: "Had we known earlier, we would have acted." }
+    ],
+    workedExamples: [
+      {
+        title: "Worked Analysis 1: Diagnosing Type 2 vs Type 3 Conditional Clauses",
+        problemStatement: "Complete: 'If the engineering team had calibrated the sensors accurately, the circuit malfunction (would be / would have been) prevented.'",
+        steps: [
+          { stepNumber: 1, instruction: "Inspect the tense of the 'If'-clause (protasis).", reasoning: "'had calibrated' is Past Perfect (had + past participle), locking the condition into an unfulfilled past timeline." },
+          { stepNumber: 2, instruction: "Match the required main clause (apodosis) architecture.", reasoning: "Unfulfilled past Type 3 requires modal perfect passive: 'would have been' + past participle ('prevented')." },
+          { stepNumber: 3, instruction: "Eliminate tense-tier mismatches.", reasoning: "'would be' is Type 2 (present counterfactual), which conflicts with 'had calibrated' unless explicitly anchored to 'now'." },
+          { stepNumber: 4, instruction: "Verify the full sentence.", reasoning: "'If the engineering team had calibrated the sensors accurately, the circuit malfunction would have been prevented.'" }
+        ],
+        takeawayRule: "Always match the conditional family across both clauses: Past Perfect in the If-clause pairs with 'would have + past participle' in the result clause."
+      },
+      {
+        title: "Worked Analysis 2: Mandative Subjunctive & Formal Conditional Inversion",
+        problemStatement: "Justify: (A) 'The board recommended that each candidate (submit / submits) a portfolio.' and (B) '(Had / If) the meteorologist issued the alert, residents would have evacuated.'",
+        steps: [
+          { stepNumber: 1, instruction: "Identify the trigger verb in Sentence A.", reasoning: "'recommended that...' is a mandative trigger expressing policy requirement." },
+          { stepNumber: 2, instruction: "Apply bare-infinitive subjunctive morphology.", reasoning: "Even though 'each candidate' is singular, mandative subjunctive strips third-person '-s', forcing bare base verb 'submit'." },
+          { stepNumber: 3, instruction: "Inspect the auxiliary gap in Sentence B.", reasoning: "After the blank lies 'the meteorologist issued' (already inverted past participle without 'had' inside the VP), and the result is 'would have evacuated'." },
+          { stepNumber: 4, instruction: "Insert the inverted Type 3 auxiliary.", reasoning: "Placing 'Had' at the front forms 'Had the meteorologist issued...', reconstructing 'If the meteorologist had issued...' formally." }
+        ],
+        takeawayRule: "Remember the bare verb after 'recommend/insist/vital that...', and use fronted 'Had...' to invert 'If ... had...' in formal academic English."
+      }
+    ],
+    commonMisconceptionsAndTraps: [
+      { misconception: "Adding third-person '-s' inside a mandative subjunctive clause ('recommended that she submits').", whyItIsWrong: "The formal mandative subjunctive strictly uses the uninflected base verb ('submit'), never '-s' or past tense.", correctCorrection: "Use the bare infinitive ('submit', 'be', 'attend') after verbs of recommendation and demand." },
+      { misconception: "Writing 'If I would have known...' in the If-clause of Type 3 conditionals.", whyItIsWrong: "Standard English forbids 'would' inside the 'if'-clause of counterfactual conditionals; the modal belongs only in the result clause.", correctCorrection: "Use Past Perfect in the If-clause: 'If I had known, I would have helped'." }
+    ],
+    guidedPracticePrompt: "Rewrite using formal inversion without 'if': 'If the central bank had raised reserves earlier, inflation would have slowed.'",
+    independentPracticePrompt: "Write one Type 2 counterfactual sentence using 'were' and one mandative subjunctive sentence using 'insisted that'.",
+    diagnosticSelfCheck: "Can you distinguish Past Perfect anterior sequencing ('had concluded' before 'arrived') from Type 3 Conditionals?",
+    transferApplication: "Authoring fault-analysis post-mortems, legal stipulations, policy briefs, and precision journalism.",
+    masteryAssessment: "Score >= 85% across 5 WAEC/JAMB items testing Type 2/3 conditionals, inversion, past perfect sequence, and mandative subjunctive.",
+    extensionActivity: "Analyze Mixed Conditionals where a past unreal cause produces a present unreal consequence ('If I had taken that train, I would be in Lagos right now').",
+    summaryRecap: "Type 2 pairs Past/'were' with 'would + V'; Type 3 pairs Past Perfect with 'would have + V-en'; mandative subjunctive takes the bare base verb; earlier past actions require Past Perfect.",
+    estimatedMinutes: 115
   },
 
   "skill-eng-clause-analysis": {

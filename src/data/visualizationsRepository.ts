@@ -50,7 +50,48 @@ export const VISUALIZATION_REPOSITORY: Record<string, EducationalVisualization> 
         ]
       }
     ],
-    takeaway: "The axis of symmetry lies midway between the roots at x = 2. The sign of 'a' (+1) determines that the parabola opens upward."
+    takeaway: "The axis of symmetry lies midway between the roots at x = 2. The sign of 'a' (+1) determines that the parabola opens upward.",
+    diagramSvgSnippet: `<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Parabola y = x squared minus 4x plus 3 with vertex, axis of symmetry, and discriminant classification">
+  <rect width="720" height="340" rx="14" fill="#0f172a" />
+  <text x="24" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="800" fill="#f8fafc">PARABOLIC GEOMETRY &amp; DISCRIMINANT: y = x² - 4x + 3 = (x - 2)² - 1</text>
+  <!-- Grid & Axes -->
+  <g transform="translate(40, 52)">
+    <rect width="380" height="250" rx="10" fill="#1e293b" stroke="#334155" />
+    <!-- Axes lines -->
+    <line x1="25" y1="185" x2="360" y2="185" stroke="#94a3b8" stroke-width="1.5" />
+    <line x1="75" y1="20" x2="75" y2="235" stroke="#94a3b8" stroke-width="1.5" />
+    <text x="364" y="189" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#cbd5e1">x</text>
+    <text x="71" y="15" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#cbd5e1">y</text>
+    <!-- Axis of symmetry x = 2 (pixel x = 195) -->
+    <line x1="195" y1="22" x2="195" y2="235" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,4" />
+    <text x="202" y="34" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#fbbf24">Axis x = -b/(2a) = 2</text>
+    <!-- Parabola curve passing through (0,3)->(75,65), (1,0)->(135,185), (2,-1)->(195,225), (3,0)->(255,185), (4,3)->(315,65) -->
+    <path d="M 55 28 Q 195 422 335 28" fill="none" stroke="#38bdf8" stroke-width="3.5" />
+    <!-- Key points -->
+    <circle cx="75" cy="65" r="5" fill="#a855f7" stroke="#ffffff" stroke-width="1.5" />
+    <text x="84" y="68" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#e9d5ff">y-int (0, 3)</text>
+    <circle cx="135" cy="185" r="6" fill="#22c55e" stroke="#ffffff" stroke-width="1.5" />
+    <text x="108" y="173" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#86efac">Root (1, 0)</text>
+    <circle cx="255" cy="185" r="6" fill="#22c55e" stroke="#ffffff" stroke-width="1.5" />
+    <text x="242" y="173" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#86efac">Root (3, 0)</text>
+    <circle cx="195" cy="225" r="6" fill="#f43f5e" stroke="#ffffff" stroke-width="1.5" />
+    <text x="195" y="243" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#fda4af" text-anchor="middle">Vertex Minimum (2, -1)</text>
+  </g>
+  <!-- Right Discriminant Reference Panel -->
+  <g transform="translate(442, 52)">
+    <rect width="254" height="250" rx="10" fill="#1e293b" stroke="#334155" />
+    <text x="16" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="800" fill="#38bdf8">DISCRIMINANT CASES (Δ = b² - 4ac)</text>
+    <rect x="14" y="42" width="226" height="58" rx="8" fill="#064e3b" stroke="#10b981" />
+    <text x="24" y="62" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#6ee7b7">Δ &gt; 0 : Two Distinct Real Roots</text>
+    <text x="24" y="80" font-family="system-ui, sans-serif" font-size="10" fill="#d1fae5">Crosses x-axis twice (here Δ = 16 - 12 = 4)</text>
+    <rect x="14" y="112" width="226" height="58" rx="8" fill="#78350f" stroke="#f59e0b" />
+    <text x="24" y="132" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#fde68a">Δ = 0 : One Repeated Real Root</text>
+    <text x="24" y="150" font-family="system-ui, sans-serif" font-size="10" fill="#fef3c7">Tangent vertex touches x-axis at x = -b/(2a)</text>
+    <rect x="14" y="182" width="226" height="58" rx="8" fill="#4c0519" stroke="#f43f5e" />
+    <text x="24" y="202" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#fda4af">Δ &lt; 0 : Complex Conjugate Roots</text>
+    <text x="24" y="220" font-family="system-ui, sans-serif" font-size="10" fill="#ffe4e6">Parabola stays strictly above/below x-axis</text>
+  </g>
+</svg>`
   },
   "vis-econ-equilibrium": {
     id: "vis-econ-equilibrium",
@@ -784,6 +825,246 @@ export const VISUALIZATION_REPOSITORY: Record<string, EducationalVisualization> 
   <text x="42" y="461" font-family="system-ui, sans-serif" font-size="11" font-weight="900" fill="#34d399" text-anchor="middle">★</text>
   <text x="62" y="449" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#ecfdf5">CIVIC INVARIANT (CONSTITUTIONAL EMBLEMS PROTOCOL):</text>
   <text x="62" y="466" font-family="system-ui, sans-serif" font-size="9" font-weight="500" fill="#94a3b8">The Coat of Arms is the supreme seal of state sovereignty. Every citizen must show solemn reverence to national emblems; flying a defaced, frayed, or altered flag is an offense against national dignity.</text>
+</svg>`
+  },
+  "vis-linear-balance": {
+    id: "vis-linear-balance",
+    skillId: "skill-linear-equations",
+    unitId: "unit-jss-algebra-linear",
+    title: "Algebraic Balance Scale & Fraction-Clearing Pipeline",
+    type: "process_diagram",
+    caption: "Step-by-step equilibrium-preserving transformation solving (2y + 2)/4 - (y - 1)/3 = 2 cleanly to y = 7.",
+    steps: [
+      { step: 1, title: "Clear Denominators (× LCM 12)", description: "Scale both sides identically by 12 -> 3(2y + 2) - 4(y - 1) = 24." },
+      { step: 2, title: "Distribute Signed Brackets", description: "Expand 6y + 6 - 4y + 4 = 24, guarding the double negative -4(-1) = +4." },
+      { step: 3, title: "Isolate Variable & Verify", description: "2y + 10 = 24 -> 2y = 14 -> y = 7. Verification: (16/4) - (6/3) = 4 - 2 = 2." }
+    ],
+    takeaway: "Every valid equation transformation preserves horizontal beam equilibrium between Left-Hand Side and Right-Hand Side.",
+    diagramSvgSnippet: `<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Linear equation balance beam and step transformation diagram">
+  <rect width="720" height="320" rx="14" fill="#0f172a" />
+  <text x="24" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="800" fill="#f8fafc">ALGEBRAIC BALANCE AXIOM: PRESERVING LHS = RHS THROUGH REVERSIBLE STEPS</text>
+  <!-- Balance Scale Graphic -->
+  <g transform="translate(30, 56)">
+    <rect width="310" height="236" rx="10" fill="#1e293b" stroke="#334155" />
+    <text x="155" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#38bdf8" text-anchor="middle">EQUILIBRIUM BEAM: 3(2y + 2) - 4(y - 1) = 24</text>
+    <!-- Fulcrum -->
+    <polygon points="155,152 135,200 175,200" fill="#475569" stroke="#94a3b8" stroke-width="1.5" />
+    <rect x="115" y="200" width="80" height="10" rx="3" fill="#64748b" />
+    <!-- Beam -->
+    <line x1="45" y1="150" x2="265" y2="150" stroke="#facc15" stroke-width="4" />
+    <circle cx="155" cy="150" r="6" fill="#facc15" />
+    <!-- Left Pan -->
+    <line x1="55" y1="150" x2="55" y2="122" stroke="#94a3b8" stroke-width="1.5" />
+    <rect x="16" y="72" width="110" height="50" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+    <text x="71" y="94" font-family="monospace" font-size="12" font-weight="800" fill="#ecfdf5" text-anchor="middle">LHS: 2y + 10</text>
+    <text x="71" y="112" font-family="system-ui, sans-serif" font-size="9.5" fill="#6ee7b7" text-anchor="middle">At y=7: 14 + 10 = 24</text>
+    <!-- Right Pan -->
+    <line x1="255" y1="150" x2="255" y2="122" stroke="#94a3b8" stroke-width="1.5" />
+    <rect x="184" y="72" width="110" height="50" rx="8" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.5" />
+    <text x="239" y="94" font-family="monospace" font-size="12" font-weight="800" fill="#eff6ff" text-anchor="middle">RHS: 24</text>
+    <text x="239" y="112" font-family="system-ui, sans-serif" font-size="9.5" fill="#93c5fd" text-anchor="middle">Scaled 2 × LCM(12)</text>
+    <text x="155" y="226" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#fde047" text-anchor="middle">Apply identical inverse operations to both pans</text>
+  </g>
+  <!-- Right Pipeline Steps -->
+  <g transform="translate(360, 56)">
+    <rect width="330" height="236" rx="10" fill="#1e293b" stroke="#334155" />
+    <text x="16" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#f8fafc">STROUD TRANSFORMATION SEQUENCE</text>
+    <rect x="16" y="38" width="298" height="38" rx="6" fill="#0f172a" stroke="#475569" />
+    <text x="26" y="54" font-family="monospace" font-size="10.5" font-weight="700" fill="#38bdf8">1. × 12 : 3(2y + 2) - 4(y - 1) = 24</text>
+    <text x="26" y="69" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Clear fractions using LCM(4, 3) = 12</text>
+    <rect x="16" y="84" width="298" height="38" rx="6" fill="#0f172a" stroke="#475569" />
+    <text x="26" y="100" font-family="monospace" font-size="10.5" font-weight="700" fill="#fbbf24">2. Expand: 6y + 6 - 4y + 4 = 24</text>
+    <text x="26" y="115" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Guard double-negative: (-4)(-1) = +4</text>
+    <rect x="16" y="130" width="298" height="38" rx="6" fill="#0f172a" stroke="#475569" />
+    <text x="26" y="146" font-family="monospace" font-size="10.5" font-weight="700" fill="#a78bfa">3. Solve : 2y = 14  ⇒  y = 7</text>
+    <text x="26" y="161" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Subtract 10 from both pans, divide by 2</text>
+    <rect x="16" y="176" width="298" height="44" rx="6" fill="#064e3b" stroke="#10b981" />
+    <text x="26" y="194" font-family="monospace" font-size="10.5" font-weight="800" fill="#6ee7b7">4. Check : (14+2)/4 - (7-1)/3 = 4 - 2 = 2</text>
+    <text x="26" y="210" font-family="system-ui, sans-serif" font-size="9" fill="#d1fae5">Identity LHS = RHS verified on original equation</text>
+  </g>
+</svg>`
+  },
+  "vis-simultaneous-intersection": {
+    id: "vis-simultaneous-intersection",
+    skillId: "skill-simultaneous-eq",
+    unitId: "unit-jss-algebra-linear",
+    title: "Simultaneous Linear Intersection: (5, 3)",
+    type: "coordinate_graph",
+    caption: "Intersection of 2x + 3y = 19 (blue) and x - y = 2 (emerald) at unique coordinates (5, 3).",
+    axes: {
+      xLabel: "x",
+      yLabel: "y",
+      xMin: 0,
+      xMax: 9,
+      yMin: -1,
+      yMax: 8
+    },
+    dataPoints: [
+      { label: "Intersection", x: 5, y: 3, highlight: true, description: "Unique common solution (x = 5, y = 3)" },
+      { label: "Line 1 y-int", x: 0, y: 6.33, description: "2x + 3y = 19 at x = 0" },
+      { label: "Line 2 x-int", x: 2, y: 0, description: "x - y = 2 at y = 0" }
+    ],
+    takeaway: "A unique solution exists iff the two straight lines have non-equal gradients (a₁b₂ - a₂b₁ ≠ 0).",
+    diagramSvgSnippet: `<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Simultaneous linear intersection graph showing 2x+3y=19 meeting x-y=2 at (5,3)">
+  <rect width="720" height="320" rx="14" fill="#0f172a" />
+  <text x="24" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="800" fill="#f8fafc">GEOMETRIC MEANING OF SIMULTANEOUS SOLUTIONS: INTERSECTION AT (5, 3)</text>
+  <g transform="translate(30, 50)">
+    <rect width="400" height="245" rx="10" fill="#1e293b" stroke="#334155" />
+    <!-- Axes -->
+    <line x1="45" y1="205" x2="375" y2="205" stroke="#94a3b8" stroke-width="1.5" />
+    <line x1="45" y1="20" x2="45" y2="228" stroke="#94a3b8" stroke-width="1.5" />
+    <text x="380" y="209" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#cbd5e1">x</text>
+    <text x="41" y="15" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#cbd5e1">y</text>
+    <!-- Scale: x: 0 at 45, 35px per unit; y: 0 at 205, 24px per unit -->
+    <!-- Line 1: 2x+3y=19 => (0,6.33)->(45,53) to (8,1)->(325,181) -->
+    <line x1="45" y1="53" x2="345" y2="197" stroke="#38bdf8" stroke-width="3" />
+    <text x="72" y="50" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#7dd3fc">2x + 3y = 19</text>
+    <!-- Line 2: x-y=2 => (1,-1)->(80,229) to (8,6)->(325,61) -->
+    <line x1="80" y1="229" x2="325" y2="61" stroke="#10b981" stroke-width="3" />
+    <text x="275" y="54" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#6ee7b7">x - y = 2</text>
+    <!-- Intersection (5,3) => (220, 133) -->
+    <line x1="220" y1="133" x2="220" y2="205" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,3" />
+    <line x1="45" y1="133" x2="220" y2="133" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,3" />
+    <circle cx="220" cy="133" r="6.5" fill="#f43f5e" stroke="#ffffff" stroke-width="2" />
+    <rect x="230" y="114" width="125" height="24" rx="5" fill="#881337" stroke="#f43f5e" />
+    <text x="292" y="130" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#ffffff" text-anchor="middle">Solution (5, 3)</text>
+    <text x="220" y="220" font-family="system-ui, sans-serif" font-size="9.5" fill="#fbbf24" text-anchor="middle">x = 5</text>
+    <text x="28" y="136" font-family="system-ui, sans-serif" font-size="9.5" fill="#fbbf24">y = 3</text>
+  </g>
+  <g transform="translate(448, 50)">
+    <rect width="242" height="245" rx="10" fill="#1e293b" stroke="#334155" />
+    <text x="14" y="26" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#f8fafc">SYSTEM CLASSIFICATION</text>
+    <rect x="14" y="42" width="214" height="58" rx="7" fill="#064e3b" stroke="#10b981" />
+    <text x="22" y="60" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#6ee7b7">1. Unique Intersection</text>
+    <text x="22" y="77" font-family="system-ui, sans-serif" font-size="9.5" fill="#d1fae5">m₁ ≠ m₂  (a₁b₂ - a₂b₁ ≠ 0)</text>
+    <text x="22" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#a7f3d0">Consistent &amp; Independent</text>
+    <rect x="14" y="108" width="214" height="58" rx="7" fill="#4c0519" stroke="#f43f5e" />
+    <text x="22" y="126" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#fda4af">2. Parallel Lines (No Sol.)</text>
+    <text x="22" y="143" font-family="system-ui, sans-serif" font-size="9.5" fill="#ffe4e6">m₁ = m₂ but intercepts differ</text>
+    <text x="22" y="157" font-family="system-ui, sans-serif" font-size="9" fill="#fecdd3">Inconsistent system</text>
+    <rect x="14" y="174" width="214" height="58" rx="7" fill="#1e3a8a" stroke="#3b82f6" />
+    <text x="22" y="192" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#93c5fd">3. Coincident Lines (∞ Sol.)</text>
+    <text x="22" y="209" font-family="system-ui, sans-serif" font-size="9.5" fill="#dbeafe">One equation is a scalar multiple</text>
+    <text x="22" y="223" font-family="system-ui, sans-serif" font-size="9" fill="#bfdbfe">Every point on line satisfies both</text>
+  </g>
+</svg>`
+  },
+  "vis-concord-syntax-tree": {
+    id: "vis-concord-syntax-tree",
+    skillId: "skill-eng-concord",
+    unitId: "unit-eng-concord-syntax",
+    title: "Subject-Verb Concord Syntax Tree & Proximity Contrast",
+    type: "flow_diagram",
+    caption: "Structural parsing contrasting Head-Noun Agreement (bypassing parenthetical/prepositional modifiers) against Either/Neither Proximity Agreement.",
+    steps: [
+      { step: 1, title: "Locate Head Noun", description: "Isolate the primary subject head noun outside 'of...' or comma-delimited parentheticals." },
+      { step: 2, title: "Distinguish Correlatives", description: "For 'either...or' / 'neither...nor', inspect the constituent closest to the verb blank." },
+      { step: 3, title: "Verify Indefinite & Collective Cues", description: "'Every one / each' is strictly singular; collective nouns follow unitary vs divided cues." }
+    ],
+    takeaway: "Verbs bind to syntactic head nouns rather than adjacent nouns inside embedded prepositional phrases.",
+    diagramSvgSnippet: `<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="English Subject-Verb Concord syntax tree showing head noun agreement vs proximity rule">
+  <rect width="720" height="320" rx="14" fill="#0f172a" />
+  <text x="24" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="800" fill="#f8fafc">SYNTACTIC CONCORD ARCHITECTURE: HEAD-NOUN LOCK VS PROXIMITY</text>
+  <!-- Left Card: Head Noun Bypass -->
+  <g transform="translate(24, 52)">
+    <rect width="330" height="244" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2" />
+    <text x="16" y="24" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#38bdf8">RULE 1: HEAD-NOUN PERCOLATION (IGNORE INTERVENERS)</text>
+    <rect x="16" y="42" width="106" height="44" rx="7" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+    <text x="69" y="61" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#ffffff" text-anchor="middle">The principal</text>
+    <text x="69" y="76" font-family="system-ui, sans-serif" font-size="9" fill="#6ee7b7" text-anchor="middle">HEAD NOUN (SG.)</text>
+    <rect x="132" y="42" width="182" height="44" rx="7" fill="#334155" stroke="#64748b" stroke-dasharray="4,3" />
+    <text x="223" y="61" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1" text-anchor="middle">, together with the teachers,</text>
+    <text x="223" y="76" font-family="system-ui, sans-serif" font-size="8.5" fill="#94a3b8" text-anchor="middle">PARENTHETICAL MODIFIER (BYPASS)</text>
+    <!-- Arc jumping over modifier -->
+    <path d="M 69 88 Q 165 148 258 148" fill="none" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrow)" />
+    <rect x="195" y="128" width="118" height="42" rx="7" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+    <text x="254" y="146" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">IS attending</text>
+    <text x="254" y="161" font-family="system-ui, sans-serif" font-size="9" fill="#6ee7b7" text-anchor="middle">SINGULAR VERB LOCK</text>
+    <rect x="16" y="186" width="298" height="44" rx="7" fill="#0f172a" stroke="#475569" />
+    <text x="26" y="204" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#fde047">Same Rule Applies To:</text>
+    <text x="26" y="220" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">'Every one of the applicants IS...'  |  'A herd of elephants WAS...'</text>
+  </g>
+  <!-- Right Card: Correlative Proximity -->
+  <g transform="translate(368, 52)">
+    <rect width="328" height="244" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="16" y="24" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#fbbf24">RULE 2: CORRELATIVE PROXIMITY (NEITHER / NOR)</text>
+    <rect x="16" y="42" width="138" height="44" rx="7" fill="#334155" stroke="#64748b" />
+    <text x="85" y="61" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1" text-anchor="middle">Neither the prefect</text>
+    <text x="85" y="76" font-family="system-ui, sans-serif" font-size="8.5" fill="#94a3b8" text-anchor="middle">DISTANT SUBJECT (IGNORED)</text>
+    <rect x="166" y="42" width="146" height="44" rx="7" fill="#78350f" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="239" y="61" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#ffffff" text-anchor="middle">nor the delegates</text>
+    <text x="239" y="76" font-family="system-ui, sans-serif" font-size="9" fill="#fde68a" text-anchor="middle">NEAREST NOUN (PLURAL)</text>
+    <line x1="239" y1="88" x2="239" y2="125" stroke="#f59e0b" stroke-width="2.5" />
+    <rect x="166" y="128" width="146" height="42" rx="7" fill="#78350f" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="239" y="146" font-family="system-ui, sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">WERE convinced</text>
+    <text x="239" y="161" font-family="system-ui, sans-serif" font-size="9" fill="#fde68a" text-anchor="middle">PROXIMITY PLURAL VERB</text>
+    <rect x="16" y="186" width="296" height="44" rx="7" fill="#0f172a" stroke="#475569" />
+    <text x="26" y="204" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#fda4af">Notional Concord Trap:</text>
+    <text x="26" y="220" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">'The jury IS unanimous' (1 unit) vs 'The jury ARE divided in their views'</text>
+  </g>
+</svg>`
+  },
+  "vis-conditional-timeline": {
+    id: "vis-conditional-timeline",
+    skillId: "skill-eng-tenses-conditionals",
+    unitId: "unit-eng-concord-syntax",
+    title: "Conditional Tense Matrix & Mandative Subjunctive",
+    type: "process_diagram",
+    caption: "Timeline mapping Type 1/2/3 Conditional pairs, formal Type 3 inversion ('Had...'), and bare-infinitive Mandative Subjunctive clauses.",
+    steps: [
+      { step: 1, title: "Type 2 Unreal Present", description: "If + Past / were  ==>  would / could + base verb." },
+      { step: 2, title: "Type 3 Unreal Past", description: "If + had + past participle  ==>  would / could + have + past participle." },
+      { step: 3, title: "Mandative Subjunctive", description: "Recommend / demand / insist + that + Subject + bare infinitive (e.g. 'submit')." }
+    ],
+    takeaway: "Matching protasis (If-clause) and apodosis (result clause) tense morphology prevents unreal timeline contradictions.",
+    diagramSvgSnippet: `<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="English Conditionals and Subjunctive Mood tense matrix diagram">
+  <rect width="720" height="300" rx="14" fill="#0f172a" />
+  <text x="24" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="800" fill="#f8fafc">TEMPORAL MATRIX: CONDITIONALS (TYPES 1–3), INVERSION &amp; SUBJUNCTIVE</text>
+  <!-- Timeline axis -->
+  <line x1="36" y1="62" x2="684" y2="62" stroke="#64748b" stroke-width="2" />
+  <circle cx="150" cy="62" r="5" fill="#f43f5e" />
+  <text x="150" y="50" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#fda4af" text-anchor="middle">ANTERIOR / UNREAL PAST</text>
+  <circle cx="370" cy="62" r="5" fill="#f59e0b" />
+  <text x="370" y="50" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#fde68a" text-anchor="middle">UNREAL PRESENT</text>
+  <circle cx="585" cy="62" r="5" fill="#10b981" />
+  <text x="585" y="50" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#6ee7b7" text-anchor="middle">REAL CONTINGENCY / DEMAND</text>
+  <!-- 3 Cards -->
+  <g transform="translate(24, 82)">
+    <rect width="214" height="196" rx="10" fill="#1e293b" stroke="#f43f5e" stroke-width="1.2" />
+    <text x="14" y="24" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#fda4af">TYPE 3: UNREAL PAST</text>
+    <text x="14" y="46" font-family="monospace" font-size="10" fill="#f8fafc">If + had + V-en</text>
+    <text x="14" y="64" font-family="monospace" font-size="10" fill="#38bdf8">=&gt; would have + V-en</text>
+    <text x="14" y="92" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1">'If team had calibrated,</text>
+    <text x="14" y="106" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1">fault would have been prevented.'</text>
+    <rect x="12" y="124" width="190" height="58" rx="6" fill="#4c0519" stroke="#f43f5e" />
+    <text x="20" y="142" font-family="system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#fecdd3">FORMAL INVERSION (NO 'IF'):</text>
+    <text x="20" y="158" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff">'Had the meteorologist issued</text>
+    <text x="20" y="171" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff">the alert, residents would have...'</text>
+  </g>
+  <g transform="translate(253, 82)">
+    <rect width="214" height="196" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="14" y="24" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#fde68a">TYPE 2: UNREAL PRESENT</text>
+    <text x="14" y="46" font-family="monospace" font-size="10" fill="#f8fafc">If + Past / WERE</text>
+    <text x="14" y="64" font-family="monospace" font-size="10" fill="#38bdf8">=&gt; would / could + V</text>
+    <text x="14" y="92" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1">'If our lab WERE equipped,</text>
+    <text x="14" y="106" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1">we could inspect capsids.'</text>
+    <rect x="12" y="124" width="190" height="58" rx="6" fill="#78350f" stroke="#f59e0b" />
+    <text x="20" y="142" font-family="system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#fef3c7">PAST PERFECT SEQUENCE:</text>
+    <text x="20" y="158" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff">'By the time speaker arrived,</text>
+    <text x="20" y="171" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff">organizers HAD concluded...'</text>
+  </g>
+  <g transform="translate(482, 82)">
+    <rect width="214" height="196" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.2" />
+    <text x="14" y="24" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#6ee7b7">MANDATIVE SUBJUNCTIVE</text>
+    <text x="14" y="46" font-family="monospace" font-size="9.5" fill="#f8fafc">recommend / insist + that</text>
+    <text x="14" y="64" font-family="monospace" font-size="10" fill="#38bdf8">+ Subject + BARE VERB</text>
+    <text x="14" y="92" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1">'The board recommended that</text>
+    <text x="14" y="106" font-family="system-ui, sans-serif" font-size="9.5" fill="#cbd5e1">each candidate SUBMIT a file.'</text>
+    <rect x="12" y="124" width="190" height="58" rx="6" fill="#064e3b" stroke="#10b981" />
+    <text x="20" y="142" font-family="system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#d1fae5">ZERO -S INFLECTION RULE:</text>
+    <text x="20" y="158" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff">Never inflect with -s or -ed;</text>
+    <text x="20" y="171" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff">use bare infinitive ('submit', 'be').</text>
+  </g>
 </svg>`
   }
 };
