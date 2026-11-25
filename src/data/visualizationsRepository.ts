@@ -6,6 +6,10 @@
  */
 
 import { EducationalVisualization } from "../types/contentSaturation";
+import { P1_MATH_BATCH1_VISUALIZATIONS } from "./p1MathVisualizations";
+import { P1_MATH_BATCH2_JSS_VISUALIZATIONS } from "./p1MathBatch2JssVisualizations";
+import { P1_MATH_BATCH2_SSS_VISUALIZATIONS } from "./p1MathBatch2SssVisualizations";
+import { P3_SCIENCE_BATCH3_VISUALIZATIONS } from "./p3ScienceBatch3Visualizations";
 
 export const VISUALIZATION_REPOSITORY: Record<string, EducationalVisualization> = {
   "vis-quadratic-parabola": {
@@ -2779,5 +2783,9 @@ export const VISUALIZATION_REPOSITORY: Record<string, EducationalVisualization> 
     <text x="160" y="210" font-family="monospace" font-size="9.5" fill="#cbd5e1" text-anchor="middle">3,600 m³ / 0.90 = 4,000 m³</text>
   </g>
 </svg>`
-  }
+  },
+  ...P1_MATH_BATCH1_VISUALIZATIONS,
+  ...P1_MATH_BATCH2_JSS_VISUALIZATIONS,
+  ...P1_MATH_BATCH2_SSS_VISUALIZATIONS,
+  ...P3_SCIENCE_BATCH3_VISUALIZATIONS
 };

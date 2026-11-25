@@ -100,7 +100,16 @@ export function getDomainIdForCategory(code: string): string {
     code.includes("algebraic") ||
     code.includes("trigonometry") ||
     code.includes("linear_graphs") ||
-    code.includes("sets_venn")
+    code.includes("sets_venn") ||
+    code.includes("_mathematics_") ||
+    /^pri_15[3-8]_/.test(code) ||
+    code.startsWith("pri_161_") ||
+    code.startsWith("jss_196_") ||
+    code.startsWith("jss_199_") ||
+    /^jss_20[1-6]_/.test(code) ||
+    code === "univ_257_calculus_mechanics_design_analysis" ||
+    code.startsWith("sss_270_") ||
+    code.startsWith("sss_272_")
   ) {
     return "mathematics";
   }
@@ -139,7 +148,14 @@ export function getDomainIdForCategory(code: string): string {
     code.includes("health") ||
     code.includes("home_economics") ||
     code.includes("mcat") ||
-    code.includes("olympiad")
+    code.includes("olympiad") ||
+    code.startsWith("pri_171_") ||
+    code.startsWith("pri_176_") ||
+    code.startsWith("pri_182_") ||
+    code.startsWith("jss_217_") ||
+    code.startsWith("jss_218_") ||
+    code.startsWith("jss_231_") ||
+    code.startsWith("sss_277_")
   ) {
     return "science";
   }

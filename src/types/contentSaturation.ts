@@ -112,7 +112,10 @@ export type VisualizationType =
   | "biology_process"
   | "equilibrium_curve"
   | "flow_diagram"
-  | "bar_comparison";
+  | "bar_comparison"
+  | "conceptual_diagram"
+  | "geometry_diagram"
+  | "geometry_figure";
 
 export interface ChartDataPoint {
   label: string;
