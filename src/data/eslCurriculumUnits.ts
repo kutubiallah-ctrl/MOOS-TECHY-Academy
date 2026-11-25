@@ -192,6 +192,10 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
     description: "Develop native-like natural phrasing through high-frequency collocations, academic word list (AWL) usage, and eliminating L1 false friends.",
     order: 2,
     category: "core",
+    estimatedHours: 4.0,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["CEFR_B2_C1", "IELTS_ACADEMIC", "WAEC_ESL", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-esl-verb-noun-collocations",
@@ -206,6 +210,7 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-eng-roots-affixes", "skill-esl-phonemes-vowels"],
         questions: [
           {
             id: "q-esl-colloc-1",
@@ -214,8 +219,8 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
             difficulty: "medium",
             questionText: "Select the sentence with the natural English collocation:",
             options: [
-              "The research committee made an extensive investigation into the matter.",
               "The research committee conducted an extensive investigation into the matter.",
+              "The research committee made an extensive investigation into the matter.",
               "The research committee did an extensive investigation into the matter.",
               "The research committee played an extensive investigation into the matter."
             ],
@@ -228,8 +233,8 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
             ],
             misconceptionAlerts: [
               {
-                trigger: "Literal verb translation",
-                note: "Directly translating the general action verb 'faire' or 'se' from L1 as 'make' or 'do'."
+                trigger: "The research committee made an extensive investigation into the matter.",
+                note: "Directly translating a general action verb from L1 as 'make' produces non-idiomatic academic prose."
               }
             ]
           },
@@ -254,8 +259,86 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
             ],
             misconceptionAlerts: [
               {
-                trigger: "Adjective mismatch",
-                note: "Using 'strong rain' because in languages like Spanish, French, or Yoruba, rainfall intensity is described with words meaning strong or big."
+                trigger: "Strong rain",
+                note: "Using 'strong rain' transfers L1 intensity adjectives directly; English pairs 'heavy' with rain and 'strong' with wind."
+              }
+            ]
+          },
+          {
+            id: "q-esl-colloc-3",
+            type: "multiple_choice",
+            skillId: "skill-esl-verb-noun-collocations",
+            difficulty: "easy",
+            questionText: "Choose the correct verb to complete the standard academic and workplace sentence: 'Every candidate must ______ an earnest effort to verify their citations before submission.'",
+            options: [
+              "make",
+              "do",
+              "perform",
+              "work"
+            ],
+            correctAnswer: "make",
+            explanation: "The abstract noun 'effort' collocates strictly with 'make' ('make an effort', 'make an earnest effort'), whereas 'homework' and 'research' pair with 'do'.",
+            hintLadder: [
+              "Test whether 'effort' represents a routine chore ('do') or an intentional exertion/outcome ('make').",
+              "Native speakers consistently say 'make an effort', 'make a decision', and 'make progress'.",
+              "Select 'make'."
+            ],
+            misconceptionAlerts: [
+              {
+                trigger: "do",
+                note: "Remember: you 'do homework' and 'do research', but you 'make an effort' and 'make progress'."
+              }
+            ]
+          },
+          {
+            id: "q-esl-colloc-4",
+            type: "multiple_choice",
+            skillId: "skill-esl-verb-noun-collocations",
+            difficulty: "medium",
+            questionText: "Which sentence uses the formal Academic Word List (AWL) collocation correctly to express inferring a result from experimental evidence?",
+            options: [
+              "From the longitudinal dataset, the statisticians drew a cautious conclusion regarding seasonal variance.",
+              "From the longitudinal dataset, the statisticians pulled a cautious conclusion regarding seasonal variance.",
+              "From the longitudinal dataset, the statisticians did a cautious conclusion regarding seasonal variance.",
+              "From the longitudinal dataset, the statisticians said a cautious conclusion regarding seasonal variance."
+            ],
+            correctAnswer: "From the longitudinal dataset, the statisticians drew a cautious conclusion regarding seasonal variance.",
+            explanation: "Standard academic English collocates 'conclusion' with 'draw' ('draw a conclusion') or 'reach' ('reach a conclusion'), never 'pull', 'do', or 'say'.",
+            hintLadder: [
+              "Recall the formal verb paired with 'a conclusion' in scientific reports.",
+              "Although 'draw' and 'pull' share physical meanings, only 'draw' partners idiomatically with 'conclusion'.",
+              "Choose 'drew a cautious conclusion'."
+            ],
+            misconceptionAlerts: [
+              {
+                trigger: "From the longitudinal dataset, the statisticians pulled a cautious conclusion regarding seasonal variance.",
+                note: "Synonym substitution fails in fixed collocations: you 'draw' a conclusion, never 'pull' one."
+              }
+            ]
+          },
+          {
+            id: "q-esl-colloc-5",
+            type: "multiple_choice",
+            skillId: "skill-esl-verb-noun-collocations",
+            difficulty: "hard",
+            questionText: "Identify the sentence that avoids BOTH a false-friend transfer error and a broken intensifier collocation:",
+            options: [
+              "The director was bitterly disappointed that the seminar was postponed despite heavy traffic warnings.",
+              "The director was sourly disappointed that the seminar was assisted despite strong traffic warnings.",
+              "The director was deeply sad that the conference was assisted despite big traffic warnings.",
+              "The director was hardly disappointed that the seminar was postponed despite tall traffic warnings."
+            ],
+            correctAnswer: "The director was bitterly disappointed that the seminar was postponed despite heavy traffic warnings.",
+            explanation: "'Bitterly disappointed' and 'heavy traffic' are canonical English intensifier collocations, and 'postponed' avoids the false friend 'assisted' (often misused for 'attended').",
+            hintLadder: [
+              "Check the adverb that conventionally intensifies 'disappointed' ('bitterly' or 'deeply', never 'sourly' or 'hardly').",
+              "Check the adjective that collocates with 'traffic' ('heavy traffic', not 'strong' or 'big').",
+              "Select the sentence with 'bitterly disappointed' and 'heavy traffic'."
+            ],
+            misconceptionAlerts: [
+              {
+                trigger: "The director was sourly disappointed that the seminar was assisted despite strong traffic warnings.",
+                note: "'Sourly disappointed' and 'strong traffic' are unidiomatic, and 'assist' means to help—not to attend."
               }
             ]
           }
@@ -272,6 +355,10 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
     description: "Write rigorous analytical essays with complex sentence subordination, concessive clauses, formal register, and evidence synthesis.",
     order: 3,
     category: "core",
+    estimatedHours: 4.5,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["CEFR_C1", "IELTS_WRITING_TASK2", "TOEFL_IBT", "WAEC_ESL"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-esl-cohesive-transitions",
@@ -286,6 +373,7 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
         ],
         difficulty: "advanced",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-eng-clauses-sentence-types", "skill-esl-verb-noun-collocations"],
         questions: [
           {
             id: "q-esl-acad-1",
@@ -308,7 +396,7 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
             ],
             misconceptionAlerts: [
               {
-                trigger: "Double-conjunction error",
+                trigger: "Although the initial sample size was limited, but the trial showed efficacy.",
                 note: "Writing 'Although... but...' due to direct transfer from languages that use two coordinating markers for contrast."
               }
             ]
@@ -334,8 +422,86 @@ export const ESL_CURRICULUM_UNITS: Unit[] = [
             ],
             misconceptionAlerts: [
               {
-                trigger: "Epistemic stance confusion",
+                trigger: "To indicate that the author does not believe their own research",
                 note: "Assuming that using words like 'may' or 'suggests' reflects weak knowledge rather than scholarly precision."
+              }
+            ]
+          },
+          {
+            id: "q-esl-acad-3",
+            type: "multiple_choice",
+            skillId: "skill-esl-cohesive-transitions",
+            difficulty: "easy",
+            questionText: "Which option correctly completes this concessive sentence without a grammatical error: '______ the strict deadline, the engineering students submitted a thoroughly documented prototype.'?",
+            options: [
+              "Despite",
+              "Despite of",
+              "Although",
+              "Whereas"
+            ],
+            correctAnswer: "Despite",
+            explanation: "'the strict deadline' is a noun phrase (no finite verb), so it requires the preposition 'Despite' (or 'In spite of'). 'Although' and 'Whereas' require a full clause with a finite verb, and 'Despite of' is ungrammatical.",
+            hintLadder: [
+              "Inspect what follows the blank: 'the strict deadline' is a noun phrase, not a full subject + verb clause.",
+              "Subordinating conjunctions like 'Although' require a finite verb, whereas prepositions take a noun phrase.",
+              "Remember 'Despite' never takes 'of'."
+            ],
+            misconceptionAlerts: [
+              {
+                trigger: "Despite of",
+                note: "'Despite' is already a complete preposition; only 'in spite' takes 'of' ('in spite of')."
+              }
+            ]
+          },
+          {
+            id: "q-esl-acad-4",
+            type: "multiple_choice",
+            skillId: "skill-esl-cohesive-transitions",
+            difficulty: "medium",
+            questionText: "Which sentence correctly punctuates the conjunctive adverb 'however' between two independent clauses?",
+            options: [
+              "Urban rail investment reduced peak congestion; however, last-mile feeder buses remained underfunded.",
+              "Urban rail investment reduced peak congestion, however, last-mile feeder buses remained underfunded.",
+              "Urban rail investment reduced peak congestion, however last-mile feeder buses remained underfunded.",
+              "Although urban rail investment reduced peak congestion; however, feeder buses remained underfunded."
+            ],
+            correctAnswer: "Urban rail investment reduced peak congestion; however, last-mile feeder buses remained underfunded.",
+            explanation: "Because 'however' is a conjunctive adverb rather than a coordinating conjunction, linking two independent clauses requires a semicolon (or period) before 'however' and a comma after it.",
+            hintLadder: [
+              "Check for comma splices: two independent clauses cannot be joined solely by ', however,'.",
+              "Do not combine 'Although' with '; however,' across two clauses.",
+              "Select the sentence using '; however,'."
+            ],
+            misconceptionAlerts: [
+              {
+                trigger: "Urban rail investment reduced peak congestion, however, last-mile feeder buses remained underfunded.",
+                note: "Using a comma before 'however' between two complete sentences creates a comma splice error."
+              }
+            ]
+          },
+          {
+            id: "q-esl-acad-5",
+            type: "multiple_choice",
+            skillId: "skill-esl-cohesive-transitions",
+            difficulty: "hard",
+            questionText: "Select the causal transition that maintains both grammatical integrity and formal C1 academic register: 'Solar micro-grid costs dropped 42% over five years, ______ accelerating rural electrification across northern states.'",
+            options: [
+              "thereby",
+              "therefore",
+              "because",
+              "however"
+            ],
+            correctAnswer: "thereby",
+            explanation: "'thereby + present participle (-ing)' cleanly introduces a direct result or consequence without starting a new finite clause. 'Therefore' requires a finite clause (and semicolon), while 'because' inverts causality.",
+            hintLadder: [
+              "Notice the participle 'accelerating rural electrification' immediately after the blank—there is no finite subject + verb.",
+              "Which result marker naturally precedes a '-ing' participial phrase ('...by that means')?",
+              "'thereby accelerating...' links the preceding clause cleanly to its consequence."
+            ],
+            misconceptionAlerts: [
+              {
+                trigger: "therefore",
+                note: "'Therefore' connects finite independent clauses ('; therefore, rural electrification accelerated'), whereas 'thereby' modifies a participial consequence."
               }
             ]
           }

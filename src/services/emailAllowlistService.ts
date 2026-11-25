@@ -310,8 +310,37 @@ export class EmailAllowlistService {
   }
 
   public revokeCurrentSession(): void {
+    const token = this.activeVerificationToken;
     this.activeSession = null;
     this.activeVerificationToken = null;
+    if (token && typeof fetch !== "undefined") {
+      fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }).catch(() => {});
+    }
+  }
+
+  public async logoutSession(): Promise<void> {
+    const token = this.activeVerificationToken;
+    this.activeSession = null;
+    this.activeVerificationToken = null;
+    if (token && typeof fetch !== "undefined") {
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+      } catch {
+        // Local session already cleared
+      }
+    }
   }
 
   // =========================================================================

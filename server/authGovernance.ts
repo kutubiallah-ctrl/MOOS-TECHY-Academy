@@ -70,7 +70,10 @@ export interface AuthenticatedRequest extends Request {
 export class ServerAuthGovernance {
   private static instance: ServerAuthGovernance;
   private directory: Map<string, InternalUserRecord> = new Map();
+  private revokedTokens: Map<string, number> = new Map();
+  private learnerProgressStore: Map<string, Record<string, any>> = new Map();
   private googleCertCache: CertCache | null = null;
+  private testFirebaseCerts: Record<string, string> | null = null;
 
   private constructor() {
     this.seedBaseline();
@@ -191,18 +194,34 @@ export class ServerAuthGovernance {
   // =========================================================================
   // SERVER CRYPTOGRAPHIC SESSION TOKEN ISSUANCE & VERIFICATION
   // =========================================================================
+  private tokenFingerprint(token: string): string {
+    return crypto.createHash("sha256").update(token).digest("hex");
+  }
+
+  private pruneRevokedTokens(nowMs: number = Date.now()): void {
+    for (const [key, exp] of this.revokedTokens.entries()) {
+      if (exp <= nowMs) {
+        this.revokedTokens.delete(key);
+      }
+    }
+  }
+
   public issueSessionToken(session: {
     email: string;
     role: AllowlistRole;
     fullName?: string;
     authProvider?: "password" | "firebase";
+    ttlMs?: number;
   }): { token: string; expiresAt: number; session: VerifiedAuthSession } {
     const norm = this.normalizeEmail(session.email);
     const issuedAt = Date.now();
-    const expiresAt = issuedAt + TOKEN_TTL_MS;
+    const ttl = typeof session.ttlMs === "number" ? session.ttlMs : TOKEN_TTL_MS;
+    const expiresAt = issuedAt + ttl;
     const isOwner = session.role === "owner" && this.isOwner(norm);
+    const jti = crypto.randomBytes(16).toString("hex");
 
     const claims: VerifiedAuthSession = {
+      jti,
       email: norm,
       role: session.role,
       fullName: session.fullName || norm,
@@ -221,6 +240,19 @@ export class ServerAuthGovernance {
       expiresAt,
       session: claims
     };
+  }
+
+  public revokeSessionToken(token: string | undefined | null): boolean {
+    if (!token || typeof token !== "string") return false;
+    const session = this.verifySessionToken(token);
+    if (!session) return false;
+    this.pruneRevokedTokens();
+    const exp = session.expiresAt || Date.now() + TOKEN_TTL_MS;
+    if (session.jti) {
+      this.revokedTokens.set(`jti:${session.jti}`, exp);
+    }
+    this.revokedTokens.set(`tok:${this.tokenFingerprint(token)}`, exp);
+    return true;
   }
 
   public verifySessionToken(token: string | undefined | null, expectedEmail?: string): VerifiedAuthSession | null {
@@ -249,6 +281,14 @@ export class ServerAuthGovernance {
         return null;
       }
       if (Date.now() > parsed.expiresAt) {
+        return null;
+      }
+
+      this.pruneRevokedTokens();
+      if (
+        (parsed.jti && this.revokedTokens.has(`jti:${parsed.jti}`)) ||
+        this.revokedTokens.has(`tok:${this.tokenFingerprint(token)}`)
+      ) {
         return null;
       }
 
@@ -453,6 +493,12 @@ export class ServerAuthGovernance {
   // CRYPTOGRAPHIC FIREBASE ID TOKEN VERIFICATION & SERVER OWNER ELEVATION
   // =========================================================================
   private async fetchGooglePublicCerts(): Promise<Record<string, string>> {
+    if (
+      this.testFirebaseCerts &&
+      (process.env.MOOS_SKIP_AUTO_LISTEN === "true" || process.env.NODE_ENV === "test")
+    ) {
+      return this.testFirebaseCerts;
+    }
     if (this.googleCertCache && Date.now() < this.googleCertCache.expiresAtMs) {
       return this.googleCertCache.certs;
     }
@@ -499,6 +545,9 @@ export class ServerAuthGovernance {
       const nowSec = Math.floor(Date.now() / 1000);
       if (typeof payload.exp !== "number" || payload.exp <= nowSec) {
         return { valid: false, error: "Firebase token has expired." };
+      }
+      if (typeof payload.iat === "number" && payload.iat > nowSec + 300) {
+        return { valid: false, error: "Firebase token issued-at timestamp is invalid." };
       }
       if (payload.aud !== FIREBASE_PROJECT_ID || payload.iss !== FIREBASE_TOKEN_ISSUER) {
         return { valid: false, error: "Firebase token audience or issuer mismatch." };
@@ -798,7 +847,78 @@ export class ServerAuthGovernance {
     });
   };
 
-  // Test isolation helper
+  // =========================================================================
+  // AUTHENTICATED LEARNER PROGRESS ISOLATION STORE (PER-ACCOUNT SCOPED)
+  // =========================================================================
+  public getLearnerProgress(
+    session: VerifiedAuthSession,
+    targetAccountEmail: string
+  ): { statusCode: number; allowed: boolean; progress?: Record<string, any>; message?: string } {
+    const normTarget = this.normalizeEmail(targetAccountEmail);
+    if (!normTarget) {
+      return { statusCode: 400, allowed: false, message: "Target account identifier is required." };
+    }
+    if (session.email !== normTarget && !session.isOwner) {
+      return {
+        statusCode: 403,
+        allowed: false,
+        message: "Forbidden: Cross-account learner data access is strictly prohibited."
+      };
+    }
+    return {
+      statusCode: 200,
+      allowed: true,
+      progress: this.learnerProgressStore.get(normTarget) || {
+        accountEmail: normTarget,
+        masteryRecords: {},
+        xp: 0,
+        masteryPoints: 0,
+        updatedAt: null
+      }
+    };
+  }
+
+  public saveLearnerProgress(
+    session: VerifiedAuthSession,
+    targetAccountEmail: string,
+    payload: Record<string, any>
+  ): { statusCode: number; allowed: boolean; progress?: Record<string, any>; message?: string } {
+    const normTarget = this.normalizeEmail(targetAccountEmail);
+    if (!normTarget) {
+      return { statusCode: 400, allowed: false, message: "Target account identifier is required." };
+    }
+    if (session.email !== normTarget) {
+      return {
+        statusCode: 403,
+        allowed: false,
+        message: "Forbidden: Cannot modify another learner's progress record."
+      };
+    }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return { statusCode: 400, allowed: false, message: "Invalid progress payload." };
+    }
+    const existing = this.learnerProgressStore.get(normTarget) || {};
+    const saved = {
+      ...existing,
+      ...payload,
+      accountEmail: normTarget,
+      updatedAt: new Date().toISOString()
+    };
+    this.learnerProgressStore.set(normTarget, saved);
+    return {
+      statusCode: 200,
+      allowed: true,
+      progress: saved
+    };
+  }
+
+  // Test isolation helpers
+  public setTestFirebaseCerts(certs: Record<string, string> | null): void {
+    if (process.env.MOOS_SKIP_AUTO_LISTEN === "true" || process.env.NODE_ENV === "test") {
+      this.testFirebaseCerts = certs;
+    }
+  }
+
   public provisionOwnerPasswordForTest(ownerEmail: string, password: string): void {
     const norm = this.normalizeEmail(ownerEmail);
     const existing = this.directory.get(norm);
@@ -810,6 +930,9 @@ export class ServerAuthGovernance {
 
   public resetForTesting(): void {
     this.directory.clear();
+    this.revokedTokens.clear();
+    this.learnerProgressStore.clear();
+    this.testFirebaseCerts = null;
     this.seedBaseline();
   }
 }

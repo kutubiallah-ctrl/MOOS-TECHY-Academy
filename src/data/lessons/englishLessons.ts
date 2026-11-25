@@ -372,60 +372,99 @@ export const ENGLISH_LESSONS: Record<string, SkillLesson> = {
   "skill-esl-verb-noun-collocations": {
     id: "les-esl-verb-noun-collocations",
     title: "ESL High-Frequency Verb-Noun Collocations & Natural Idiomatic Phrasing",
-    hookAndIntuition: "Why can you 'make a cake' and 'make a decision', but you must 'do homework' and 'do research'? Grammar rules alone cannot explain this—collocations are customary partnerships between words that native speakers instinctively expect. Mastering them makes your English flow naturally.",
-    conceptualExplanation: "A collocation is a predictable, conventional combination of words that co-occur with greater frequency than random chance. For ESL learners, literal translation from one's mother tongue is the primary source of unnatural phrasing. (1) 'Make' vs 'Do': 'Make' generally associates with creation, producing an outcome, communication, or decisions ('make a choice', 'make an effort', 'make an inquiry', 'make a profit'). 'Do' associates with routine duties, general actions, work, and open-ended obligations ('do homework', 'do research', 'do business', 'do one's best'). (2) Adjective-Noun collocations: 'heavy rain' (never 'strong rain'), 'strong wind' (never 'heavy wind'), 'deep sleep' (never 'high sleep'). (3) Academic Collocations: 'conduct an experiment', 'formulate a hypothesis', 'draw a tentative conclusion'.",
+    hookAndIntuition: "Why can you 'make a cake' and 'make a decision', but you must 'do homework' and 'do research'? Grammar rules alone cannot explain this—collocations are customary partnerships between words that native speakers instinctively expect. Mastering them transforms grammatically correct yet stiff English into fluent, authoritative communication.",
+    conceptualExplanation: "CORE SYLLABUS (CEFR B2-C1 / IELTS / TOEFL / WAEC ESL): A collocation is a predictable, conventional partnership of words that co-occur in standard English with far higher probability than random synonym substitution allows. For multilingual learners, word-for-word translation from one's first language (L1 interference) is the single greatest cause of unnatural phrasing. Four High-Yield Collocation Systems: (1) 'Make' vs 'Do' Binary: 'Make' partners with nouns denoting creation, production, decisions, plans, and speech acts ('make a choice', 'make an effort', 'make a complaint', 'make progress', 'make a mistake'). 'Do' partners with routine tasks, general duties, academic/scientific work, and open-ended activities ('do homework', 'do research', 'do business', 'do one's duty', 'do damage'). (2) Adverb-Adjective Intensifiers: Natural English pairs 'heavy rain / heavy traffic' (never 'strong rain'), 'strong wind / strong coffee' (never 'heavy wind'), 'bitterly disappointed', and 'deeply concerned'. (3) Academic Word List (AWL) Verb-Noun Collocations: Formal essays require 'conduct an investigation', 'formulate a hypothesis', 'draw a conclusion', 'raise an objection', and 'substantiate a claim'. (4) Register Pairs & False Friends: Distinguish 'take an examination' (student) from 'give/set an examination' (examiner), and 'attend a lecture' from 'assist a colleague'.",
+    conceptualModel: "Lexical Chunk Retrieval Matrix: Store abstract nouns permanently bound to their licensed verb and intensifier partners rather than translating isolated headwords.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Lexical Collocation", definition: "Words that naturally fit together according to accepted communicative convention rather than strict grammatical rules.", practicalExample: "'Pay attention', 'cast a ballot', 'bear in mind'." },
-      { termOrSymbol: "L1 Transfer / Negative Interference", definition: "Applying syntactic or lexical conventions from one's first language into English, yielding awkward phrasing.", practicalExample: "Translating 'hacer una pregunta' literally as 'make a question' instead of 'ask a question'." },
-      { termOrSymbol: "Academic Word List (AWL) Collocation", definition: "Standard pairings used across university research publications and scholarly debate.", practicalExample: "'Substantiate a claim', 'corroborate empirical data'." }
+      { termOrSymbol: "Lexical Collocation", definition: "Habitual, conventional word partnerships dictated by usage rather than abstract syntax alone.", practicalExample: "'Pay attention', 'cast a ballot', 'bear in mind', 'reach a consensus'." },
+      { termOrSymbol: "L1 Transfer / Negative Interference", definition: "Mapping syntactic or lexical habits from a mother tongue literally into English, producing non-idiomatic pairs.", practicalExample: "Replacing literal 'make an investigation' or 'do a mistake' with natural 'conduct an investigation' and 'make a mistake'." },
+      { termOrSymbol: "Academic Word List (AWL) Collocation", definition: "Formal scholarly verb-noun frames expected in university essays and professional policy reports.", practicalExample: "'Substantiate a claim', 'corroborate empirical data', 'mitigate adverse effects'." }
     ],
     workedExamples: [
       {
-        title: "Rectifying Common Collocational Errors in a Business Pitch",
-        problemStatement: "Correct the following non-native sentences:\n1. 'We need to make research before we do a decision.'\n2. 'There was a strong rain yesterday, so we did a big mistake.'",
+        title: "Worked Analysis 1: Rectifying Verb-Noun & Intensifier Errors in a Formal Proposal",
+        problemStatement: "Audit and rewrite two non-native sentences into natural academic English:\n1. 'We must make extensive research before we do a strategic decision.'\n2. 'Because of strong rain yesterday, our logistics unit did a serious mistake.'",
         steps: [
-          { stepNumber: 1, instruction: "Analyze sentence 1 verbs.", reasoning: "Research is an investigative process (requires 'do' or 'conduct'). Decisions are conclusions reached (requires 'make')." },
-          { stepNumber: 2, instruction: "Rewrite sentence 1.", reasoning: "'We need to conduct research (or do research) before we make a decision.'" },
-          { stepNumber: 3, instruction: "Analyze sentence 2 modifiers and verbs.", reasoning: "Precipitation pairs with 'heavy'. Errors pair with 'make'." },
-          { stepNumber: 4, instruction: "Rewrite sentence 2.", reasoning: "'There was heavy rain yesterday, so we made a big mistake.'" }
+          { stepNumber: 1, instruction: "Classify the abstract nouns in Sentence 1 by semantic domain.", reasoning: "'Research' denotes systematic investigative work (paired with 'do' or formal 'conduct'). 'Decision' denotes an executive choice/outcome (paired with 'make')." },
+          { stepNumber: 2, instruction: "Rewrite Sentence 1 with standard AWL collocations.", reasoning: "'We must conduct extensive research before we make a strategic decision.'" },
+          { stepNumber: 3, instruction: "Audit Sentence 2 for intensifier and verb partnerships.", reasoning: "Atmospheric precipitation intensity selects 'heavy' ('heavy rain'), not 'strong'. An error/fault selects 'make' ('made a mistake'), not 'do'." },
+          { stepNumber: 4, instruction: "Verify natural register in Sentence 2.", reasoning: "'Because of heavy rain yesterday, our logistics unit made a serious mistake.'" }
         ],
-        takeawayRule: "Always learn new English nouns together with the specific verbs and adjectives that accompany them."
+        takeawayRule: "'Make' produces outcomes, choices, and errors; 'do/conduct' executes tasks and inquiries. Never substitute synonyms blindly inside fixed collocations."
+      },
+      {
+        title: "Worked Analysis 2: Upgrading Informal Verbs to AWL Academic Collocations",
+        problemStatement: "Upgrade the underlined phrases in a university lab report: 'The panel (did a talk on) renewable policy, (got proof for) their thesis, and (made an end result) about solar tariffs.'",
+        steps: [
+          { stepNumber: 1, instruction: "Replace 'did a talk on' with formal presentation collocation.", reasoning: "Academic panels 'deliver a presentation on' or 'hold a symposium on' a policy topic." },
+          { stepNumber: 2, instruction: "Replace 'got proof for' with scholarly argumentation collocation.", reasoning: "Evidence does not get 'gotten'; researchers 'adduce evidence for', 'provide empirical support for', or 'substantiate' a thesis." },
+          { stepNumber: 3, instruction: "Replace 'made an end result' with standard inferential collocation.", reasoning: "Analytical reports 'draw a conclusion' or 'reach a consensus' rather than 'make an end result'." },
+          { stepNumber: 4, instruction: "Verify full C1 academic fluency.", reasoning: "'The panel held a seminar on renewable policy, substantiated their thesis, and drew a decisive conclusion about solar tariffs.'" }
+        ],
+        takeawayRule: "Academic register clarity arises from precise verb-noun pairs ('draw a conclusion', 'substantiate a thesis', 'pose a question')."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Believing that synonym substitution is always safe in collocations (e.g. if 'big mistake' is correct, then 'large mistake' must be equally good).", whyItIsWrong: "Collocations are arbitrary lexical habits; native speakers say 'big mistake', 'grave error', or 'fatal flaw', but rarely 'large mistake'.", correctCorrection: "Store words in contextual chunks rather than isolated dictionary items." }
+      { misconception: "Assuming arbitrary synonyms inside collocations remain idiomatic (e.g., 'large mistake' or 'fast food' -> 'quick food').", whyItIsWrong: "Collocations are usage-locked: English speakers say 'big mistake' or 'grave error', and 'fast food' vs 'quick meal', not vice versa.", correctCorrection: "Verify high-frequency adjective-noun and verb-noun partners as unified chunks." },
+      { misconception: "Using 'do' for mistakes, complaints, and progress due to broad L1 general-action verbs.", whyItIsWrong: "Errors ('make a mistake'), communication acts ('make a complaint'), and gains ('make progress') universally take 'make'.", correctCorrection: "Reserve 'do' for chores, business, research, and homework." }
     ],
-    guidedPracticePrompt: "Which verb pairs with 'a complaint': make, do, or take?",
-    summaryRecap: "Collocations are natural word partnerships. 'Make' creates; 'do' performs. Learn words in multi-word chunks."
+    guidedPracticePrompt: "Select the natural collocation: 'After reviewing the quarterly ledger, the auditor decided to (make / do / raise) an objection to the unverified invoice.'",
+    independentPracticePrompt: "Write four original academic sentences using each of these collocations accurately: 'conduct a survey', 'make an allowance', 'bitterly disappointed', and 'draw a distinction'.",
+    diagnosticSelfCheck: "Can you pair 'research', 'damage', 'complaint', 'progress', and 'rain' with their exact standard English verb or adjective partners without L1 translation?",
+    transferApplication: "Drafting IELTS Writing Task 2 essays, executive board proposals, legal briefs, and international grant applications.",
+    masteryAssessment: "Achieve >= 85% across 5 tiered items diagnosing verb-noun, adjective-noun, false-friend, and academic collocation accuracy.",
+    extensionActivity: "Compare institutional collocation differences between British/West African English ('sit an examination') and North American English ('take an exam').",
+    summaryRecap: "Collocations lock specific verbs and adjectives to nouns: 'make' (decisions, errors, progress), 'do/conduct' (homework, research, investigations), 'heavy rain', 'strong wind'.",
+    estimatedMinutes: 95
   },
 
   "skill-esl-cohesive-transitions": {
     id: "les-esl-cohesive-transitions",
     title: "ESL Academic Discourse, Concessive Clauses & Paragraph Cohesion",
-    hookAndIntuition: "Imagine listening to an argument where every sentence starts with 'And then...' or 'Also...'. It sounds disconnected and childish. In advanced academic English, discourse markers (like 'Notwithstanding', 'Whereas', and 'Conversely') act as highway signs guiding your reader through sophisticated logic.",
-    conceptualExplanation: "Cohesion refers to the grammatical and lexical links that hold a text together and give it structural unity. (1) Concessive Connectors: allow the writer to acknowledge an opposing viewpoint before reaffirming their core thesis. Formulations include: 'Although + clause' (requires no following 'but'), 'Despite / In spite of + noun phrase' (never 'despite of'), and 'Notwithstanding + noun phrase' for high-register C1 discourse. (2) Cause and Effect Markers: 'Consequently', 'As a result', 'Thereby + participle'. (3) Addition and Reinforcement: 'Furthermore', 'Moreover', 'In addition to'. (4) Hedging: academic English prizes epistemic modesty through tentative modal verbs ('may', 'might') and cautious epistemic verbs ('suggests', 'tends to indicate') to prevent over-generalization.",
+    hookAndIntuition: "Imagine reading a policy report where every sentence opens with 'Also...' or 'And then...'. Even if each individual clause is grammatical, the logic feels fragmented and unpersuasive. Academic discourse markers ('Notwithstanding', 'Consequently', 'Conversely') act as structural steel joints binding claims, concessions, evidence, and synthesis into seamless prose.",
+    conceptualExplanation: "CORE SYLLABUS (CEFR B2-C1 / IELTS / TOEFL / WAEC ESL): Discourse cohesion links clauses and paragraphs along explicit logical trajectories—concession, causality, contrast, and epistemic hedging. Four Core Structural Principles: (1) Concessive Clauses & Prepositional Phrases: A concession acknowledges a counter-fact before asserting a stronger main thesis. Grammar governs word class strictly: Subordinating conjunctions ('Although', 'Even though', 'Whereas') require a full subject + finite verb clause and MUST NEVER be paired with 'but' in the main clause. Prepositions ('Despite', 'In spite of', 'Notwithstanding') take a noun phrase or gerund (-ing) phrase; 'despite' NEVER takes 'of'. (2) Conjunctive Adverbs & Punctuation Integrity: Connectors such as 'However', 'Nevertheless', 'Consequently', and 'Moreover' are adverbs, NOT coordinating conjunctions; joining two independent clauses with only a comma before 'however' creates a comma splice. Use a semicolon or period before the conjunctive adverb followed by a comma ('; however,'). (3) Parallelism & Logical Reference: Pronoun antecedents ('this finding', 'such disparities') and correlative pairs ('not only ... but also') must align grammatically. (4) Academic Hedging & Epistemic Modality: Scholarly English differentiates observed correlation from absolute proof via calibrated modals ('may', 'could', 'tend to') and epistemic verbs ('suggests', 'indicates').",
+    conceptualModel: "Clause-Linking Architecture: Subordinator + [S+V], [Main S+V] (no 'but') | Preposition + [NP] | Independent Clause; [Conjunctive Adverb], Independent Clause.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Concessive Clause", definition: "A subordinate clause that acknowledges a counter-fact without overturning the main proposition.", practicalExample: "'Although the temperature dropped sharply, the reaction proceeded to completion.'" },
-      { termOrSymbol: "Double Conjunction Error", definition: "Using both a subordinating conjunction and a coordinating conjunction together, creating a grammatical fault.", practicalExample: "INCORRECT: 'Although it rained, but we went out.' CORRECT: 'Although it rained, we went out.'" },
-      { termOrSymbol: "Academic Hedging", definition: "Using tentative language to signal intellectual precision and avoid unsubstantiated claims.", practicalExample: "'The empirical findings tend to support the hypothesis' vs 'This proves everything'." }
+      { termOrSymbol: "Concessive Preposition Rule", definition: "'Despite' and 'Notwithstanding' govern a noun phrase or gerund directly; only 'In spite of' includes 'of'.", practicalExample: "Despite the budget shortfall (NOT 'Despite of the budget shortfall'), the clinic expanded." },
+      { termOrSymbol: "Zero Double-Conjunction Axiom", definition: "Never combine a subordinator ('Although / Even though') with a coordinator ('but / yet') inside one sentence.", practicalExample: "Although the sensor drifted, the model converged (NEVER 'Although ..., but ...')." },
+      { termOrSymbol: "Conjunctive Adverb Punctuation", definition: "'; consequently,' or '. Consequently,' joins two complete clauses without creating a comma splice.", practicalExample: "Solar costs fell by 40%; consequently, rural adoption accelerated." }
     ],
     workedExamples: [
       {
-        title: "Transforming Fragmented Sentences into a Cohesive Academic Paragraph",
-        problemStatement: "Combine these disconnected sentences into a C1 cohesive academic paragraph:\n'Solar power is growing fast. Battery storage is still very expensive. Many rural clinics cannot store energy at night. We need cheaper batteries.'",
+        title: "Worked Analysis 1: Synthesizing Fragmented Claims into C1 Cohesive Prose",
+        problemStatement: "Combine four short sentences into a unified academic paragraph using concession, causal transition, and epistemic hedging:\n'Solar panel adoption is rising rapidly. Battery storage remains expensive. Many rural clinics lack night-time power. Governments should subsidize storage.'",
         steps: [
-          { stepNumber: 1, instruction: "Introduce contrast with a concessive marker.", reasoning: "Start with: 'Notwithstanding the exponential growth of solar power generation, electrical battery storage systems remain prohibitively expensive.'" },
-          { stepNumber: 2, instruction: "Connect cause and consequence logically.", reasoning: "'Consequently, rural medical clinics frequently face severe nocturnal energy deficits.'" },
-          { stepNumber: 3, instruction: "Synthesize with actionable, academic hedging.", reasoning: "'These findings suggest that state-sponsored subsidies for next-generation iron-air batteries represent an urgent developmental imperative.'" }
+          { stepNumber: 1, instruction: "Establish concession between the first two contrasting facts.", reasoning: "Convert 'Solar panel adoption is rising rapidly' into a noun phrase governed by 'Notwithstanding': 'Notwithstanding the rapid expansion of solar photovoltaic adoption, electrochemical battery storage remains prohibitively expensive.'" },
+          { stepNumber: 2, instruction: "Link cause to effect with a properly punctuated conjunctive adverb.", reasoning: "Join the clinic deficit via causal transition: 'Consequently, off-grid rural clinics continue to experience acute nocturnal power shortfalls.'" },
+          { stepNumber: 3, instruction: "Apply academic hedging rather than dogmatic assertion in the policy recommendation.", reasoning: "Use hedged epistemic framing: 'These operational constraints suggest that targeted public subsidies for next-generation storage may accelerate reliable healthcare electrification.'" },
+          { stepNumber: 4, instruction: "Audit clause grammar and punctuation.", reasoning: "Check that 'Notwithstanding' governs an NP cleanly and 'Consequently,' follows a complete sentence boundary with no comma splice." }
         ],
-        takeawayRule: "Use 'Notwithstanding', 'Consequently', and 'suggests that' to create seamless, scholarly paragraph architecture."
+        takeawayRule: "Combine concessive markers ('Notwithstanding'), causal connectors ('Consequently'), and hedged verbs ('suggest that / may') to elevate fragmented notes into scholarly prose."
+      },
+      {
+        title: "Worked Analysis 2: Diagnosing and Repairing Comma Splices & Double Conjunctions",
+        problemStatement: "Repair both faulty sentences:\n(A) 'Although the reagent was purified, yet the yield remained low.'\n(B) 'The sample size was small, however, the variance remained tightly bounded.'",
+        steps: [
+          { stepNumber: 1, instruction: "Identify the structural fault in Sentence A.", reasoning: "Sentence A pairs subordinator 'Although' with coordinator 'yet', creating a redundant double-conjunction error." },
+          { stepNumber: 2, instruction: "Repair Sentence A cleanly.", reasoning: "Delete 'yet': 'Although the reagent was purified, the yield remained low.'" },
+          { stepNumber: 3, instruction: "Identify the punctuation fault in Sentence B.", reasoning: "'however' is a conjunctive adverb, not a FANBOYS coordinator; using a comma before 'however' fuses two independent clauses illegally (comma splice)." },
+          { stepNumber: 4, instruction: "Repair Sentence B with a semicolon.", reasoning: "'The sample size was small; however, the variance remained tightly bounded.'" }
+        ],
+        takeawayRule: "Use a semicolon before conjunctive adverbs ('however', 'moreover', 'nevertheless') when linking two independent clauses."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Writing 'Despite of the rain...' in formal essays.", whyItIsWrong: "'Despite' is a preposition that takes a direct noun object with NO 'of'. Only 'in spite of' contains the preposition 'of'.", correctCorrection: "Write 'Despite the rain' OR 'In spite of the rain'." }
+      { misconception: "Writing 'Despite of the rain...' or 'Although he studied hard, but he failed.'", whyItIsWrong: "'Despite' never takes 'of', and 'Although' already subordinates its clause so adding 'but' violates clause coordination.", correctCorrection: "Write 'Despite the rain...' (or 'In spite of the rain...') and 'Although he studied hard, he failed.'" },
+      { misconception: "Joining two independent sentences with ', however,' (comma splice).", whyItIsWrong: "'However' is an adverb rather than a coordinating conjunction (for/and/nor/but/or/yet/so) and cannot link clauses across a bare comma.", correctCorrection: "Use '; however,' or '. However,' at the boundary between independent clauses." }
     ],
-    guidedPracticePrompt: "Rewrite this sentence without the double conjunction: 'Although the candidate studied hard, but she failed the grammar test.'",
-    summaryRecap: "Discourse markers structure thought. Never combine 'although' with 'but'. 'Despite' takes no 'of'. Hedging ensures academic precision."
+    guidedPracticePrompt: "Correct the syntax error: 'Despite of the delayed shipment, but the engineering team assembled the turbine on schedule.'",
+    independentPracticePrompt: "Write a 3-sentence paragraph evaluating urban public transit using one concessive clause ('Whereas' or 'Despite'), one semicolon + conjunctive adverb ('; nevertheless,'), and one hedged claim ('evidence indicates that').",
+    diagnosticSelfCheck: "Can you distinguish a subordinating conjunction (Although + S + V), a concessive preposition (Despite + NP), and a conjunctive adverb (; however,)?",
+    transferApplication: "Authoring academic literature reviews, executive policy briefings, university admissions essays, and peer-reviewed abstracts.",
+    masteryAssessment: "Achieve >= 85% across 5 C1 items testing concessive syntax, punctuation of conjunctive adverbs, hedging, and coherent paragraph transitions.",
+    extensionActivity: "Analyze how nominalization ('the rapid urbanization of Lagos' vs 'Lagos urbanized rapidly') enables compact transitions after prepositions like 'Notwithstanding' and 'Owing to'.",
+    summaryRecap: "Never pair 'Although' with 'but'. 'Despite' takes no 'of'. Separate independent clauses before 'however/consequently' with a semicolon or period. Hedge claims with precision.",
+    estimatedMinutes: 100
   }
 };
 

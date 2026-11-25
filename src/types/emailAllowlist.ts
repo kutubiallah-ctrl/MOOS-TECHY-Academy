@@ -23,6 +23,7 @@ export interface AllowlistEntry {
 }
 
 export interface VerifiedAuthSession {
+  jti?: string;
   email: string;
   role: AllowlistRole;
   fullName: string;

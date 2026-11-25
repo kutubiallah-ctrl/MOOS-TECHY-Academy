@@ -11,7 +11,7 @@ import { serverAuthGovernance, AuthenticatedRequest } from "./server/authGoverna
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
@@ -106,6 +106,29 @@ app.post("/api/auth/firebase-session", async (req: Request, res: Response) => {
 // Inspect Active Server Session
 app.get("/api/auth/session", serverAuthGovernance.authenticateRequest, (req: AuthenticatedRequest, res: Response) => {
   return res.json({ authenticated: true, session: req.authSession });
+});
+
+// Logout & Server-Side Session Token Revocation
+app.post("/api/auth/logout", serverAuthGovernance.authenticateRequest, (req: AuthenticatedRequest, res: Response) => {
+  const token = serverAuthGovernance.extractBearerToken(req);
+  const revoked = serverAuthGovernance.revokeSessionToken(token);
+  return res.json({
+    success: revoked,
+    loggedOut: true,
+    email: req.authSession?.email,
+    message: "Session invalidated cleanly on server."
+  });
+});
+
+// Authenticated Cross-Account Isolated Learner Progress Endpoints
+app.get("/api/learner/progress/:accountEmail", serverAuthGovernance.authenticateRequest, (req: AuthenticatedRequest, res: Response) => {
+  const result = serverAuthGovernance.getLearnerProgress(req.authSession!, req.params.accountEmail);
+  return res.status(result.statusCode).json(result);
+});
+
+app.put("/api/learner/progress/:accountEmail", serverAuthGovernance.authenticateRequest, (req: AuthenticatedRequest, res: Response) => {
+  const result = serverAuthGovernance.saveLearnerProgress(req.authSession!, req.params.accountEmail, req.body);
+  return res.status(result.statusCode).json(result);
 });
 
 // List allowlist entries (Verified Owner only — ignores header/query callerEmail)
@@ -1135,6 +1158,11 @@ async function startServer() {
         clientWs.close();
       }
     }
+  });
+
+  // Consistent JSON 404 for unknown /api/* endpoints across both dev and production modes
+  app.all("/api/*", (_req: Request, res: Response) => {
+    return res.status(404).json({ error: "API endpoint not found." });
   });
 
   if (process.env.NODE_ENV !== "production") {

@@ -139,13 +139,18 @@ export const UNIVERSITY_TERTIARY_CURRICULUM_UNITS: Unit[] = [
     description: "Formal epsilon-delta definition of limits, continuity on intervals, L'Hôpital's Rule for indeterminate forms, and multivariable partial differentiation.",
     order: 2,
     category: "core",
+    estimatedHours: 5.0,
+    estimationMethod: "Rigorous epsilon-delta & L'Hopital proofs, multivariable Jacobian/Clairaut derivations, and 5 tiered tertiary questions",
+    provenanceVersion: "2.0.0",
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["UNIVERSITY_PREPARATION", "CAMBRIDGE_AS_A_LEVEL"],
     skills: [
       {
         id: "skill-uni-lhopital-partials",
         unitId: "unit-uni-limits-continuity",
         title: "L'Hôpital's Rule & Multivariable Partial Derivatives",
         code: "SKL-UNI-202",
-        summary: "Evaluating 0/0 and ∞/∞ indeterminate limits using L'Hôpital's Rule and taking partial derivatives ∂f/∂x and ∂f/∂y.",
+        summary: "Evaluating 0/0 and ∞/∞ indeterminate limits using L'Hôpital's Rule, continuity conditions, and partial derivatives ∂f/∂x, ∂f/∂y.",
         objectives: [
           "Evaluate indeterminate limit forms (0/0 and ∞/∞) using L'Hôpital's Rule: lim f(x)/g(x) = lim f'(x)/g'(x)",
           "Compute first and second-order partial derivatives of multivariable functions f(x, y)",
@@ -153,58 +158,107 @@ export const UNIVERSITY_TERTIARY_CURRICULUM_UNITS: Unit[] = [
         ],
         difficulty: "advanced",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-derivatives"],
         lesson: {
           id: "les-uni-lhopital-partials",
-          title: "L'Hôpital's Rule & Partial Derivatives",
-          hookAndIntuition: "In physical chemistry and thermodynamics, the pressure P of a gas depends on both volume V and temperature T simultaneously: P(V, T). To find how pressure responds to temperature while volume is held constant in a sealed cylinder, we take the partial derivative ∂P/∂T.",
-          conceptualExplanation: "When calculating limits of quotients, substitution often yields indeterminate forms like 0/0 or ∞/∞. L'Hôpital's Rule states that if f and g are differentiable, the limit of f(x)/g(x) equals the limit of their derivatives f'(x)/g'(x). When transitioning to functions of several variables z = f(x, y), a partial derivative treats all other variables as constants while differentiating with respect to the active variable.",
+          title: "Rigorous Limits, L'Hôpital's Rule & Multivariable Partial Differentiation",
+          hookAndIntuition: "In physical chemistry and thermodynamics, the pressure P of an ideal gas depends on both volume V and temperature T simultaneously: P(V, T) = nRT/V. To find how pressure responds to heating while volume is locked inside a rigid steel cylinder, we take the partial derivative ∂P/∂T.",
+          conceptualExplanation: "CORE UNIVERSITY ANALYSIS (K.A. Stroud Engineering Mathematics Standard): (1) Continuity at x = c requires three conditions: f(c) exists, lim_{x->c} f(x) exists, and lim_{x->c} f(x) = f(c). (2) When direct substitution into f(x)/g(x) yields strictly indeterminate forms 0/0 or ±∞/±∞ and both functions are differentiable near c (g'(x) ≠ 0), L'Hôpital's Rule guarantees lim f(x)/g(x) = lim f'(x)/g'(x). Exponential-or-product indeterminate forms such as 0·∞ or 1^∞ must first be rewritten as ratios or log-transformed via y = ln L. (3) For multivariable surfaces z = f(x, y), the partial derivative ∂f/∂x differentiates strictly along x while freezing y as a constant. By Clairaut's Theorem, mixed second partials match (∂²f/∂x∂y = ∂²f/∂y∂x) whenever both are continuous.",
+          conceptualModel: "Tangent-Plane Slice: freezing y = y₀ cuts the 3D surface z = f(x, y) into a 2D curve whose slope is ∂f/∂x.",
           keyTermsAndFormulas: [
             {
               termOrSymbol: "L'Hôpital's Rule",
-              definition: "\\lim_{x \\to c} \\frac{f(x)}{g(x)} = \\lim_{x \\to c} \\frac{f'(x)}{g'(x)}, \\quad \\text{if form is } \\frac{0}{0} \\text{ or } \\frac{\\infty}{\\infty}",
+              definition: "\\lim_{x \\to c} \\frac{f(x)}{g(x)} = \\lim_{x \\to c} \\frac{f'(x)}{g'(x)}, \\quad \\text{iff form is } \\frac{0}{0} \\text{ or } \\frac{\\infty}{\\infty}",
               practicalExample: "\\lim_{x \\to 0} \\frac{\\sin x}{x} = \\lim_{x \\to 0} \\frac{\\cos x}{1} = 1."
             },
             {
-              termOrSymbol: "Partial Derivative",
+              termOrSymbol: "Partial Derivative ∂f/∂x",
               definition: "\\frac{\\partial f}{\\partial x} = \\lim_{h \\to 0} \\frac{f(x+h, y) - f(x, y)}{h}",
               practicalExample: "For f(x, y) = x³y², ∂f/∂x = 3x²y² and ∂f/∂y = 2x³y."
+            },
+            {
+              termOrSymbol: "Clairaut's Symmetry Theorem",
+              definition: "\\frac{\\partial^2 f}{\\partial x \\partial y} = \\frac{\\partial^2 f}{\\partial y \\partial x}",
+              practicalExample: "Mixed partials of smooth polynomials and exponentials always commute."
             }
           ],
           workedExamples: [
             {
-              title: "Applying L'Hôpital's Rule to an Indeterminate Limit",
-              problemStatement: "Evaluate the limit: lim_{x -> 0} (e^(2x) - 1 - 2x) / x².",
+              title: "Stroud Frame 1: Iterated L'Hôpital's Rule on a Second-Order Indeterminate Limit",
+              problemStatement: "Evaluate the limit exactly: lim_{x -> 0} (e^(2x) - 1 - 2x) / x².",
               mathExpression: "\\lim_{x \\to 0} \\frac{e^{2x} - 1 - 2x}{x^2}",
               steps: [
                 {
                   stepNumber: 1,
-                  instruction: "Verify if direct substitution produces an indeterminate form",
-                  reasoning: "Numerator: e^0 - 1 - 0 = 1 - 1 = 0. Denominator: 0² = 0. Form is 0/0, so L'Hôpital's Rule applies."
+                  instruction: "Verify indeterminate status via direct substitution",
+                  reasoning: "Numerator: e⁰ - 1 - 0 = 0; Denominator: 0² = 0. Form is 0/0, so L'Hôpital's Rule is valid."
                 },
                 {
                   stepNumber: 2,
-                  instruction: "Differentiate numerator and denominator with respect to x",
-                  reasoning: "f'(x) = 2e^(2x) - 2. g'(x) = 2x. Limit is lim_{x -> 0} (2e^(2x) - 2) / (2x)."
+                  instruction: "Differentiate numerator and denominator separately",
+                  reasoning: "f'(x) = 2e^(2x) - 2 and g'(x) = 2x, giving lim_{x -> 0} (2e^(2x) - 2) / (2x)."
                 },
                 {
                   stepNumber: 3,
-                  instruction: "Check form again: 2(1) - 2 = 0 in numerator, 2(0) = 0 in denominator. Apply L'Hôpital a second time",
-                  reasoning: "f''(x) = 4e^(2x). g''(x) = 2. Now evaluate: lim_{x -> 0} (4e^(2x)) / 2 = 4(1) / 2 = 2."
+                  instruction: "Re-test indeterminate status before proceeding",
+                  reasoning: "Numerator at 0 is 2(1) - 2 = 0 and denominator is 2(0) = 0, still 0/0."
+                },
+                {
+                  stepNumber: 4,
+                  instruction: "Apply L'Hôpital a second time and evaluate",
+                  reasoning: "f''(x) = 4e^(2x) and g''(x) = 2. Now lim_{x -> 0} (4e^(2x)) / 2 = 4(1) / 2 = 2."
                 }
               ],
-              takeawayRule: "L'Hôpital's Rule can be applied sequentially as long as the quotient remains strictly indeterminate (0/0 or ∞/∞)."
+              takeawayRule: "Stop applying L'Hôpital the instant either numerator or denominator stops being 0 or ∞!"
+            },
+            {
+              title: "Stroud Frame 2: Verifying Clairaut's Theorem on Mixed Partial Derivatives",
+              problemStatement: "For f(x, y) = x³ sin(2y) + 4x²y, compute ∂f/∂x, ∂f/∂y, and confirm ∂²f/∂y∂x = ∂²f/∂x∂y.",
+              steps: [
+                {
+                  stepNumber: 1,
+                  instruction: "Compute ∂f/∂x treating y (and therefore sin(2y)) as constant",
+                  reasoning: "∂f/∂x = 3x² sin(2y) + 8xy."
+                },
+                {
+                  stepNumber: 2,
+                  instruction: "Differentiate ∂f/∂x with respect to y to get ∂²f/∂y∂x",
+                  reasoning: "Treating x as constant: ∂/∂y[3x² sin(2y) + 8xy] = 6x² cos(2y) + 8x."
+                },
+                {
+                  stepNumber: 3,
+                  instruction: "Now reverse order: compute ∂f/∂y treating x as constant",
+                  reasoning: "∂f/∂y = 2x³ cos(2y) + 4x²."
+                },
+                {
+                  stepNumber: 4,
+                  instruction: "Differentiate ∂f/∂y with respect to x to confirm symmetry",
+                  reasoning: "∂²f/∂x∂y = 6x² cos(2y) + 8x, matching ∂²f/∂y∂x identically!"
+                }
+              ],
+              takeawayRule: "For smooth functions, mixed partial derivatives match regardless of differentiation order—providing a built-in algebraic self-check."
             }
           ],
           commonMisconceptionsAndTraps: [
             {
               misconception: "Using the Quotient Rule instead of differentiating numerator and denominator separately in L'Hôpital's Rule",
-              whyItIsWrong: "L'Hôpital's Rule takes f'(x) / g'(x), NOT the derivative of the quotient d/dx [f/g].",
-              correctCorrection: "Differentiate the top independently, differentiate the bottom independently."
+              whyItIsWrong: "L'Hôpital's Rule forms f'(x) / g'(x), NOT d/dx [f(x)/g(x)].",
+              correctCorrection: "Differentiate top and bottom independently, and verify 0/0 or ∞/∞ before every step."
+            },
+            {
+              misconception: "Applying L'Hôpital when direct substitution produces a determinate ratio like 0/5 or 3/0",
+              whyItIsWrong: "0/5 is already equal to 0; blindly differentiating yields wrong non-zero limits.",
+              correctCorrection: "Always substitute first to confirm 0/0 or ∞/∞ before differentiating."
             }
           ],
-          guidedPracticePrompt: "Given z = 4x²y³ - 5xy + 7, find ∂z/∂x and ∂z/∂y.",
-          diagnosticSelfCheck: "Can L'Hôpital's Rule be applied if direct substitution gives 0/5?",
-          summaryRecap: "Advanced analysis provides rigorous tools: L'Hôpital resolves indeterminate limits, while partial derivatives unlock multivariable physics, optimization, and engineering."
+          guidedPracticePrompt: "Given z = 4x²y³ - 5xy + 7, find ∂z/∂x, ∂z/∂y, and verify ∂²z/∂x∂y.",
+          independentPracticePrompt: "Evaluate lim_{x -> ∞} (x²) / e^(x) using repeated L'Hôpital's Rule.",
+          diagnosticSelfCheck: "Why must lim_{x -> 0} (cos x) / (x + 1) NOT be evaluated with L'Hôpital's Rule?",
+          transferApplication: "Gradient descent optimization in machine learning, Navier-Stokes fluid equations, and thermodynamic Maxwell relations.",
+          masteryAssessment: "Evaluate indeterminate limits, continuity removals, and multivariable partial/mixed derivatives across 5 university-level problems.",
+          extensionActivity: "Use logarithmic transformation y = ln[(1 + 3/x)^x] and L'Hôpital's Rule to prove lim_{x -> ∞} (1 + 3/x)^x = e³.",
+          summaryRecap: "L'Hôpital resolves 0/0 and ∞/∞ via f'(x)/g'(x); partial derivatives freeze orthogonal variables; smooth mixed partials obey Clairaut's equality.",
+          estimatedMinutes: 65
         },
         questions: [
           {
@@ -238,17 +292,76 @@ export const UNIVERSITY_TERTIARY_CURRICULUM_UNITS: Unit[] = [
               "2x²y² + 10x"
             ],
             correctAnswer: "6x²y² + 10x",
-            explanation: "When taking ∂f/∂x, treat y as a constant. d/dx[2x³y²] = 6x²y², d/dx[5x²] = 10x, and d/dx[-3y⁴] = 0 (since it has no x). Thus ∂f/∂x = 6x²y² + 10x.",
+            explanation: "When taking ∂f/∂x, treat y as a constant. d/dx[2x³y²] = 6x²y², d/dx[5x²] = 10x, and d/dx[-3y⁴] = 0. Thus ∂f/∂x = 6x²y² + 10x.",
             hintLadder: [
               "Treat y as a constant number.",
               "Differentiate 2x³ to get 6x², keeping y² attached.",
-              "Differentiate 5x² to get 10x. The -3y⁴ term vanishes because it contains no x."
+              "The -3y⁴ term vanishes because it contains no x."
             ],
             misconceptionAlerts: [
-              { trigger: "6x²y² + 10x - 12y³", note: "Did you differentiate the y⁴ term? In ∂f/∂x, terms containing only y have a derivative of zero." }
+              { trigger: "6x²y² + 10x - 12y³", note: "Did you differentiate the y⁴ term? In ∂f/∂x, terms containing only y have derivative zero." }
             ],
             skillId: "skill-uni-lhopital-partials",
             difficulty: "medium"
+          },
+          {
+            id: "q-uni-lim-3",
+            type: "multiple_choice",
+            questionText: "Evaluate the limit: lim_{x -> 2} (x² - 4) / (x + 2).",
+            mathExpression: "\\lim_{x \\to 2} \\frac{x^2 - 4}{x + 2}",
+            options: ["0", "4", "1", "Undefined"],
+            correctAnswer: "0",
+            explanation: "Always substitute first! At x = 2, the numerator is 4 - 4 = 0 and the denominator is 2 + 2 = 4. The form 0/4 is NOT indeterminate; the limit equals 0.",
+            hintLadder: [
+              "Substitute x = 2 directly into numerator and denominator before considering L'Hôpital.",
+              "0 divided by non-zero 4 equals 0."
+            ],
+            misconceptionAlerts: [
+              { trigger: "4", note: "You mistakenly differentiated top and bottom (2x / 1 -> 4) even though 0/4 is not an indeterminate form!" }
+            ],
+            skillId: "skill-uni-lhopital-partials",
+            difficulty: "easy"
+          },
+          {
+            id: "q-uni-lim-4",
+            type: "multiple_choice",
+            questionText: "For the smooth surface f(x, y) = 5x²y³ - e^(2x), compute the mixed second partial derivative ∂²f / ∂x∂y.",
+            mathExpression: "\\frac{\\partial}{\\partial x}\\left(\\frac{\\partial f}{\\partial y}\\right)",
+            options: [
+              "30xy²",
+              "30xy² - 2e^(2x)",
+              "10x y³ - 4e^(2x)",
+              "15x²y²"
+            ],
+            correctAnswer: "30xy²",
+            explanation: "First ∂f/∂y = 15x²y² (the e^(2x) term depends only on x, so its y-partial is 0). Then ∂/∂x(15x²y²) = 30xy².",
+            hintLadder: [
+              "Compute ∂f/∂y first while treating x as a constant (so -e^(2x) vanishes).",
+              "Then differentiate the result 15x²y² with respect to x."
+            ],
+            misconceptionAlerts: [
+              { trigger: "30xy² - 2e^(2x)", note: "Because -e^(2x) has no y variable, it disappears when differentiating with respect to y." }
+            ],
+            skillId: "skill-uni-lhopital-partials",
+            difficulty: "hard"
+          },
+          {
+            id: "q-uni-lim-5",
+            type: "multiple_choice",
+            questionText: "Using L'Hôpital's Rule (twice), evaluate lim_{x -> 0} (1 - cos(2x)) / x².",
+            mathExpression: "\\lim_{x \\to 0} \\frac{1 - \\cos(2x)}{x^2}",
+            options: ["2", "0", "1", "4"],
+            correctAnswer: "2",
+            explanation: "Form is 0/0. First L'Hôpital gives 2sin(2x) / (2x), still 0/0. Second L'Hôpital gives 4cos(2x) / 2 -> 4(1)/2 = 2.",
+            hintLadder: [
+              "First derivative: numerator becomes 2sin(2x), denominator becomes 2x (still 0/0).",
+              "Differentiate again: 4cos(2x) / 2, then set x = 0."
+            ],
+            misconceptionAlerts: [
+              { trigger: "4", note: "Remember to differentiate the denominator x² -> 2x -> 2, dividing 4 by 2 to get 2." }
+            ],
+            skillId: "skill-uni-lhopital-partials",
+            difficulty: "hard"
           }
         ]
       }

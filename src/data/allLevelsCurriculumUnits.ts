@@ -359,46 +359,72 @@ export const PRIMARY_FOUNDATIONS_UNITS: Unit[] = [
     description: "Identify key components of a computer (monitor, keyboard, mouse, system unit) and learn essential digital hygiene.",
     order: 1,
     category: "core",
+    estimatedHours: 3.5,
+    estimationMethod: "Structured hardware lab, screen-safety routine drills, 2 worked examples, and 5 tiered diagnostic questions",
+    provenanceVersion: "2.0.0",
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_NIGERIAN", "COMMON_ENTRANCE"],
     skills: [
       {
         id: "skill-pf-computer-parts",
         unitId: "unit-pri-found-ict-1",
         title: "Parts of a Computer and Screen Safety Rules",
         code: "SKL-PF-CPT",
-        summary: "Name the monitor, keyboard, and mouse; understand how to click and type safely; and practice healthy screen habits.",
+        summary: "Name the monitor, keyboard, mouse, and system unit; understand input vs output roles; and practice healthy screen habits.",
         objectives: [
-          "Identify and name the 4 primary parts of a desktop computer",
-          "Understand the purpose of the mouse (pointing/clicking) and keyboard (typing)",
-          "Practice healthy posture and screen-time balance"
+          "Identify and name the 4 primary parts of a desktop computer (monitor, system unit, keyboard, mouse)",
+          "Classify devices as Input (keyboard, mouse, microphone) or Output (monitor, printer, speakers)",
+          "Practice healthy ergonomics, posture, and screen-time safety rules"
         ],
         difficulty: "foundational",
         masteryPointsRequired: 100,
         lesson: {
           id: "les-pf-computer",
-          title: "Meet the Computer: Screen, Mouse, Keyboard and Safety",
-          hookAndIntuition: "When you want to draw a picture on a computer, which part shows the picture and which part lets you click?",
-          conceptualExplanation: "A computer has special parts working together: The Monitor shows pictures and words. The Keyboard has buttons with letters and numbers for typing. The Mouse points and clicks. Always sit straight and take screen breaks!",
+          title: "Meet the Computer: Input, Processing, Output, and Digital Safety",
+          hookAndIntuition: "When you draw a house on a computer, your hand moves the mouse (Input), the system box thinks about where to place the lines (Processing), and the screen lights up to show your drawing (Output). Every computer follows this three-step team!",
+          conceptualExplanation: "A desktop computer works as an organized team of four main physical parts called hardware. The System Unit (tower) houses the brain (CPU) that processes instructions. Input devices—such as the Keyboard (for typing letters and numbers) and the Mouse (for pointing, clicking, and dragging)—send your commands into the System Unit. Output devices—such as the Monitor (display screen), Speakers (sound), and Printer (paper copies)—show you the finished work. Safe digital exploration requires sitting upright with your back supported, keeping drinks away from keyboards, positioning the monitor at arm's length, and taking a 20-second eye break every 20 minutes.",
+          conceptualModel: "Input -> Process -> Output (IPO) Loop: Keyboard/Mouse feed commands into the System Unit, which sends visual/audio results to the Monitor/Speakers.",
           keyTermsAndFormulas: [
-            { termOrSymbol: "Monitor", definition: "The screen that displays information, pictures, and videos.", practicalExample: "Viewing your lesson." },
-            { termOrSymbol: "Mouse", definition: "A handheld pointing device used to select items on the screen.", practicalExample: "Left-click to choose." },
-            { termOrSymbol: "Keyboard", definition: "A board of keys with letters and numbers for entering information.", practicalExample: "Typing your name." }
+            { termOrSymbol: "Monitor (Output)", definition: "The visual display screen that shows lessons, pictures, and videos.", practicalExample: "Viewing an interactive math diagram." },
+            { termOrSymbol: "System Unit (Processing)", definition: "The main casing holding the CPU brain, memory, and storage drives.", practicalExample: "Runs programs and saves your schoolwork." },
+            { termOrSymbol: "Keyboard & Mouse (Input)", definition: "Devices used to enter characters (keyboard) and point/click icons (mouse).", practicalExample: "Typing your name and clicking Submit." }
           ],
           workedExamples: [
             {
-              title: "Typing Your Name",
-              problemStatement: "Which computer part do you use to type the letters of your name?",
+              title: "Worked Trace 1: Typing & Submitting Your Name Safely",
+              problemStatement: "Trace step-by-step which hardware parts work together when you type your name and click the Submit button.",
               steps: [
-                { stepNumber: 1, instruction: "Think about which part has letters", reasoning: "The keyboard contains keys with letters A to Z." },
-                { stepNumber: 2, instruction: "Press the keys", reasoning: "Pressing keys sends letters onto the monitor." }
+                { stepNumber: 1, instruction: "Position yourself safely at the desk", reasoning: "Sit upright with feet flat and keep your eyes about an arm's length from the monitor." },
+                { stepNumber: 2, instruction: "Use the Mouse (Input) to click the name box", reasoning: "Moving the mouse moves the pointer arrow; left-clicking activates the text box." },
+                { stepNumber: 3, instruction: "Use the Keyboard (Input) to type your letters", reasoning: "Each letter key sends an electrical signal to the System Unit." },
+                { stepNumber: 4, instruction: "Observe the Monitor (Output) and confirm", reasoning: "The System Unit processes the keystrokes and displays your name on the monitor before you click Submit." }
               ],
-              takeawayRule: "We use the keyboard to type words and numbers into the computer."
+              takeawayRule: "Input sends commands in (keyboard, mouse), the System Unit processes them, and Output shows results (monitor, speakers)."
+            },
+            {
+              title: "Worked Trace 2: Sorting Classroom Devices into Input vs Output",
+              problemStatement: "Classify a keyboard, a printer, a microphone, and speakers into Input or Output devices.",
+              steps: [
+                { stepNumber: 1, instruction: "Ask the direction question: Does data go INTO the computer or OUT to you?", reasoning: "Any tool that captures your voice, clicks, or keystrokes is Input; any tool that presents results to your eyes, ears, or hands is Output." },
+                { stepNumber: 2, instruction: "Classify the Keyboard and Microphone", reasoning: "You type into a keyboard and speak into a microphone, so both are Input devices." },
+                { stepNumber: 3, instruction: "Classify the Printer and Speakers", reasoning: "A printer pushes ink onto paper and speakers push sound out to your ears, so both are Output devices." },
+                { stepNumber: 4, instruction: "Verify with a safety check", reasoning: "Never unplug power cables with wet hands and never keep open cups of water near any hardware." }
+              ],
+              takeawayRule: "Direction of information decides the category: user-to-computer = Input; computer-to-user = Output."
             }
           ],
           commonMisconceptionsAndTraps: [
-            { misconception: "Thinking the monitor is the whole computer.", whyItIsWrong: "The monitor is just the screen; the system unit does the processing.", correctCorrection: "The monitor shows what the computer is doing." }
+            { misconception: "Thinking the monitor is the whole computer.", whyItIsWrong: "The monitor is only the display output screen; the system unit does the actual computing and processing.", correctCorrection: "The System Unit is the computer's processing box, while the monitor displays what it produces." },
+            { misconception: "Using a computer with drinks or messy snacks resting on the keyboard.", whyItIsWrong: "Spilled liquids cause short circuits and permanent hardware damage inside key switches.", correctCorrection: "Keep all food and liquids away from the computer desk and rest your eyes every 20 minutes." }
           ],
-          guidedPracticePrompt: "Which part of the computer do you click to open a learning game?",
-          summaryRecap: "Computers help us learn through monitors, mice, and keyboards; safe posture keeps our bodies healthy."
+          guidedPracticePrompt: "Which part of the computer do you click to open a learning game, and which part lets you hear the game's audio?",
+          independentPracticePrompt: "Walk around your classroom or home and list 2 Input devices and 2 Output devices you can spot, explaining why each belongs in its group.",
+          diagnosticSelfCheck: "If your computer screen is dark even when the System Unit power light is glowing, which specific part should you check first?",
+          transferApplication: "Practicing safe posture and hardware care in school ICT laboratories and home study stations.",
+          masteryAssessment: "Identify the 4 desktop parts, distinguish Input from Output, and apply safe screen-time habits across 5 checkpoint items.",
+          extensionActivity: "Draw and label your own 4-part computer station showing arrows from Input (keyboard/mouse) into Processing (System Unit) and out to Output (Monitor).",
+          summaryRecap: "Keyboards and mice send Input to the System Unit for processing; monitors, printers, and speakers deliver Output. Sit straight, keep liquids away, and take eye breaks.",
+          estimatedMinutes: 45
         },
         questions: [
           {
@@ -407,13 +433,13 @@ export const PRIMARY_FOUNDATIONS_UNITS: Unit[] = [
             questionText: "Which part of a computer displays pictures, lessons, and videos?",
             options: ["The Monitor", "The Mouse", "The Keyboard", "The Power Cable"],
             correctAnswer: "The Monitor",
-            explanation: "The monitor is the visual display screen that shows text, images, and videos.",
+            explanation: "The monitor is the visual output screen that displays text, images, and videos.",
             hintLadder: [
               "Which part looks like a television screen?",
-              "You use your eyes to look at this part."
+              "You use your eyes to look at this output device."
             ],
             misconceptionAlerts: [
-              { trigger: "The Mouse", note: "The mouse is used to point and click, not to display pictures." }
+              { trigger: "The Mouse", note: "The mouse is an input device used to point and click, not to display pictures." }
             ],
             skillId: "skill-pf-computer-parts",
             difficulty: "easy"
@@ -424,12 +450,13 @@ export const PRIMARY_FOUNDATIONS_UNITS: Unit[] = [
             questionText: "What device do you use to type words, numbers, and your name into a computer?",
             options: ["Keyboard", "Microphone", "Printer", "Speakers"],
             correctAnswer: "Keyboard",
-            explanation: "The keyboard contains letter, number, and punctuation keys used for typing.",
+            explanation: "The keyboard contains letter, number, and punctuation keys used for typing text input.",
             hintLadder: [
-              "Look for the board with rows of letter buttons from A to Z."
+              "Look for the board with rows of letter buttons from A to Z.",
+              "You press keys with your fingers to send letters to the screen."
             ],
             misconceptionAlerts: [
-              { trigger: "Printer", note: "A printer puts words on paper; a keyboard types them into the computer." }
+              { trigger: "Printer", note: "A printer outputs words onto paper; a keyboard types them into the computer." }
             ],
             skillId: "skill-pf-computer-parts",
             difficulty: "easy"
@@ -447,13 +474,53 @@ export const PRIMARY_FOUNDATIONS_UNITS: Unit[] = [
             correctAnswer: "Take regular breaks and sit up straight",
             explanation: "Healthy digital habits include sitting with good posture and taking breaks to rest your eyes.",
             hintLadder: [
-              "Think about protecting your eyes and spine while studying."
+              "Think about protecting your eyes and spine while studying.",
+              "Healthy posture and short breaks prevent eye strain and back pain."
             ],
             misconceptionAlerts: [
-              { trigger: "Eat messy soup directly over the keyboard", note: "Liquid spills can damage delicate electronics!" }
+              { trigger: "Eat messy soup directly over the keyboard", note: "Liquid spills can short-circuit delicate electronics!" }
             ],
             skillId: "skill-pf-computer-parts",
             difficulty: "easy"
+          },
+          {
+            id: "q-pf-ict-4",
+            type: "multiple_choice",
+            questionText: "Which computer part contains the CPU 'brain' that processes instructions and connects all other parts together?",
+            options: ["The System Unit", "The Mouse Pad", "The Printer Tray", "The Monitor Stand"],
+            correctAnswer: "The System Unit",
+            explanation: "The System Unit houses the Central Processing Unit (CPU), memory, and storage where all digital instructions are processed.",
+            hintLadder: [
+              "The monitor only shows images; another box actually performs the thinking.",
+              "Look for the main tower or casing holding the CPU."
+            ],
+            misconceptionAlerts: [
+              { trigger: "The Monitor Stand", note: "The stand only supports the screen physically; the System Unit holds the processing electronics." }
+            ],
+            skillId: "skill-pf-computer-parts",
+            difficulty: "medium"
+          },
+          {
+            id: "q-pf-ict-5",
+            type: "multiple_choice",
+            questionText: "A learner wants to record their reading voice for a language lesson AND print their worksheet onto paper. Which pair correctly matches Input first and Output second?",
+            options: [
+              "Microphone (Input) and Printer (Output)",
+              "Printer (Input) and Monitor (Output)",
+              "Speakers (Input) and Keyboard (Output)",
+              "Monitor (Input) and Mouse (Output)"
+            ],
+            correctAnswer: "Microphone (Input) and Printer (Output)",
+            explanation: "A microphone sends sound INTO the computer (Input), while a printer sends completed pages OUT onto paper (Output).",
+            hintLadder: [
+              "Ask which device carries your voice INTO the computer.",
+              "Then ask which device puts the completed document OUT onto physical paper."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Printer (Input) and Monitor (Output)", note: "A printer produces paper output; it does not send voice audio into the computer." }
+            ],
+            skillId: "skill-pf-computer-parts",
+            difficulty: "hard"
           }
         ]
       }
@@ -852,13 +919,18 @@ export const JUNIOR_SECONDARY_STEM_ICT_UNITS: Unit[] = [
     description: "Investigate kinetic and potential energy, the Law of Conservation of Energy, thermal transfers (conduction, convection, radiation), and renewable energy.",
     order: 1,
     category: "core",
+    estimatedHours: 4.0,
+    estimationMethod: "Mechanics & energy transformation derivations, 2 worked numerical traces, and 5 tiered conceptual/quantitative questions",
+    provenanceVersion: "2.0.0",
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_NIGERIAN", "CAMBRIDGE_IGCSE"],
     skills: [
       {
         id: "skill-js-energy-conversion",
         unitId: "unit-jss-stem-energy",
         title: "Kinetic-Potential Transformations and Conservation of Energy",
         code: "SKL-JS-ENG",
-        summary: "Calculate kinetic energy (½mv²) and gravitational potential energy (mgh), tracking energy transitions in mechanical systems.",
+        summary: "Calculate kinetic energy (½mv²) and gravitational potential energy (mgh), tracking energy transitions in mechanical and thermal systems.",
         objectives: [
           "State the Law of Conservation of Energy: energy cannot be created or destroyed, only transformed",
           "Differentiate between Potential Energy (Ep = mgh) and Kinetic Energy (Ek = ½mv²)",
@@ -866,33 +938,55 @@ export const JUNIOR_SECONDARY_STEM_ICT_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-pf-computer-parts"],
         lesson: {
           id: "les-js-energy",
-          title: "The Law of Conservation of Energy: Tracking Transformations",
-          hookAndIntuition: "When a stone is lifted to the top of a cliff, where does the work you did go? When it falls, where does that energy end up?",
-          conceptualExplanation: "Energy can never be created out of nothing, nor can it disappear. At the top of a drop, an object has Maximum Gravitational Potential Energy (Ep = mgh). As it falls, Ep converts into Kinetic Energy (Ek = ½mv²). Just before hitting the ground, Ep has completely converted into Ek (ignoring air resistance).",
+          title: "The Law of Conservation of Energy: Tracking Mechanical & Thermal Transformations",
+          hookAndIntuition: "When a stone is lifted to the top of a cliff, the work you did is stored invisibly as elevation energy. When it drops, where does that energy go—and why does a bouncing ball bounce lower each time?",
+          conceptualExplanation: "CORE SYLLABUS (NERDC JSS2–JSS3): Energy is the capacity to do work and is measured in Joules (J). By the Law of Conservation of Energy, total energy in an isolated system remains constant—it only converts between forms. An object of mass m held at vertical height h stores Gravitational Potential Energy Ep = mgh (where g ≈ 9.8 or 10 m/s²). A moving object of speed v possesses Kinetic Energy Ek = ½mv². During free fall without air drag, mechanical energy Ep + Ek stays constant: every Joule lost from height reappears instantaneously as speed. Real machines also convert part of mechanical energy into thermal heat and sound via friction, lowering mechanical efficiency (Useful Output / Total Input × 100%).",
+          conceptualModel: "Closed Energy Reservoir: Ep_top + 0 = Ep_mid + Ek_mid = 0 + Ek_bottom (when friction is negligible).",
           keyTermsAndFormulas: [
-            { termOrSymbol: "Ep = mgh", definition: "Gravitational Potential Energy (mass × gravity × height).", practicalExample: "Ep = (2 kg)(9.8 m/s²)(10 m) = 196 J" },
-            { termOrSymbol: "Ek = ½mv²", definition: "Kinetic Energy of a moving mass.", practicalExample: "Ek = 0.5 × 2 × (14)² = 196 J" },
-            { termOrSymbol: "Joule (J)", definition: "The standard SI unit for work and energy." }
+            { termOrSymbol: "Ep = mgh", definition: "Gravitational Potential Energy (mass × gravity × vertical height).", practicalExample: "Ep = (2 kg)(9.8 m/s²)(10 m) = 196 J." },
+            { termOrSymbol: "Ek = ½mv²", definition: "Kinetic Energy of a moving mass.", practicalExample: "A 4 kg trolley at 5 m/s has Ek = 0.5 × 4 × 25 = 50 J." },
+            { termOrSymbol: "Conservation: Ep_initial = Ek_final", definition: "Equating potential energy drop to kinetic speed gain: v = √(2gh).", practicalExample: "Falling 5 m gives v = √(2 × 10 × 5) = 10 m/s." }
           ],
           workedExamples: [
             {
-              title: "Calculating Potential Energy",
-              problemStatement: "A 4 kg stone is resting on a ledge 5 metres above the ground. Calculate its potential energy (taking g = 10 m/s²).",
-              mathExpression: "E_p = m \\times g \\times h",
+              title: "Worked Derivation 1: Potential-to-Kinetic Velocity Conversion",
+              problemStatement: "A 4 kg stone rests on a ledge 5 m above the ground (g = 10 m/s²). Calculate: (a) its initial Ep, and (b) its speed just before hitting the ground assuming zero air resistance.",
+              mathExpression: "E_p = mgh = E_k = \\frac{1}{2}mv^2",
               steps: [
-                { stepNumber: 1, instruction: "Identify given variables", reasoning: "m = 4 kg, g = 10 m/s², h = 5 m" },
-                { stepNumber: 2, instruction: "Substitute into formula", reasoning: "Ep = 4 × 10 × 5 = 200 Joules" }
+                { stepNumber: 1, instruction: "Identify known physical constants and height", reasoning: "m = 4 kg, g = 10 m/s², h = 5 m, initial speed = 0 m/s." },
+                { stepNumber: 2, instruction: "Calculate initial Gravitational Potential Energy", reasoning: "Ep = mgh = 4 × 10 × 5 = 200 J." },
+                { stepNumber: 3, instruction: "Apply Conservation of Mechanical Energy at impact", reasoning: "At ground level h = 0, so Ep = 0 and Ek = 200 J. Therefore ½(4)v² = 200 => 2v² = 200." },
+                { stepNumber: 4, instruction: "Solve for final velocity v", reasoning: "v² = 100 => v = √100 = 10 m/s (notice mass cancels out in mgh = ½mv²!)." }
               ],
-              takeawayRule: "Potential energy depends directly on mass, gravitational acceleration, and elevation height."
+              takeawayRule: "In frictionless free fall, final speed depends solely on drop height h via v = √(2gh), independent of mass."
+            },
+            {
+              title: "Worked Derivation 2: Hydroelectric Dam Efficiency & Power Chain",
+              problemStatement: "At Kainji Dam, 500 kg of water falls 20 m each second onto a turbine (g = 10 m/s²). If the generator efficiency is 80%, find the electrical energy generated each second.",
+              steps: [
+                { stepNumber: 1, instruction: "Compute the gravitational potential energy available per second", reasoning: "Ep = mgh = 500 × 10 × 20 = 100,000 J per second (100 kW input power)." },
+                { stepNumber: 2, instruction: "Track the two-step physical conversion", reasoning: "Water loses Ep, gains Ek spinning the blades, and electromagnetic induction creates Electrical energy." },
+                { stepNumber: 3, instruction: "Account for 20% frictional and thermal losses", reasoning: "Efficiency = 80% = 0.80. Useful electrical output = 0.80 × 100,000 J." },
+                { stepNumber: 4, instruction: "Compute final useful electrical output", reasoning: "Output = 80,000 J per second (80 kW); remaining 20,000 J dissipates as heat and sound." }
+              ],
+              takeawayRule: "Total energy is always conserved even when efficiency < 100%: Input Energy = Useful Output + Waste Thermal/Sound Energy."
             }
           ],
           commonMisconceptionsAndTraps: [
-            { misconception: "Thinking energy is lost when an object stops.", whyItIsWrong: "Energy is transformed into thermal energy (heat) and sound, not destroyed.", correctCorrection: "Total energy remains constant in an isolated system." }
+            { misconception: "Thinking energy disappears when a moving car brakes to a halt.", whyItIsWrong: "Kinetic energy never vanishes; friction in brake pads converts it into thermal energy (heat) and sound.", correctCorrection: "Account for every Joule by tracking thermal and acoustic dissipation alongside mechanical energy." },
+            { misconception: "Assuming doubling speed merely doubles kinetic energy.", whyItIsWrong: "Because velocity is squared in Ek = ½mv², doubling v multiplies kinetic energy by 2² = 4 times.", correctCorrection: "Always square the velocity before multiplying by ½m." }
           ],
-          guidedPracticePrompt: "If a stone with 200 J of Ep falls with no air drag, what is its Ek just before hitting the ground?",
-          summaryRecap: "Energy is neither created nor destroyed; total mechanical energy is conserved."
+          guidedPracticePrompt: "If a stone with 200 J of Ep falls half-way down (h = 2.5 m), what are its Ep and Ek at the midpoint?",
+          independentPracticePrompt: "A 2 kg ball is thrown vertically upward at 12 m/s (g = 10 m/s²). Calculate its initial Ek and the maximum height h it reaches.",
+          diagnosticSelfCheck: "Why does the speed of a falling stone at ground level not depend on whether the stone is 2 kg or 20 kg (ignoring air drag)?",
+          transferApplication: "Designing hydroelectric turbines at Kainji and Shiroro dams, roller coaster braking distances, and automotive crumple zones.",
+          masteryAssessment: "Compute Ep, Ek, speed transitions, and dam efficiency across 5 conservation-of-energy questions.",
+          extensionActivity: "Compare conduction, convection, and radiation as the three heat transfer pathways when electrical resistance warms a kettle.",
+          summaryRecap: "Ep = mgh and Ek = ½mv² transform reversibly in free fall, while total energy (useful + thermal/sound) remains strictly conserved.",
+          estimatedMinutes: 55
         },
         questions: [
           {
@@ -935,6 +1029,65 @@ export const JUNIOR_SECONDARY_STEM_ICT_UNITS: Unit[] = [
             ],
             skillId: "skill-js-energy-conversion",
             difficulty: "easy"
+          },
+          {
+            id: "q-js-eng-3",
+            type: "multiple_choice",
+            questionText: "Calculate the kinetic energy of a 6 kg bicycle and rider coasting at a steady speed of 4 m/s.",
+            mathExpression: "E_k = \\frac{1}{2}mv^2 = \\frac{1}{2}(6)(4^2)",
+            options: ["48 J", "24 J", "12 J", "96 J"],
+            correctAnswer: "48 J",
+            explanation: "Ek = 0.5 × 6 × 4² = 3 × 16 = 48 Joules.",
+            hintLadder: [
+              "First square the speed: v² = 4² = 16.",
+              "Then multiply by half the mass: 0.5 × 6 × 16 = 48 J."
+            ],
+            misconceptionAlerts: [
+              { trigger: "24 J", note: "Remember to square the velocity (4² = 16) rather than doubling it (4 × 2 = 8)." }
+            ],
+            skillId: "skill-js-energy-conversion",
+            difficulty: "easy"
+          },
+          {
+            id: "q-js-eng-4",
+            type: "multiple_choice",
+            questionText: "If the velocity of a moving toy car is doubled while its mass stays constant, how does its kinetic energy change?",
+            mathExpression: "E_k' = \\frac{1}{2}m(2v)^2",
+            options: [
+              "It becomes 4 times larger",
+              "It becomes 2 times larger",
+              "It stays the same",
+              "It becomes 8 times larger"
+            ],
+            correctAnswer: "It becomes 4 times larger",
+            explanation: "Replacing v with 2v gives ½m(2v)² = 4(½mv²), so kinetic energy quadruples.",
+            hintLadder: [
+              "Kinetic energy is proportional to the square of speed (v²).",
+              "Compute 2² = 4 to see the scaling factor."
+            ],
+            misconceptionAlerts: [
+              { trigger: "It becomes 2 times larger", note: "Kinetic energy depends on v², not v directly." }
+            ],
+            skillId: "skill-js-energy-conversion",
+            difficulty: "medium"
+          },
+          {
+            id: "q-js-eng-5",
+            type: "multiple_choice",
+            questionText: "A 3 kg metal block slides down a rough ramp from a height of 5 m (g = 10 m/s²). At the bottom, its kinetic energy is 120 J. How much energy was converted to heat and sound by friction?",
+            mathExpression: "E_{\\text{initial}} = mgh = E_k + E_{\\text{thermal}}",
+            options: ["30 J", "150 J", "120 J", "15 J"],
+            correctAnswer: "30 J",
+            explanation: "Initial Ep = 3 × 10 × 5 = 150 J. By energy conservation, Waste Heat = 150 J - 120 J = 30 J.",
+            hintLadder: [
+              "First find total initial gravitational potential energy: Ep = 3 × 10 × 5.",
+              "Subtract the 120 J of kinetic energy remaining at the bottom."
+            ],
+            misconceptionAlerts: [
+              { trigger: "150 J", note: "150 J is the total initial potential energy before subtracting the 120 J of kinetic energy." }
+            ],
+            skillId: "skill-js-energy-conversion",
+            difficulty: "hard"
           }
         ]
       }
@@ -951,46 +1104,73 @@ export const JUNIOR_SECONDARY_STEM_ICT_UNITS: Unit[] = [
     description: "Explore the Von Neumann architecture (CPU, RAM, Storage), binary number conversions, and flowchart algorithms.",
     order: 1,
     category: "core",
+    estimatedHours: 4.0,
+    estimationMethod: "Positional binary arithmetic drills, Von Neumann trace, 2 worked examples, and 5 tiered assessment questions",
+    provenanceVersion: "2.0.0",
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_NIGERIAN", "CAMBRIDGE_IGCSE"],
     skills: [
       {
         id: "skill-js-binary-logic",
         unitId: "unit-jss-ict-architecture",
         title: "Binary to Denary Conversion and Algorithmic Flowcharts",
         code: "SKL-JS-BIN",
-        summary: "Convert 8-bit binary numbers to decimal and read algorithmic decision flowchart symbols.",
+        summary: "Convert 8-bit binary numbers between base 2 and decimal, explain CPU/RAM roles, and trace algorithmic decision flowcharts.",
         objectives: [
-          "Convert unsigned binary bytes (base 2) into decimal (base 10)",
+          "Convert unsigned binary bytes (base 2) into decimal (base 10) and back",
           "Identify CPU components: ALU (Arithmetic Logic Unit), Control Unit, and Registers",
           "Construct and trace flowcharts using standard symbols: Terminator, Process, Decision, Input/Output"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-pf-computer-parts"],
         lesson: {
           id: "les-js-binary",
-          title: "The Language of Computers: Bits, Bytes, and Binary Positional Values",
-          hookAndIntuition: "Inside every smartphone and supercomputer are billions of tiny switches called transistors. Each switch is either OFF (0) or ON (1). How can numbers and words be made from just 0 and 1?",
-          conceptualExplanation: "In our regular base-10 system, column values are powers of 10: 1, 10, 100, 1000. In binary (base-2), column values are powers of 2 from right to left: 1, 2, 4, 8, 16, 32, 64, 128. To convert a binary byte to decimal, add up the column values where there is a 1.",
+          title: "The Language of Computers: Bits, Bytes, Von Neumann CPU, and Binary Notation",
+          hookAndIntuition: "Inside every smartphone and supercomputer are billions of microscopic switches called transistors, each either OFF (0) or ON (1). How can a machine built out of simple on/off switches represent numbers, grades, and step-by-step decisions?",
+          conceptualExplanation: "CORE SYLLABUS (NERDC JSS2–JSS3): Computers store all numbers, text, and instructions in Base-2 (Binary) because electronic circuits reliably distinguish two voltage levels: 0 (OFF) and 1 (ON). Each single binary digit is a Bit, and 8 bits form a Byte (representing 0 to 255). From right to left, the 8 positional weights double by powers of 2: 128 (2⁷), 64 (2⁶), 32 (2⁵), 16 (2⁴), 8 (2³), 4 (2²), 2 (2¹), 1 (2⁰). Inside the Von Neumann CPU, the Control Unit fetches and decodes instructions from volatile RAM, the Arithmetic Logic Unit (ALU) executes binary math and comparisons, and Registers hold active operands. Programmers design those steps visually using flowcharts: Oval (Terminator Start/Stop), Parallelogram (Input/Output), Rectangle (Process), and Diamond (Yes/No Decision branch).",
+          conceptualModel: "Binary Weight Grid [128 | 64 | 32 | 16 | 8 | 4 | 2 | 1] feeding the Fetch-Decode-Execute CPU cycle.",
           keyTermsAndFormulas: [
-            { termOrSymbol: "Bit", definition: "A single binary digit: 0 or 1.", practicalExample: "The smallest unit of data." },
-            { termOrSymbol: "Byte", definition: "A sequence of 8 bits.", practicalExample: "1 byte can store values 0 to 255." },
-            { termOrSymbol: "Binary Positional Values", definition: "128, 64, 32, 16, 8, 4, 2, 1" }
+            { termOrSymbol: "Bit & Byte (8 bits)", definition: "1 bit holds 0 or 1; 1 byte holds 8 bits with range 0 to 255.", practicalExample: "11111111₂ = 128+64+32+16+8+4+2+1 = 255₁₀." },
+            { termOrSymbol: "Binary Positional Weights", definition: "Right-to-left powers of 2: 2⁰=1, 2¹=2, 2²=4, 2³=8, 2⁴=16, 2⁵=32, 2⁶=64, 2⁷=128.", practicalExample: "00010101₂ = 16 + 4 + 1 = 21₁₀." },
+            { termOrSymbol: "ALU & Control Unit", definition: "ALU performs calculations/logic; Control Unit coordinates instruction fetch-decode-execute.", practicalExample: "Comparing score >= 50 inside a flowchart decision diamond." }
           ],
           workedExamples: [
             {
-              title: "Converting 00001101 to Decimal",
-              problemStatement: "Convert binary 00001101 into decimal (denary).",
+              title: "Worked Conversion 1: Binary Byte 00101101₂ to Decimal",
+              problemStatement: "Convert the 8-bit binary byte 00101101₂ into its base-10 (denary) integer value.",
               steps: [
-                { stepNumber: 1, instruction: "Align bits under powers of 2", reasoning: "Bits are: (8=1), (4=1), (2=0), (1=1)" },
-                { stepNumber: 2, instruction: "Sum active weights", reasoning: "8 + 4 + 1 = 13" }
+                { stepNumber: 1, instruction: "Write the 8 positional weights from left to right", reasoning: "Weights: 128, 64, 32, 16, 8, 4, 2, 1." },
+                { stepNumber: 2, instruction: "Align each bit of 00101101 under its weight", reasoning: "128(0), 64(0), 32(1), 16(0), 8(1), 4(1), 2(0), 1(1)." },
+                { stepNumber: 3, instruction: "Select only the weights with bit = 1", reasoning: "Active weights are 32, 8, 4, and 1." },
+                { stepNumber: 4, instruction: "Sum the active weights", reasoning: "32 + 8 + 4 + 1 = 45₁₀." }
               ],
-              takeawayRule: "Only add the place values where the bit is set to 1."
+              takeawayRule: "Ignore weights paired with 0 bits and sum every power of 2 paired with a 1 bit."
+            },
+            {
+              title: "Worked Conversion 2: Decimal 54₁₀ to 8-Bit Binary via Repeated Division",
+              problemStatement: "Convert decimal 54 into an 8-bit binary byte and trace a pass/fail flowchart decision for score = 54.",
+              steps: [
+                { stepNumber: 1, instruction: "Divide 54 repeatedly by 2 and record each remainder", reasoning: "54÷2=27 r0; 27÷2=13 r1; 13÷2=6 r1; 6÷2=3 r0; 3÷2=1 r1; 1÷2=0 r1." },
+                { stepNumber: 2, instruction: "Read remainders from bottom (MSB) to top (LSB)", reasoning: "110110₂." },
+                { stepNumber: 3, instruction: "Pad leading zeros on the left to form a full 8-bit byte", reasoning: "00110110₂ (check: 32 + 16 + 4 + 2 = 54)." },
+                { stepNumber: 4, instruction: "Trace the diamond decision: IS score >= 50?", reasoning: "Since 54 >= 50 evaluates TRUE inside the ALU, the flowchart takes the YES branch to output 'PASS'." }
+              ],
+              takeawayRule: "Read repeated-division remainders from bottom to top, then verify by summing active powers of 2."
             }
           ],
           commonMisconceptionsAndTraps: [
-            { misconception: "Reading binary from left to right instead of matching places from right (units = 2^0 = 1).", whyItIsWrong: "The rightmost bit is always the 1s column.", correctCorrection: "Write column headers 128, 64, 32, 16, 8, 4, 2, 1 above your bits." }
+            { misconception: "Assigning the 1s place value to the leftmost bit instead of the rightmost bit.", whyItIsWrong: "Just like decimal hundreds-tens-units, the units column (2⁰ = 1) is always on the far right.", correctCorrection: "Label column weights starting from 1 on the far right moving leftward (1, 2, 4, 8, 16, 32, 64, 128)." },
+            { misconception: "Confusing Flowchart Rectangles (Process) with Diamonds (Decision).", whyItIsWrong: "A rectangle executes a single linear calculation with one exit arrow; a diamond tests a Yes/No condition and branches along two paths.", correctCorrection: "Use Diamonds exclusively for IF/ELSE branching questions." }
           ],
-          guidedPracticePrompt: "Convert binary 00000111 to decimal. What is 4 + 2 + 1?",
-          summaryRecap: "Binary is base-2 positional notation: every 1 activates a power of 2."
+          guidedPracticePrompt: "Convert binary 00001110₂ to decimal and identify which CPU unit tests whether the result exceeds 10.",
+          independentPracticePrompt: "Convert decimal 75 into an 8-bit binary byte and verify your answer by summing the powers of 2.",
+          diagnosticSelfCheck: "What is the largest decimal number that can be stored inside one unsigned 8-bit byte (11111111₂)?",
+          transferApplication: "IP network subnet masks, microcontrollers, and logic gates inside modern processors.",
+          masteryAssessment: "Convert between 8-bit binary and decimal accurately and classify CPU/flowchart blocks across 5 exam questions.",
+          extensionActivity: "Research how ASCII encodes uppercase letter 'A' (decimal 65) into binary 01000001₂ inside text files.",
+          summaryRecap: "Binary places double rightward-to-left (1..128). The CPU's Control Unit and ALU run instructions from RAM, modeled visually with Oval, Parallelogram, Rectangle, and Diamond flowchart blocks.",
+          estimatedMinutes: 55
         },
         questions: [
           {
@@ -1026,6 +1206,63 @@ export const JUNIOR_SECONDARY_STEM_ICT_UNITS: Unit[] = [
             ],
             skillId: "skill-js-binary-logic",
             difficulty: "easy"
+          },
+          {
+            id: "q-js-bin-3",
+            type: "multiple_choice",
+            questionText: "Which component of the Central Processing Unit (CPU) performs mathematical calculations and logical comparisons (such as checking if X > Y)?",
+            options: [
+              "Arithmetic Logic Unit (ALU)",
+              "Hard Disk Drive (HDD)",
+              "Power Supply Unit (PSU)",
+              "Visual Display Adapter"
+            ],
+            correctAnswer: "Arithmetic Logic Unit (ALU)",
+            explanation: "The ALU executes arithmetic (+, -, ×, ÷) and Boolean comparisons (>, <, =) inside the CPU.",
+            hintLadder: [
+              "Think about what the letters A and L stand for in CPU subsystems.",
+              "Arithmetic = math; Logic = comparisons."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Hard Disk Drive (HDD)", note: "An HDD is secondary storage for saved files, not the CPU's calculation unit." }
+            ],
+            skillId: "skill-js-binary-logic",
+            difficulty: "easy"
+          },
+          {
+            id: "q-js-bin-4",
+            type: "multiple_choice",
+            questionText: "Convert the decimal number 42₁₀ into its 8-bit binary representation:",
+            options: ["00101010", "00101100", "00110010", "01010100"],
+            correctAnswer: "00101010",
+            explanation: "32 + 8 + 2 = 42, so bits 32, 8, and 2 are 1 while all other weights are 0 -> 00101010.",
+            hintLadder: [
+              "Find the largest power of 2 <= 42 (which is 32).",
+              "Remainder is 42 - 32 = 10 = 8 + 2, so turn on bits 32, 8, and 2."
+            ],
+            misconceptionAlerts: [
+              { trigger: "01010100", note: "01010100 equals 64 + 16 + 4 = 84, which is double 42 because bits were shifted left by 1 place." }
+            ],
+            skillId: "skill-js-binary-logic",
+            difficulty: "medium"
+          },
+          {
+            id: "q-js-bin-5",
+            type: "multiple_choice",
+            questionText: "In an 8-bit unsigned binary byte, what is the sum of 00001101₂ (13) and 00000111₂ (7) expressed in binary?",
+            mathExpression: "00001101_2 + 00000111_2",
+            options: ["00010100", "00010010", "00011100", "00001110"],
+            correctAnswer: "00010100",
+            explanation: "13 + 7 = 20. In binary, 20 = 16 + 4 = 00010100₂ (check column carries from right to left: 1+1=10 carry 1).",
+            hintLadder: [
+              "Verify both numbers in decimal first: 13 + 7 = 20.",
+              "Decompose 20 into powers of 2: 16 + 4 = 00010100."
+            ],
+            misconceptionAlerts: [
+              { trigger: "00010010", note: "00010010 equals 16 + 2 = 18, missing one carry into the 4s column." }
+            ],
+            skillId: "skill-js-binary-logic",
+            difficulty: "hard"
           }
         ]
       }

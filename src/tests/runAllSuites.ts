@@ -1,7 +1,7 @@
 /**
  * MOOS TECHY ACADEMY — UNIFIED TEST SUITE RUNNER
  *
- * Runs all 19 canonical test suites across all pillars.
+ * Runs all 24 canonical test suites across all pillars.
  * Non-brittle execution: executes all suites and aggregates results.
  * Reports PASS, FAIL, SKIPPED, ERROR metrics and overall summary.
  */
@@ -44,7 +44,9 @@ export const CANONICAL_TEST_SUITES: CanonicalSuiteDefinition[] = [
   { path: "src/tests/postFirebaseHardeningAndMultimodalRegression.test.ts", name: "postFirebaseHardeningAndMultimodalRegression" },
   { path: "src/tests/mfaSecurityForensics.test.ts", name: "mfaSecurityForensics" },
   { path: "src/tests/emailEntryGateForensics.test.ts", name: "emailEntryGateForensics" },
-  { path: "src/tests/directive002HardeningAndContentQA.test.ts", name: "directive002HardeningAndContentQA" }
+  { path: "src/tests/directive002HardeningAndContentQA.test.ts", name: "directive002HardeningAndContentQA" },
+  { path: "src/tests/workstream1AuthSessionSecurityVerification.test.ts", name: "workstream1AuthSessionSecurityVerification" },
+  { path: "src/tests/workstream2And3CurriculumQualityAndProgression.test.ts", name: "workstream2And3CurriculumQualityAndProgression" }
 ];
 
 export const TEST_SUITES = CANONICAL_TEST_SUITES.map((s) => s.path);

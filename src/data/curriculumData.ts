@@ -94,7 +94,13 @@ export function getDomainIdForCategory(code: string): string {
     code.startsWith("jss_math") ||
     code.startsWith("sss_general_math") ||
     code.startsWith("sss_further_math") ||
-    code.includes("actuarial_math")
+    code.includes("actuarial_math") ||
+    code.includes("number_patterns") ||
+    code === "hall_engineering_gate_prep" ||
+    code.includes("algebraic") ||
+    code.includes("trigonometry") ||
+    code.includes("linear_graphs") ||
+    code.includes("sets_venn")
   ) {
     return "mathematics";
   }
@@ -113,7 +119,7 @@ export function getDomainIdForCategory(code: string): string {
     code.includes("electronics") ||
     code.includes("telecommunication") ||
     code.includes("basic_technology") ||
-    code.includes("engineering") ||
+    (!code.includes("agric") && code.includes("engineering")) ||
     code.includes("maker")
   ) {
     return "computing_ai";

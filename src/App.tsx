@@ -29,6 +29,7 @@ import { Skill, Unit, PracticeQuestion, EducationalLevel, DiagnosticResult } fro
 import { EmailEntryGate } from "./components/gate/EmailEntryGate";
 import { OwnerAllowlistManager } from "./components/gate/OwnerAllowlistManager";
 import { emailAllowlistService } from "./services/emailAllowlistService";
+import { firebaseSyncService } from "./services/firebaseSyncService";
 import { VerifiedAuthSession } from "./types/emailAllowlist";
 import { WhatsAppAdminChatButton } from "./components/WhatsAppAdminChatButton";
 import { ShieldAlert } from "lucide-react";
@@ -442,7 +443,8 @@ export default function App() {
   };
 
   const handleSignOut = () => {
-    emailAllowlistService.revokeCurrentSession();
+    void emailAllowlistService.logoutSession();
+    firebaseSyncService.signOutUser().catch(() => {});
     setAuthSession(null);
   };
 

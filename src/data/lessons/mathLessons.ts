@@ -214,213 +214,343 @@ export const MATH_LESSONS: Record<string, SkillLesson> = {
     id: "les-sine-cosine-rule",
     title: "Trigonometry: Sine Rule, Cosine Rule, & 3D Bearings",
     hookAndIntuition: "How do maritime captains navigate across vast open oceans, or civil engineers measure the height of a mountain without climbing it? Trigonometry extends right-angle triangle ratios to any arbitrary triangle on Earth using the Sine and Cosine Rules.",
-    conceptualExplanation: "For any triangle ABC with side lengths a, b, c opposite angles A, B, C: (1) The Sine Rule: a / sin A = b / sin B = c / sin C = 2R (where R is the circumradius). Use when given: two angles and one side (AAS/ASA), or two sides and a non-included angle (SSA—beware the ambiguous case). (2) The Cosine Rule: a² = b² + c² - 2bc cos A (generalization of Pythagoras). Rearranged for angles: cos A = (b² + c² - a²) / (2bc). Use when given: two sides and the included angle (SAS), or all three sides (SSS). (3) Area of Triangle: Area = 0.5 ab sin C. (4) Three-Figure Bearings: Angles measured clockwise from True North (000° to 360°), written with 3 digits (e.g. 045°, 210°).",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): For any general triangle ABC with side lengths a, b, c opposite interior angles A, B, C: (1) The Sine Rule: a / sin A = b / sin B = c / sin C = 2R (where R is the circumradius). Select Sine Rule when given two angles and one side (AAS/ASA) or two sides and a non-included angle (SSA—checking for an obtuse supplement when sin B < 1). (2) The Cosine Rule: c² = a² + b² - 2ab cos C (reducing to Pythagoras when C = 90°). Rearranged for finding angles from three sides: cos C = (a² + b² - c²) / (2ab). Select Cosine Rule when given two sides and their included angle (SAS) or all three sides (SSS). (3) Trigonometric Triangle Area: Area = (1/2)ab sin C. (4) Three-Figure Navigational Bearings: Bearings are always measured clockwise from True North (000° to 360°) using three digits. Back Bearing rule: if forward bearing θ < 180°, Back Bearing = θ + 180°; if θ >= 180°, Back Bearing = θ - 180°.",
+    conceptualModel: "Triangle Solver Decision Tree: SAS / SSS -> Cosine Rule; ASA / AAS / SSA -> Sine Rule; Area -> 0.5 ab sin C; North-Line Parallelism -> Bearings.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Sine Rule: a / sin A = b / sin B = c / sin C", definition: "Ratio of side length to sine of opposite angle is constant in any triangle.", practicalExample: "In triangle with A = 30°, B = 45°, a = 10 cm: b = 10 × (sin 45° / sin 30°) = 14.14 cm." },
-      { termOrSymbol: "Cosine Rule: c² = a² + b² - 2ab cos C", definition: "Solves triangles with two sides and included angle (SAS) or three sides (SSS).", practicalExample: "If a = 5, b = 7, C = 60°: c² = 25 + 49 - 2(5)(7)(0.5) = 74 - 35 = 39 => c = √39 ≈ 6.24." },
-      { termOrSymbol: "Three-Figure Bearings", definition: "Direction measured clockwise from North using 3 digits.", practicalExample: "South-West is a bearing of 225°." }
+      { termOrSymbol: "Sine Rule: a / sin A = b / sin B = c / sin C", definition: "Ratio of any side length to the sine of its opposite interior angle is invariant in a triangle.", practicalExample: "If A = 30°, B = 45°, a = 10 cm: b = 10 × (sin 45° / sin 30°) = 10√2 ≈ 14.14 cm." },
+      { termOrSymbol: "Cosine Rule: c² = a² + b² - 2ab cos C", definition: "Solves triangles with two sides and included angle (SAS) or three sides (SSS).", practicalExample: "If a = 5, b = 8, C = 60°: c² = 25 + 64 - 2(5)(8)(0.5) = 89 - 40 = 49 => c = 7." },
+      { termOrSymbol: "Three-Figure Bearings", definition: "Direction measured clockwise from True North (000°–360°) using three digits.", practicalExample: "Forward bearing 060° gives back bearing 060° + 180° = 240°." }
     ],
     workedExamples: [
       {
-        title: "Applying the Cosine Rule to Calculate Navigation Distance",
+        title: "Worked Analysis 1: Applying the Cosine Rule to a Bearing Triangle",
         problemStatement: "A ship sails 12 km from port P on a bearing of 060° to point Q, then turns and sails 18 km on a bearing of 150° to point R. Find the direct straight-line distance from port P to point R.",
         steps: [
-          { stepNumber: 1, instruction: "Sketch the bearing path and calculate the included angle at Q.", reasoning: "At Q, back-bearing to P is 060° + 180° = 240°. Bearing of forward path QR is 150°. The interior angle ∠PQR = 240° - 150° = 90°." },
-          { stepNumber: 2, instruction: "Recognize the triangle configuration.", reasoning: "In triangle PQR: PQ = 12 km, QR = 18 km, included angle ∠PQR = 90°." },
-          { stepNumber: 3, instruction: "Apply the Cosine Rule for PR.", reasoning: "PR² = PQ² + QR² - 2(PQ)(QR) cos 90°. Since cos 90° = 0, this simplifies to Pythagoras: PR² = 12² + 18² = 144 + 324 = 468." },
-          { stepNumber: 4, instruction: "Calculate PR.", reasoning: "PR = √468 = 21.63 km." }
+          { stepNumber: 1, instruction: "Draw North lines at P and Q to determine the interior angle ∠PQR.", reasoning: "Back-bearing from Q to P is 060° + 180° = 240°. Forward bearing from Q to R is 150°. Interior angle ∠PQR = 240° - 150° = 90°." },
+          { stepNumber: 2, instruction: "Identify the triangle known configuration.", reasoning: "In triangle PQR we know two sides (PQ = 12 km, QR = 18 km) and their included angle (90°): SAS case." },
+          { stepNumber: 3, instruction: "Apply the Cosine Rule for PR.", reasoning: "PR² = 12² + 18² - 2(12)(18) cos 90° = 144 + 324 - 0 = 468." },
+          { stepNumber: 4, instruction: "Extract the positive square root.", reasoning: "PR = √468 = 6√13 ≈ 21.63 km." }
         ],
-        takeawayRule: "Draw a North line at every vertex when solving bearing problems to calculate interior angles accurately."
+        takeawayRule: "Draw vertical North lines at every turning point; parallel North lines give alternate and co-interior angles that unlock the triangle's interior angles."
+      },
+      {
+        title: "Worked Analysis 2: Using the Sine Rule for AAS Triangles",
+        problemStatement: "In triangle PQR, ∠P = 30°, ∠Q = 45°, and side p = 10 cm opposite ∠P. Find the exact length of side q opposite ∠Q.",
+        steps: [
+          { stepNumber: 1, instruction: "Verify the given data configuration.", reasoning: "We have two angles (30°, 45°) and one opposite side (p = 10 cm): AAS case -> use Sine Rule." },
+          { stepNumber: 2, instruction: "Write the Sine Rule proportion linking p and q.", reasoning: "q / sin Q = p / sin P => q / sin 45° = 10 / sin 30°." },
+          { stepNumber: 3, instruction: "Substitute exact special-angle values.", reasoning: "sin 45° = √2 / 2 and sin 30° = 1 / 2." },
+          { stepNumber: 4, instruction: "Solve algebraically for q.", reasoning: "q = 10 × (√2 / 2) / (1 / 2) = 10√2 ≈ 14.14 cm." }
+        ],
+        takeawayRule: "Keep special angles (30°, 45°, 60°) in exact surd form until the final rounding step to preserve WAEC/JAMB precision."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Using the Sine Rule when given two sides and their included angle (SAS).", whyItIsWrong: "With SAS, you do not have any complete side-opposite-angle pair, so the Sine Rule cannot be set up. You must use the Cosine Rule first.", correctCorrection: "SAS and SSS require the Cosine Rule; ASA, AAS, and SSA use the Sine Rule." }
+      { misconception: "Applying the Sine Rule directly to SAS (two sides and the included angle).", whyItIsWrong: "In SAS, no angle is paired with a known opposite side, leaving two unknowns in every Sine Rule fraction.", correctCorrection: "Always use the Cosine Rule first for SAS or SSS." },
+      { misconception: "Finding a back bearing by subtracting from 180° (e.g., 180° - 060° = 120°).", whyItIsWrong: "Reversing a vector rotates its direction by a straight angle (+180° or -180°), never taking a supplement.", correctCorrection: "Add 180° when forward bearing < 180°; subtract 180° when forward bearing >= 180°." }
     ],
-    guidedPracticePrompt: "Calculate the area of a triangle with sides a = 8 cm, b = 10 cm, and included angle C = 30°.",
-    summaryRecap: "Sine Rule pairs sides with opposite angles. Cosine Rule solves SAS and SSS. Bearings measure clockwise from North with three digits."
+    guidedPracticePrompt: "Calculate the exact area of a triangle with sides a = 10 cm, b = 12 cm, and included angle C = 30°.",
+    independentPracticePrompt: "A surveyor walks 5 km on a bearing of 040° then 8 km on a bearing of 160°. Sketch both North lines, prove the included angle is 60°, and compute the closing distance.",
+    diagnosticSelfCheck: "Before touching your calculator, can you classify whether a given triangle problem is SAS, SSS, ASA, or SSA?",
+    transferApplication: "Maritime dead-reckoning, civil land surveying, structural roof-truss engineering, and aviation crosswind navigation.",
+    masteryAssessment: "Achieve >= 85% across 5 tiered trigonometry and bearing problems covering Cosine Rule, Sine Rule, area, and three-figure navigation.",
+    extensionActivity: "Investigate the ambiguous SSA case: when a < b sin A (0 triangles), a = b sin A (1 right triangle), and b sin A < a < b (2 valid triangles).",
+    summaryRecap: "Cosine Rule solves SAS and SSS; Sine Rule solves AAS/ASA/SSA; Area = 0.5 ab sin C; Bearings measure clockwise from True North.",
+    estimatedMinutes: 130
   },
 
   "skill-logarithms": {
     id: "les-logarithms",
     title: "Laws of Indices, Logarithms, & Change of Base",
-    hookAndIntuition: "How does the Richter scale measure earthquake tremors, or the decibel scale measure sound? A magnitude 7 earthquake is not a little bit stronger than magnitude 6—it is 10 times more powerful, and 100 times stronger than magnitude 5! Logarithms compress colossal exponential ranges into manageable linear scales.",
-    conceptualExplanation: "A logarithm is the inverse of exponentiation: if b^y = x, then log_b(x) = y (the logarithm is the exponent to which base b must be raised to produce x). Crucial Laws of Logarithms: (1) Product Law: log_b(xy) = log_b(x) + log_b(y). (2) Quotient Law: log_b(x/y) = log_b(x) - log_b(y). (3) Power Law: log_b(x^k) = k · log_b(x). (4) Identity Laws: log_b(b) = 1, log_b(1) = 0. (5) Change of Base Formula: log_b(x) = log_c(x) / log_c(b) (allows evaluating any base on calculators using natural ln or common log₁₀). For indices: x^a · x^b = x^(a+b), x^a / x^b = x^(a-b), (x^a)^b = x^(ab), x^0 = 1, x^(-a) = 1/x^a, and x^(m/n) = ⁿ√(x^m).",
+    hookAndIntuition: "How does the Richter scale measure earthquake tremors, or the decibel scale measure sound? A magnitude 7 earthquake is not one-sixth stronger than magnitude 6—it carries 10 times the wave amplitude! Logarithms convert multiplicative leaps into manageable linear addition.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): A logarithm is the exact inverse of exponentiation: b^y = x <=> log_b(x) = y (for base b > 0, b ≠ 1, and strictly positive argument x > 0). Five Fundamental Laws: (1) Product Law: log_b(xy) = log_b(x) + log_b(y). (2) Quotient Law: log_b(x/y) = log_b(x) - log_b(y). (3) Power Law: log_b(x^k) = k · log_b(x). (4) Identity Laws: log_b(b) = 1 and log_b(1) = 0. (5) Change of Base Formula: log_b(a) = log_c(a) / log_c(b). Laws of Indices: x^a · x^b = x^(a+b), x^a / x^b = x^(a-b), (x^a)^b = x^(ab), x^0 = 1, x^(-a) = 1/x^a, and fractional exponent x^(m/n) = (ⁿ√x)^m. Always check logarithmic solutions against the strict domain requirement x > 0 to reject extraneous roots.",
+    conceptualModel: "Exponent-Logarithm Isomorphism: Multiplication in argument space <==> Addition in logarithm space; Exponentiation <==> Scalar Scaling.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "log_b(xy) = log_b(x) + log_b(y)", definition: "Product law: log of a product equals the sum of individual logs.", practicalExample: "log₁₀(1000) = log₁₀(10 × 100) = log₁₀(10) + log₁₀(100) = 1 + 2 = 3." },
-      { termOrSymbol: "log_b(x^k) = k · log_b(x)", definition: "Power law: brings exponents down as multipliers, solving exponential equations.", practicalExample: "Solving 2^x = 50: x · log(2) = log(50) => x = log(50)/log(2) ≈ 5.64." },
-      { termOrSymbol: "Change of Base: log_b(a) = log₁₀(a) / log₁₀(b)", definition: "Converts logarithms between arbitrary bases.", practicalExample: "log₂(8) = log₁₀(8) / log₁₀(2) = 0.903 / 0.301 = 3." }
+      { termOrSymbol: "Product & Quotient Laws: log(xy) = log x + log y; log(x/y) = log x - log y", definition: "Transforms products into sums and quotients into differences under the same base.", practicalExample: "log₂(80) - log₂(5) = log₂(80/5) = log₂(16) = 4." },
+      { termOrSymbol: "Power Law: log_b(x^k) = k · log_b(x)", definition: "Brings exponents down as multipliers, unlocking exponential equations.", practicalExample: "2^x = 50 => x = log(50) / log(2) ≈ 5.64." },
+      { termOrSymbol: "Fractional & Negative Indices: x^(-m/n) = 1 / (ⁿ√x)^m", definition: "Denominator specifies root order; numerator specifies power; minus takes reciprocal.", practicalExample: "27^(2/3) × 4^(-1/2) = 3² × (1/2) = 4.5." }
     ],
     workedExamples: [
       {
-        title: "Solving an Exponential Equation using Logarithms",
-        problemStatement: "Solve for x to 3 significant figures: 3^(2x - 1) = 45.",
+        title: "Worked Analysis 1: Solving an Exponential Equation Using Base Equivalence & Logarithms",
+        problemStatement: "Solve for x: 3^(2x - 1) = 45 (give answer to 3 significant figures), and verify with an exact integer-power case 3^(2x - 1) = 27.",
         steps: [
-          { stepNumber: 1, instruction: "Take common logarithm (log₁₀) of both sides.", reasoning: "log(3^(2x - 1)) = log(45)." },
-          { stepNumber: 2, instruction: "Apply the Power Law of logarithms to bring down the exponent.", reasoning: "(2x - 1) · log(3) = log(45)." },
-          { stepNumber: 3, instruction: "Divide by log(3).", reasoning: "2x - 1 = log(45) / log(3) = 1.6532 / 0.4771 = 3.465." },
-          { stepNumber: 4, instruction: "Isolate variable x.", reasoning: "2x = 3.465 + 1 = 4.465 => x = 4.465 / 2 = 2.23." }
+          { stepNumber: 1, instruction: "Take the common logarithm (base 10) of both sides of 3^(2x - 1) = 45.", reasoning: "log₁₀(3^(2x - 1)) = log₁₀(45)." },
+          { stepNumber: 2, instruction: "Apply the Power Law to extract the linear exponent.", reasoning: "(2x - 1) · log₁₀(3) = log₁₀(45)." },
+          { stepNumber: 3, instruction: "Divide by log₁₀(3).", reasoning: "2x - 1 = 1.6532 / 0.4771 = 3.465." },
+          { stepNumber: 4, instruction: "Isolate x and verify exact integer-power intuition.", reasoning: "2x = 4.465 => x ≈ 2.23 (3 s.f.). When RHS = 27 = 3³, equating powers directly gives 2x - 1 = 3 => x = 2." }
         ],
-        takeawayRule: "Whenever the unknown variable is trapped in an exponent, take logarithms of both sides and apply the power rule."
+        takeawayRule: "Convert to common prime bases when possible; otherwise take logarithms of both sides and apply the Power Law."
+      },
+      {
+        title: "Worked Analysis 2: Solving a Logarithmic Equation & Screening Extraneous Roots",
+        problemStatement: "Solve for x: log₃(x + 2) + log₃(x) = 1.",
+        steps: [
+          { stepNumber: 1, instruction: "Combine left-hand logarithms via the Product Law.", reasoning: "log₃[x(x + 2)] = 1." },
+          { stepNumber: 2, instruction: "Convert from logarithmic form to exponential form.", reasoning: "x(x + 2) = 3¹ => x² + 2x - 3 = 0." },
+          { stepNumber: 3, instruction: "Factor the resulting quadratic equation.", reasoning: "(x + 3)(x - 1) = 0 => x = 1 or x = -3." },
+          { stepNumber: 4, instruction: "Test both roots against log domain x > 0.", reasoning: "At x = -3, log₃(-3) is undefined over the reals (extraneous). At x = 1, log₃(3) + log₃(1) = 1 + 0 = 1. Unique valid root: x = 1." }
+        ],
+        takeawayRule: "Always substitute candidate roots back into the original log expressions to reject negative or zero arguments."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Writing log(x + y) = log(x) + log(y).", whyItIsWrong: "Logarithms do not distribute over addition! log(x) + log(y) = log(x · y), NOT log(x + y).", correctCorrection: "log(x + y) cannot be simplified using log product laws." }
+      { misconception: "Expanding log(x + y) as log(x) + log(y).", whyItIsWrong: "Logarithms never distribute over addition! Only log(x · y) equals log(x) + log(y).", correctCorrection: "Use the Product Law solely on products: log(xy) = log x + log y." },
+      { misconception: "Keeping negative algebraic roots inside logarithmic equations without checking domains.", whyItIsWrong: "In real arithmetic, log_b(u) exists only when u > 0.", correctCorrection: "Verify every candidate root satisfies all original argument inequalities." }
     ],
-    guidedPracticePrompt: "Simplify without a calculator: log₂(32) - log₂(4) + log₂(8).",
-    summaryRecap: "Logarithms invert exponents: b^y = x <=> log_b(x) = y. Multiplication becomes addition; powers become multipliers. Change base via log_b(a) = log a / log b."
+    guidedPracticePrompt: "Given log₁₀(2) ≈ 0.3010 and log₁₀(3) ≈ 0.4771, compute log₁₀(18) without a calculator.",
+    independentPracticePrompt: "Simplify 64^(2/3) × 16^(-1/2) completely without a calculator, then solve log₂(x) + log₂(x - 2) = 3.",
+    diagnosticSelfCheck: "Can you move seamlessly between b^y = x and log_b(x) = y, simplify fractional negative indices, and screen extraneous log roots?",
+    transferApplication: "Richter earthquake scaling, acoustic decibel engineering, chemical pH acidity calculations, and compound growth half-life analysis.",
+    masteryAssessment: "Achieve >= 85% across 5 indices and logarithm items spanning laws, fractional powers, numerical evaluation, and domain-checked equations.",
+    extensionActivity: "Derive the Change-of-Base theorem log_b(a) = log_c(a) / log_c(b) from the substitution y = log_b(a) <=> b^y = a.",
+    summaryRecap: "b^y = x <=> log_b(x) = y. Product -> sum, Quotient -> difference, Exponent -> multiplier. Always reject non-positive log arguments.",
+    estimatedMinutes: 120
   },
 
   "skill-arithmetic-progression": {
     id: "les-arithmetic-progression",
     title: "Arithmetic (AP) & Geometric (GP) Sequences and Series",
-    hookAndIntuition: "Save ₦1,000 in week 1, ₦1,500 in week 2, ₦2,000 in week 3... each week adding ₦500. How much will you save in week 52, and what will be your grand total? Arithmetic and geometric sequences predict terms and sums of orderly numerical patterns.",
-    conceptualExplanation: "A sequence is an ordered list of numbers. (1) Arithmetic Progression (AP): Each successive term increases or decreases by a constant Common Difference d = T_{n} - T_{n-1}. The n-th term is T_n = a + (n - 1)d (where a is the first term). The sum of the first n terms is S_n = (n/2)[2a + (n - 1)d] = (n/2)(a + l) where l is the last term. (2) Geometric Progression (GP): Each term is multiplied by a constant Common Ratio r = T_{n} / T_{n-1}. The n-th term is T_n = a · r^(n-1). The sum of n terms is S_n = a(r^n - 1)/(r - 1) for r > 1, or S_n = a(1 - r^n)/(1 - r) for r < 1. If -1 < r < 1, the series converges to a Sum to Infinity: S_∞ = a / (1 - r).",
+    hookAndIntuition: "Save ₦1,000 in week 1, ₦1,500 in week 2, ₦2,000 in week 3—or double an investment every cycle. How do you compute the 52nd term and total accumulated wealth without tedious manual addition? Arithmetic and geometric progressions yield exact closed-form laws.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): (1) Arithmetic Progression (AP): Consecutive terms differ by a constant common difference d = T_k - T_(k-1). General n-th term: T_n = a + (n - 1)d (first term a). Partial sum of first n terms: S_n = (n/2)[2a + (n - 1)d] = (n/2)(a + l) where l = T_n. Arithmetic mean of x and y is (x + y)/2. (2) Geometric Progression (GP): Consecutive terms multiply by a constant common ratio r = T_k / T_(k-1). General n-th term: T_n = a · r^(n - 1). Partial sum: S_n = a(r^n - 1)/(r - 1) for r ≠ 1 (or a(1 - r^n)/(1 - r)). Geometric mean of positive x, y is √(xy). (3) Infinite Convergence: Only when |r| < 1 (-1 < r < 1) does r^n -> 0 as n -> ∞, yielding Sum to Infinity S_∞ = a / (1 - r).",
+    conceptualModel: "Discrete Dynamics Contrast: AP grows linearly by constant additive step +d; GP grows exponentially by constant multiplicative factor ×r.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "AP n-th term: T_n = a + (n - 1)d", definition: "General term formula for an arithmetic sequence.", practicalExample: "First term a = 4, common difference d = 3: T₁₀ = 4 + 9(3) = 31." },
-      { termOrSymbol: "AP Sum: S_n = (n / 2)[2a + (n - 1)d]", definition: "Sum of first n terms of an arithmetic progression.", practicalExample: "Summing 1 to 100 (a = 1, d = 1, n = 100): S₁₀₀ = (100/2)(1 + 100) = 50 × 101 = 5050." },
-      { termOrSymbol: "GP Sum to Infinity: S_∞ = a / (1 - r)", definition: "Limiting sum of infinite geometric series when |r| < 1.", practicalExample: "1/2 + 1/4 + 1/8 + ... (a = 1/2, r = 1/2): S_∞ = (1/2)/(1 - 1/2) = 1.0." }
+      { termOrSymbol: "AP Terms & Sums: T_n = a + (n-1)d; S_n = (n/2)[2a + (n-1)d]", definition: "Closed-form formulas for linear sequences with common difference d.", practicalExample: "For 3, 7, 11... (a=3, d=4): S₂₀ = 10[6 + 19(4)] = 820." },
+      { termOrSymbol: "GP Terms & Finite Sums: T_n = a r^(n-1); S_n = a(r^n - 1)/(r - 1)", definition: "Closed-form formulas for exponential sequences with common ratio r ≠ 1.", practicalExample: "a=3, r=2, S_n=189 => 3(2^n - 1) = 189 => 2^n = 64 => n = 6." },
+      { termOrSymbol: "GP Sum to Infinity: S_∞ = a / (1 - r)", definition: "Convergent infinite geometric series limit valid strictly when -1 < r < 1.", practicalExample: "a=64, r=1/2 => S_∞ = 64 / 0.5 = 128." }
     ],
     workedExamples: [
       {
-        title: "Finding First Term and Common Difference from Two Given AP Terms",
-        problemStatement: "The 4th term of an Arithmetic Progression is 18 and the 9th term is 38. Find: (a) the first term a and common difference d, (b) the 20th term, (c) the sum of the first 20 terms.",
+        title: "Worked Analysis 1: Reconstructing an AP from Two Known Terms",
+        problemStatement: "The 4th term of an Arithmetic Progression is 18 and the 9th term is 38. Find: (a) a and d, (b) T₂₀, and (c) S₂₀.",
         steps: [
-          { stepNumber: 1, instruction: "Set up simultaneous equations using T_n = a + (n - 1)d.", reasoning: "T₄ = a + 3d = 18 (Eq 1). T₉ = a + 8d = 38 (Eq 2)." },
-          { stepNumber: 2, instruction: "Subtract Eq 1 from Eq 2 to eliminate a.", reasoning: "(a + 8d) - (a + 3d) = 38 - 18 => 5d = 20 => d = 4." },
-          { stepNumber: 3, instruction: "Substitute d = 4 into Eq 1 to find a.", reasoning: "a + 3(4) = 18 => a + 12 = 18 => a = 6." },
-          { stepNumber: 4, instruction: "Calculate the 20th term T₂₀.", reasoning: "T₂₀ = a + 19d = 6 + 19(4) = 6 + 76 = 82." },
-          { stepNumber: 5, instruction: "Calculate sum of first 20 terms S₂₀.", reasoning: "S₂₀ = (n/2)(a + l) = (20/2)(6 + 82) = 10 × 88 = 880." }
+          { stepNumber: 1, instruction: "Translate T₄ and T₉ into linear equations using T_n = a + (n - 1)d.", reasoning: "T₄ = a + 3d = 18 (Eq 1) and T₉ = a + 8d = 38 (Eq 2)." },
+          { stepNumber: 2, instruction: "Subtract Eq 1 from Eq 2 to eliminate a.", reasoning: "5d = 38 - 18 = 20 => d = 4." },
+          { stepNumber: 3, instruction: "Back-substitute d = 4 into Eq 1.", reasoning: "a + 12 = 18 => a = 6." },
+          { stepNumber: 4, instruction: "Compute T₂₀ and S₂₀.", reasoning: "T₂₀ = 6 + 19(4) = 82. S₂₀ = (20/2)(6 + 82) = 10 × 88 = 880." }
         ],
-        takeawayRule: "Subtracting two known terms in an AP yields (n₂ - n₁)d, immediately isolating the common difference."
+        takeawayRule: "The difference T_p - T_q in any AP equals (p - q)d, immediately isolating d."
+      },
+      {
+        title: "Worked Analysis 2: Solving for Term Count n in a Finite GP Series",
+        problemStatement: "In a Geometric Progression with first term a = 3 and common ratio r = 2, how many terms are needed for the partial sum S_n to reach 189?",
+        steps: [
+          { stepNumber: 1, instruction: "Write the GP partial sum formula for r > 1.", reasoning: "S_n = a(r^n - 1) / (r - 1)." },
+          { stepNumber: 2, instruction: "Substitute S_n = 189, a = 3, r = 2.", reasoning: "189 = 3(2^n - 1) / (2 - 1) = 3(2^n - 1)." },
+          { stepNumber: 3, instruction: "Divide by 3 and add 1.", reasoning: "2^n - 1 = 63 => 2^n = 64." },
+          { stepNumber: 4, instruction: "Match exponential powers and verify by listing terms.", reasoning: "Since 64 = 2⁶, n = 6. Check: 3 + 6 + 12 + 24 + 48 + 96 = 189." }
+        ],
+        takeawayRule: "Use index matching or logarithms when the unknown n sits in the exponent of a GP sum."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Calculating sum to infinity for a GP where ratio r >= 1.", whyItIsWrong: "If r >= 1 (e.g. 2, 4, 8, 16...), terms grow larger indefinitely; the sum diverges to infinity. S_∞ exists ONLY when -1 < r < 1.", correctCorrection: "Check convergence condition |r| < 1 before computing S_∞." }
+      { misconception: "Using T_n = a + nd instead of a + (n - 1)d.", whyItIsWrong: "The first term a already occupies index 1 with zero steps added, so the n-th term takes (n - 1) steps.", correctCorrection: "Verify at n = 1: a + (1 - 1)d = a." },
+      { misconception: "Applying S_∞ = a / (1 - r) when |r| >= 1.", whyItIsWrong: "If r = 2, terms explode without bound and the series diverges; the formula returns a nonsensical negative value.", correctCorrection: "Confirm -1 < r < 1 before evaluating an infinite sum." }
     ],
-    guidedPracticePrompt: "In a GP with first term a = 5 and common ratio r = 2, find the 8th term.",
-    summaryRecap: "AP has common difference d (T_n = a + (n-1)d; S_n = (n/2)(2a + (n-1)d)). GP has common ratio r (T_n = ar^(n-1); S_∞ = a/(1-r) for |r| < 1)."
+    guidedPracticePrompt: "The 3rd term of an AP is 14 and the 8th term is 39. Find the first term a and common difference d.",
+    independentPracticePrompt: "A ball rebounds to 3/4 of its previous height on each bounce after dropping from 16 meters. Compute the total vertical distance traveled (down + up after first drop).",
+    diagnosticSelfCheck: "Can you distinguish additive AP differences from multiplicative GP ratios and verify |r| < 1 before summing to infinity?",
+    transferApplication: "Sinking-fund annuity schedules, compound loan amortization, radioactive decay modeling, and recursive algorithm complexity.",
+    masteryAssessment: "Achieve >= 85% across 5 AP/GP items covering n-th terms, partial sums, two-term reconstruction, and convergent infinite series.",
+    extensionActivity: "Prove Gauss's pairing method for S_n = (n/2)(a + l) by writing the AP sum forward and backward and adding termwise.",
+    summaryRecap: "AP: T_n = a + (n-1)d, S_n = (n/2)[2a + (n-1)d]. GP: T_n = ar^(n-1), S_n = a(r^n - 1)/(r - 1), S_∞ = a/(1 - r) iff |r| < 1.",
+    estimatedMinutes: 120
   },
 
   "skill-line-gradients": {
     id: "les-line-gradients",
     title: "Coordinate Geometry: Gradients, Midpoints, & Linear Equations",
-    hookAndIntuition: "Look at a steep mountain road marked '12% incline'. That warning indicates the gradient: for every 100 meters traveled horizontally, the road climbs 12 meters vertically. Coordinate geometry translates geometry into algebra by mapping points onto a Cartesian plane.",
-    conceptualExplanation: "The Cartesian plane represents points via ordered pairs (x, y). (1) Distance between two points (x₁, y₁) and (x₂, y₂): d = √[(x₂ - x₁)² + (y₂ - y₁)²] (Pythagorean theorem). (2) Midpoint M: M = ((x₁ + x₂)/2, (y₁ + y₂)/2). (3) Gradient / Slope m: m = Δy / Δx = (y₂ - y₁) / (x₂ - x₁) = tan θ (where θ is the angle of inclination with the positive x-axis). Positive slope rises left-to-right; negative slope falls; horizontal line m = 0; vertical line slope is undefined. (4) Parallel lines have identical gradients: m₁ = m₂. (5) Perpendicular lines have negative reciprocal gradients: m₁ · m₂ = -1 (or m₂ = -1/m₁). (6) Equation of a straight line: Slope-intercept form y = mx + c, or Point-slope form y - y₁ = m(x - x₁).",
+    hookAndIntuition: "Look at a mountain highway marked '12% incline' or a civil engineer grading a drainage pipe. Coordinate geometry turns geometric lines, right angles, and distances into exact algebraic equations on the Cartesian plane.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): Given points A(x₁, y₁) and B(x₂, y₂) on the Cartesian plane: (1) Euclidean Distance: d = √[(x₂ - x₁)² + (y₂ - y₁)²]. (2) Midpoint M: M = ((x₁ + x₂)/2, (y₁ + y₂)/2). (3) Gradient / Slope m: m = Δy / Δx = (y₂ - y₁) / (x₂ - x₁) = tan θ (inclination angle θ to positive x-axis). Horizontal lines have m = 0; vertical lines have undefined gradient. (4) Parallel & Perpendicular Conditions: Non-vertical lines are parallel iff m₁ = m₂; they are perpendicular (90°) iff m₁ · m₂ = -1 (m₂ = -1/m₁). (5) Line Equations: Slope-intercept y = mx + c, Point-slope y - y₁ = m(x - x₁), and General form ax + by + c = 0. A perpendicular bisector of AB passes through Midpoint M with gradient -1/m_AB.",
+    conceptualModel: "Cartesian Vector-Algebra Bridge: Every geometric line relationship (parallel, orthogonal, bisector) maps cleanly to an algebraic invariant on gradient m and midpoint M.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "m = (y₂ - y₁) / (x₂ - x₁)", definition: "Formula for gradient (slope) measuring rate of vertical rise over horizontal run.", practicalExample: "Through (2, 3) and (6, 11): m = (11 - 3)/(6 - 2) = 8/4 = 2." },
-      { termOrSymbol: "Perpendicular Gradients: m₁ · m₂ = -1", definition: "Condition for two straight lines to intersect at right angles (90°).", practicalExample: "A line perpendicular to a line of slope 3/4 has slope m₂ = -4/3." },
-      { termOrSymbol: "y - y₁ = m(x - x₁)", definition: "Point-slope equation for finding line formula passing through (x₁, y₁) with slope m.", practicalExample: "Through (3, -2) with m = 4: y - (-2) = 4(x - 3) => y + 2 = 4x - 12 => y = 4x - 14." }
+      { termOrSymbol: "m = (y₂ - y₁) / (x₂ - x₁)", definition: "Gradient measuring vertical rise per unit horizontal run.", practicalExample: "Through (2, 4) and (6, 12): m = (12 - 4)/(6 - 2) = 2." },
+      { termOrSymbol: "Distance d = √[(Δx)² + (Δy)²] | Midpoint M = ((x₁+x₂)/2, (y₁+y₂)/2)", definition: "Metric length and exact center coordinates of a segment.", practicalExample: "Midpoint of (-4, 7) and (10, -3) is (3, 2)." },
+      { termOrSymbol: "Perpendicularity: m₁ · m₂ = -1", definition: "Two non-axis lines meet at 90° iff their slopes are negative reciprocals.", practicalExample: "Perpendicular to m = 1/2 has m_perp = -2." }
     ],
     workedExamples: [
       {
-        title: "Finding the Equation of a Perpendicular Bisector",
-        problemStatement: "Find the equation of the perpendicular bisector of the line segment joining points A(2, 4) and B(6, 12).",
+        title: "Worked Analysis 1: Deriving a Perpendicular Bisector in Standard Form",
+        problemStatement: "Find the equation of the perpendicular bisector of the line segment joining A(2, 4) and B(6, 12).",
         steps: [
-          { stepNumber: 1, instruction: "Find the midpoint M of AB.", reasoning: "M = ((2 + 6)/2, (4 + 12)/2) = (8/2, 16/2) = (4, 8)." },
-          { stepNumber: 2, instruction: "Calculate the gradient m_AB of segment AB.", reasoning: "m_AB = (12 - 4) / (6 - 2) = 8 / 4 = 2." },
-          { stepNumber: 3, instruction: "Determine the perpendicular gradient m_perp.", reasoning: "m_perp = -1 / m_AB = -1 / 2 = -0.5." },
-          { stepNumber: 4, instruction: "Use point-slope form with midpoint (4, 8) and m_perp = -1/2.", reasoning: "y - 8 = -1/2 (x - 4) => 2(y - 8) = -(x - 4) => 2y - 16 = -x + 4." },
-          { stepNumber: 5, instruction: "Rearrange into standard form ax + by + c = 0.", reasoning: "x + 2y - 20 = 0 (or y = -0.5x + 10)." }
+          { stepNumber: 1, instruction: "Compute the midpoint M of segment AB.", reasoning: "M = ((2 + 6)/2, (4 + 12)/2) = (4, 8)." },
+          { stepNumber: 2, instruction: "Compute gradient m_AB of segment AB.", reasoning: "m_AB = (12 - 4)/(6 - 2) = 8/4 = 2." },
+          { stepNumber: 3, instruction: "Take the negative reciprocal for perpendicular gradient.", reasoning: "m_perp = -1 / 2." },
+          { stepNumber: 4, instruction: "Apply point-slope through M(4, 8) and clear fractions.", reasoning: "y - 8 = (-1/2)(x - 4) => 2y - 16 = -x + 4 => x + 2y - 20 = 0." }
         ],
-        takeawayRule: "A perpendicular bisector passes through the midpoint with a slope that is the negative reciprocal of the original line."
+        takeawayRule: "Every perpendicular bisector needs two ingredients: the Midpoint M and the negative reciprocal slope -1/m_AB."
+      },
+      {
+        title: "Worked Analysis 2: Extracting Parallel Line Equations from General Form",
+        problemStatement: "Find the equation of the straight line passing through P(2, 5) that is parallel to 3x - y = 7.",
+        steps: [
+          { stepNumber: 1, instruction: "Convert 3x - y = 7 to slope-intercept form y = mx + c.", reasoning: "y = 3x - 7, so its gradient is m = 3." },
+          { stepNumber: 2, instruction: "Apply the parallel gradient invariant.", reasoning: "A parallel line keeps identical gradient m = 3." },
+          { stepNumber: 3, instruction: "Substitute m = 3 and point (2, 5) into point-slope form.", reasoning: "y - 5 = 3(x - 2) => y = 3x - 6 + 5 => y = 3x - 1." },
+          { stepNumber: 4, instruction: "Verify point membership.", reasoning: "At x = 2: y = 3(2) - 1 = 5 (confirmed)." }
+        ],
+        takeawayRule: "Rearrange general form ax + by = k into y = (-a/b)x + k/b before reading off the gradient."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Mixing up coordinates when calculating gradient: (y₂ - y₁) / (x₁ - x₂).", whyItIsWrong: "The subtraction order must be consistent in both numerator and denominator. Mixing indices inverts the sign of the gradient.", correctCorrection: "Always keep index order identical: (y₂ - y₁) / (x₂ - x₁)." }
+      { misconception: "Reversing coordinate subtraction order between numerator and denominator: (y₂ - y₁)/(x₁ - x₂).", whyItIsWrong: "Flipping the subtraction order in only one coordinate negates the gradient sign.", correctCorrection: "Keep consistent point order: (y₂ - y₁)/(x₂ - x₁)." },
+      { misconception: "Treating a negative reciprocal as just a reciprocal (1/m) or just a negative (-m).", whyItIsWrong: "Perpendicular slopes require BOTH negation and inversion: m₂ = -1/m₁.", correctCorrection: "Check product m₁ · m₂ = -1 every time." }
     ],
-    guidedPracticePrompt: "Determine whether the lines 2x - 3y = 6 and 3x + 2y = 12 are parallel, perpendicular, or neither.",
-    summaryRecap: "Gradient m = Δy/Δx. Distance = √((Δx)² + (Δy)²). Midpoint averages coordinates. Parallel lines have m₁ = m₂; perpendicular lines have m₁m₂ = -1."
+    guidedPracticePrompt: "Find the midpoint of P(-4, 7) and Q(10, -3), and calculate the distance between A(2, -3) and B(6, 1).",
+    independentPracticePrompt: "Determine the equation of the perpendicular bisector of the segment joining A(1, 2) and B(5, 10) in ax + by = c form.",
+    diagnosticSelfCheck: "Can you read a gradient immediately from 2x - 4y = 8 and compute its perpendicular negative reciprocal without sign errors?",
+    transferApplication: "CAD drafting, robotics path planning, linear regression trendlines, and GIS road gradient surveying.",
+    masteryAssessment: "Achieve >= 85% across 5 coordinate geometry problems covering distance, midpoint, parallel lines, and perpendicular bisectors.",
+    extensionActivity: "Show using congruent right triangles on the coordinate grid why rotating a slope vector (dx, dy) by +90° gives (-dy, dx), proving m₁m₂ = -1.",
+    summaryRecap: "d = √((Δx)² + (Δy)²); M = ((x₁+x₂)/2, (y₁+y₂)/2); m = Δy/Δx. Parallel: m₁ = m₂; Perpendicular: m₁m₂ = -1.",
+    estimatedMinutes: 115
   },
 
   "skill-circle-theorems": {
     id: "les-circle-theorems",
     title: "Circle Theorems, Subtended Angles, & Cyclic Quadrilaterals",
-    hookAndIntuition: "Why do ancient circular amphitheaters offer every spectator along the same curved tier an identical viewing angle of the central stage? The ancient Greeks proved that an arc of a circle subtends the exact same angle anywhere on its circumference!",
-    conceptualExplanation: "Circle theorems establish universal geometric relationships governing chords, arcs, tangents, and subtended angles: (1) Angle at Center: The angle subtended by an arc at the center is twice the angle subtended by it at any point on the circumference (Angle_center = 2 × Angle_circumference). (2) Angle in a Semicircle: The angle subtended by a diameter at the circumference is always a right angle (90°). (3) Angles in the Same Segment: Angles subtended by the same arc in the same segment of a circle are equal. (4) Cyclic Quadrilateral: Opposite angles of a quadrilateral whose four vertices lie on a circle are supplementary (A + C = 180°, B + D = 180°). Exterior angle equals the interior opposite angle. (5) Tangent-Radius Theorem: A tangent to a circle is perpendicular to the radius at the point of contact (90°). (6) Tangents from an External Point: Tangents drawn from a common external point to a circle are equal in length. (7) Alternate Segment Theorem: The angle between a tangent and a chord through the point of contact is equal to the angle in the alternate segment.",
+    hookAndIntuition: "Why does every seat along a circular stadium tier share the exact same viewing angle of the pitch? Classical Euclidean geometry proves that angles subtended by a fixed chord anywhere in the same circular segment are strictly invariant.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): Seven Essential Circle Theorems: (1) Angle at Center Theorem: Angle subtended by an arc at center O is twice the angle subtended at any point on the remaining circumference (∠AOB = 2∠ACB). (2) Angle in a Semicircle: Any angle subtended by a diameter at the circumference equals 90°. (3) Angles in the Same Segment: Angles subtended by the same chord in the same arc segment are equal. (4) Cyclic Quadrilateral Theorem: Opposite angles of a quadrilateral with all four vertices on a circle sum to 180° (A + C = 180°); an exterior angle equals the opposite interior angle. (5) Tangent-Radius Perpendicularity: A tangent meets the radius at the point of tangency at 90°, forming right triangles with external center segments OP. (6) Equal Tangents from an External Point: Two tangents drawn from an external point P to points T₁, T₂ satisfy PT₁ = PT₂. (7) Alternate Segment Theorem: The angle between a tangent and a chord through the contact point equals any angle subtended by that chord in the alternate segment.",
+    conceptualModel: "Circular Angle Invariants: Track which chord/arc generates an angle, whether vertices touch center O vs circumference, and whether tangents introduce 90° radii.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Angle at Center = 2 × Angle at Circumference", definition: "Subtended angle from common arc is doubled at center.", practicalExample: "If circumference angle is 35°, angle at center is 2 × 35° = 70°." },
-      { termOrSymbol: "Cyclic Quad: Opp Angles = 180°", definition: "Opposite vertices of inscribed quadrilateral sum to 180 degrees.", practicalExample: "If angle A = 110°, opposite angle C = 180° - 110° = 70°." },
-      { termOrSymbol: "Alternate Segment Theorem", definition: "Angle between tangent and chord equals angle subtended by that chord in alternate segment.", practicalExample: "Key theorem tested heavily in WAEC and NECO geometry papers." }
+      { termOrSymbol: "∠Center = 2 × ∠Circumference", definition: "Central angle is double any circumference angle standing on the same arc.", practicalExample: "Arc subtending 110° at center subtends 55° at the major circumference." },
+      { termOrSymbol: "Cyclic Quadrilateral: A + C = 180°", definition: "Opposite vertices of an inscribed four-sided polygon are supplementary.", practicalExample: "If ∠A = (3x+10)° and opposite ∠C = (2x+20)°, 5x + 30 = 180 => x = 30°." },
+      { termOrSymbol: "Tangent-Radius (90°) & Alternate Segment Theorem", definition: "Radius ⊥ tangent at contact; tangent-chord angle equals angle in opposite segment.", practicalExample: "With radius 5 cm and center-external distance 13 cm, tangent length = √(13² - 5²) = 12 cm." }
     ],
     workedExamples: [
       {
-        title: "Solving Subtended Angles and Cyclic Quadrilateral Vertices",
-        problemStatement: "In a circle with center O, points A, B, C, and D lie on the circumference in order. If angle AOC (passing through center) = 140°, find: (a) angle ABC, (b) angle ADC.",
+        title: "Worked Analysis 1: Combining Angle at Center and Cyclic Quadrilateral Theorems",
+        problemStatement: "In a circle with center O, points A, B, C, D lie sequentially on the circumference. If reflex/minor central angle ∠AOC = 140° (on the minor arc side facing B), find: (a) ∠ADC and (b) ∠ABC.",
         steps: [
-          { stepNumber: 1, instruction: "Calculate angle ADC using the Angle at Center theorem.", reasoning: "Arc ABC subtends angle AOC = 140° at the center and angle ADC at the circumference. Angle ADC = 0.5 × 140° = 70°." },
-          { stepNumber: 2, instruction: "Identify the cyclic quadrilateral.", reasoning: "ABCD has all four vertices on the circle, so it is a cyclic quadrilateral." },
-          { stepNumber: 3, instruction: "Use the Cyclic Quadrilateral theorem to find angle ABC.", reasoning: "Opposite angles sum to 180°: Angle ABC + Angle ADC = 180° => Angle ABC + 70° = 180° => Angle ABC = 110°." }
+          { stepNumber: 1, instruction: "Apply the Angle at Center theorem for point D on the major arc.", reasoning: "Minor arc AC subtends 140° at center O and ∠ADC on the major circumference: ∠ADC = 140° / 2 = 70°." },
+          { stepNumber: 2, instruction: "Identify cyclic quadrilateral ABCD.", reasoning: "All four vertices A, B, C, D lie directly on the circle's circumference." },
+          { stepNumber: 3, instruction: "Apply the supplementary opposite-angle rule.", reasoning: "∠ABC + ∠ADC = 180° => ∠ABC = 180° - 70° = 110°." },
+          { stepNumber: 4, instruction: "Cross-check via reflex angle at center.", reasoning: "Reflex ∠AOC = 360° - 140° = 220°; half of 220° = 110° = ∠ABC (verified)." }
         ],
-        takeawayRule: "Always state the exact theorem name (e.g. 'Angle at center is twice angle at circumference') to secure full method marks in WAEC/NECO."
+        takeawayRule: "Always identify whether an angle faces the minor or major arc before halving the central angle."
+      },
+      {
+        title: "Worked Analysis 2: Tangent-Radius Right Triangle & Alternate Segment Theorem",
+        problemStatement: "From external point P, tangent PT touches a circle of center O and radius OT = 5 cm at T. Given OP = 13 cm, find PT. Also, if chord AB meets tangent AT at 62°, find ∠ACB in the alternate segment.",
+        steps: [
+          { stepNumber: 1, instruction: "Establish right angle at tangency point T.", reasoning: "By Tangent-Radius theorem, OT ⊥ PT, so ∠OTP = 90°." },
+          { stepNumber: 2, instruction: "Apply Pythagoras with hypotenuse OP = 13 cm.", reasoning: "PT² + OT² = OP² => PT² = 13² - 5² = 169 - 25 = 144." },
+          { stepNumber: 3, instruction: "Take the positive length.", reasoning: "PT = √144 = 12 cm." },
+          { stepNumber: 4, instruction: "Apply Alternate Segment theorem to chord AB.", reasoning: "The angle ∠ACB subtended by chord AB in the alternate segment equals tangent-chord angle ∠TAB = 62°." }
+        ],
+        takeawayRule: "In tangent-distance problems, the center-to-external segment OP is always the hypotenuse because the 90° angle sits at the tangent contact point."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Assuming any four-sided shape drawn inside a circle is automatically a cyclic quadrilateral.", whyItIsWrong: "A quadrilateral is ONLY cyclic if ALL FOUR vertices touch the circumference. If one vertex is at the circle center, it is NOT a cyclic quadrilateral.", correctCorrection: "Check that every single vertex lies on the circumference before applying 180° opposite angle rules." }
+      { misconception: "Treating a quadrilateral with one vertex at center O (like AOCB) as a cyclic quadrilateral.", whyItIsWrong: "A quadrilateral is cyclic ONLY when ALL FOUR vertices lie on the circumference.", correctCorrection: "Inspect every vertex: center O is never on the circumference." },
+      { misconception: "Assuming the tangent segment PT is the hypotenuse instead of OP.", whyItIsWrong: "The right angle sits between radius OT and tangent PT, making OP opposite the 90° angle.", correctCorrection: "OP² = OT² + PT² always." }
     ],
-    guidedPracticePrompt: "In a circle with diameter AB, C lies on the circumference. If angle CAB = 32°, find angle ABC.",
-    summaryRecap: "Center angle = 2 × circumference angle. Angle in semicircle = 90°. Cyclic quad opposite angles sum to 180°. Alternate segment theorem equates tangent-chord angle."
+    guidedPracticePrompt: "In a circle with diameter AB, C lies on the circumference. If ∠CAB = 34°, calculate ∠ABC.",
+    independentPracticePrompt: "Prove algebraically using the Angle at Center theorem around a full 360° point why opposite angles A and C of a cyclic quadrilateral must sum to 180°.",
+    diagnosticSelfCheck: "Can you name and cite the exact circle theorem justifying each angle step in a WAEC/NECO geometry proof?",
+    transferApplication: "Optical lens design, satellite horizon line-of-sight geometry, mechanical cam-gear clearances, and surveying triangulation.",
+    masteryAssessment: "Achieve >= 85% across 5 geometry items testing cyclic quadrilaterals, central angles, semicircle right angles, alternate segments, and tangent lengths.",
+    extensionActivity: "Construct a proof of the Alternate Segment Theorem using a diameter through the point of tangency and the Angle in a Semicircle theorem.",
+    summaryRecap: "∠Center = 2∠Circumference; ∠Semicircle = 90°; Cyclic quad opposite ∠ sum = 180°; Radius ⊥ Tangent (90°); Tangent-chord = alternate segment angle.",
+    estimatedMinutes: 120
   },
 
   "skill-stats-dispersion": {
     id: "les-stats-dispersion",
-    title: "Measures of Dispersion: Variance, Standard Deviation, & Box Plots",
-    hookAndIntuition: "Imagine two investment portfolios: both offer an average annual return of 10%. But Portfolio A returns between 9% and 11% every year, while Portfolio B swings wildly between -40% and +60%. While their averages are identical, their risk is vastly different! Measures of dispersion quantify spread and uncertainty.",
-    conceptualExplanation: "Measures of central tendency (mean, median, mode) locate the center of a distribution, while measures of dispersion quantify data spread. (1) Range: Maximum - Minimum (sensitive to outliers). (2) Interquartile Range (IQR): IQR = Q₃ - Q₁ (middle 50% spread, robust against outliers). Semi-interquartile range = IQR / 2. (3) Variance (s²): The average squared deviation from the mean: s² = Σ(x - x̄)² / n (or Σfx² / Σf - (x̄)²). Squaring prevents positive and negative deviations from canceling. (4) Standard Deviation (s / σ): The positive square root of variance: s = √(s²), expressed in the exact same physical units as the original data. (5) Five-Number Summary & Box Plots: Displays Min, Q₁ (25th percentile), Q₂ (Median, 50th), Q₃ (75th percentile), and Max. Outliers are points beyond 1.5 × IQR from the quartiles.",
+    title: "Measures of Dispersion: Variance, Standard Deviation, & Probability",
+    hookAndIntuition: "Two investment portfolios both average 10% annual return, yet one stays within 9%–11% while the other swings from -40% to +60%. Averages alone hide volatility—measures of dispersion and probability rules quantify spread, outliers, and risk.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC / NECO / JAMB): (1) Measures of Central Tendency: Mean x̄ = Σx / n (or Σfx / Σf for grouped frequency data), Median (middle value Q₂), Mode. (2) Spread & Quartiles: Range = Max - Min (outlier-sensitive). Interquartile Range (IQR) = Q₃ - Q₁ captures the middle 50% spread cleanly. Outlier threshold: below Q₁ - 1.5·IQR or above Q₃ + 1.5·IQR. (3) Variance & Standard Deviation: Variance σ² = Σ(x - x̄)² / n = (Σx² / n) - x̄². Standard Deviation σ = √σ² restores original data units. (4) Theoretical & Complement Probability: P(E) = n(E) / n(S) with 0 <= P(E) <= 1. Complement rule: P(not E) = 1 - P(E). For independent events A and B: P(A and B) = P(A) × P(B). For mutually exclusive events: P(A or B) = P(A) + P(B).",
+    conceptualModel: "Center-Spread-Chance Triad: Locate center (x̄ / Q₂), measure squared/quartile spread (σ / IQR), and enumerate exact sample space outcomes n(S).",
     keyTermsAndFormulas: [
-      { termOrSymbol: "Standard Deviation: s = √[ Σ(x - x̄)² / n ]", definition: "Primary measure of statistical dispersion in same units as data.", practicalExample: "Low standard deviation means data clusters tightly around the mean." },
-      { termOrSymbol: "Interquartile Range: IQR = Q₃ - Q₁", definition: "Spread of middle 50% of sorted data, resistant to extreme outliers.", practicalExample: "In data with Q₁ = 45 and Q₃ = 75: IQR = 75 - 45 = 30." },
-      { termOrSymbol: "Outlier Rule: 1.5 × IQR", definition: "Any data point below Q₁ - 1.5(IQR) or above Q₃ + 1.5(IQR) is classified as an outlier.", practicalExample: "Used in box plot whisker boundaries." }
+      { termOrSymbol: "Variance & Standard Deviation: σ² = Σ(x - x̄)² / n; σ = √σ²", definition: "Root-mean-square deviation from the arithmetic mean.", practicalExample: "For 2, 4, 6, 8, 10 (mean 6): Σ(x - 6)² = 16+4+0+4+16 = 40 => σ² = 8 => σ = 2√2." },
+      { termOrSymbol: "IQR = Q₃ - Q₁", definition: "Middle 50% spread unaffected by extreme outliers.", practicalExample: "For 11, 14, 17, 20, 23, 27, 31: Q₁ = 14, Q₃ = 27 => IQR = 13." },
+      { termOrSymbol: "Complement & Sample-Space Rules: P(E') = 1 - P(E)", definition: "Simplifies 'not' or 'at least one' probabilities cleanly.", practicalExample: "Two fair dice: 6 out of 36 pairs sum > 9 => P(sum > 9) = 6/36 = 1/6." }
     ],
     workedExamples: [
       {
-        title: "Calculating Mean, Variance, and Standard Deviation for a Data Set",
-        problemStatement: "Calculate the sample mean, variance, and standard deviation for the test scores: 4, 7, 8, 11, 15.",
+        title: "Worked Analysis 1: Computing Mean, Variance, and Standard Deviation",
+        problemStatement: "Calculate the mean, variance, and standard deviation of the dataset: 4, 7, 8, 11, 15.",
         steps: [
-          { stepNumber: 1, instruction: "Calculate the sample mean x̄.", reasoning: "n = 5. Sum = 4 + 7 + 8 + 11 + 15 = 45. Mean x̄ = 45 / 5 = 9.0." },
-          { stepNumber: 2, instruction: "Calculate deviations (x - x̄) and squared deviations (x - x̄)².", reasoning: "4 - 9 = -5 => (-5)² = 25.\n7 - 9 = -2 => (-2)² = 4.\n8 - 9 = -1 => (-1)² = 1.\n11 - 9 = +2 => (2)² = 4.\n15 - 9 = +6 => (6)² = 36." },
-          { stepNumber: 3, instruction: "Sum the squared deviations.", reasoning: "Σ(x - x̄)² = 25 + 4 + 1 + 4 + 36 = 70." },
-          { stepNumber: 4, instruction: "Calculate variance s².", reasoning: "s² = 70 / 5 = 14.0." },
-          { stepNumber: 5, instruction: "Calculate standard deviation s = √s².", reasoning: "s = √14.0 ≈ 3.74." }
+          { stepNumber: 1, instruction: "Find the arithmetic mean x̄.", reasoning: "n = 5. Sum = 4 + 7 + 8 + 11 + 15 = 45 => x̄ = 45 / 5 = 9." },
+          { stepNumber: 2, instruction: "Compute signed deviations (x - x̄) and verify their sum is zero.", reasoning: "-5, -2, -1, +2, +6 (sum = 0, arithmetic check passed)." },
+          { stepNumber: 3, instruction: "Square each deviation and sum.", reasoning: "25 + 4 + 1 + 4 + 36 = 70." },
+          { stepNumber: 4, instruction: "Divide by n = 5 for variance and take principal square root.", reasoning: "σ² = 70 / 5 = 14.0; standard deviation σ = √14 ≈ 3.74." }
         ],
-        takeawayRule: "Standard deviation is always in the original measurement units; variance is in squared units."
+        takeawayRule: "Signed deviations from the mean always sum to zero—use that as a quick arithmetic checkpoint before squaring."
+      },
+      {
+        title: "Worked Analysis 2: Interquartile Range & Two-Dice Probability Space",
+        problemStatement: "(a) Find Q₁, Q₃, and IQR of 11, 14, 17, 20, 23, 27, 31. (b) Find the probability that two fair dice sum strictly above 9.",
+        steps: [
+          { stepNumber: 1, instruction: "Locate the median Q₂ of the 7 ordered values.", reasoning: "The 4th term is median Q₂ = 20." },
+          { stepNumber: 2, instruction: "Extract lower and upper halves excluding Q₂.", reasoning: "Lower half: [11, 14, 17] -> Q₁ = 14. Upper half: [23, 27, 31] -> Q₃ = 27. IQR = 27 - 14 = 13." },
+          { stepNumber: 3, instruction: "List all ordered pairs summing strictly > 9 (10, 11, 12).", reasoning: "Sum 10: (4,6), (5,5), (6,4) [3]; Sum 11: (5,6), (6,5) [2]; Sum 12: (6,6) [1]." },
+          { stepNumber: 4, instruction: "Divide favorable outcomes by 6 × 6 = 36 total outcomes.", reasoning: "P(sum > 9) = (3 + 2 + 1) / 36 = 6 / 36 = 1/6." }
+        ],
+        takeawayRule: "Always distinguish ordered pairs (4,6) and (6,4) on two distinct dice when counting equally likely outcomes out of 36."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Thinking standard deviation can be negative.", whyItIsWrong: "Deviations are squared, making all terms non-negative. Variance is always ≥ 0, and standard deviation is its positive principal square root.", correctCorrection: "Standard deviation is strictly non-negative (s ≥ 0). Zero standard deviation means all values are identical." }
+      { misconception: "Claiming standard deviation can be negative when values fall below the mean.", whyItIsWrong: "Squared deviations are always >= 0, and standard deviation is the non-negative principal square root.", correctCorrection: "Standard deviation is strictly >= 0 (0 only when every data value is identical)." },
+      { misconception: "Treating (5, 6) and (6, 5) as a single outcome in two-dice probability.", whyItIsWrong: "Die 1 showing 5 and Die 2 showing 6 is physically distinct from Die 1 showing 6 and Die 2 showing 5.", correctCorrection: "Use the 6 × 6 = 36 ordered outcome grid consistently." }
     ],
-    guidedPracticePrompt: "Given sorted scores 10, 15, 20, 25, 30, 35, 40, find Q₁, Median Q₂, Q₃, and the IQR.",
-    summaryRecap: "IQR = Q₃ - Q₁ resists outliers. Standard deviation s = √(variance) measures average dispersion around the mean."
+    guidedPracticePrompt: "Compute the population standard deviation of 2, 4, 6, 8, 10 without a calculator.",
+    independentPracticePrompt: "If a single extreme typo changes 31 to 310 in [11, 14, 17, 20, 23, 27, 31], calculate how much the Mean changes versus the IQR.",
+    diagnosticSelfCheck: "Can you verify that Σ(x - x̄) = 0, separate Q₁/Q₃ cleanly, and list all 36 ordered outcomes in two-dice probability?",
+    transferApplication: "Financial portfolio volatility modeling, manufacturing quality-control sigma limits, actuarial risk underwriting, and clinical trial statistics.",
+    masteryAssessment: "Achieve >= 85% across 5 statistics and probability items spanning mean, standard deviation, IQR, complement probability, and sample spaces.",
+    extensionActivity: "Prove the computational shortcut identity Σ(x - x̄)² / n = (Σx² / n) - x̄² used on scientific calculators.",
+    summaryRecap: "Mean locates balance; IQR = Q₃ - Q₁ resists outliers; σ = √[Σ(x-x̄)²/n] measures spread; P(E') = 1 - P(E).",
+    estimatedMinutes: 120
   },
 
   "skill-matrix-operations": {
     id: "les-matrix-operations",
     title: "Matrices, Determinants, & 2D Linear Transformations",
-    hookAndIntuition: "Every 3D video game rendering an explosion or moving a camera in real time executes millions of matrix multiplications every second. Matrices are rectangular arrays of numbers that transform, rotate, scale, and manipulate space.",
-    conceptualExplanation: "A matrix of dimension m × n has m rows and n columns. (1) Addition and Subtraction: Possible only for matrices of identical dimensions, computed entry-by-entry. (2) Scalar Multiplication: Multiply every entry by scalar k. (3) Matrix Multiplication: The product AB of an (m × k) matrix A and a (k × n) matrix B is an (m × n) matrix formed by taking the dot product of rows of A with columns of B. Note: Matrix multiplication is NOT commutative (AB ≠ BA in general!). (4) Determinant of a 2×2 matrix: For A = [[a, b], [c, d]], det(A) = ad - bc. If det(A) = 0, the matrix is Singular and has no inverse. (5) Matrix Inverse: A⁻¹ = (1 / det(A)) · [[d, -b], [-c, a]]. AA⁻¹ = I (Identity matrix). (6) Geometric Transformations: Matrices represent 2D linear transformations: Reflection, Rotation through angle θ [[cos θ, -sin θ], [sin θ, cos θ]], and Enlargement by scale factor k [[k, 0], [0, k]].",
+    hookAndIntuition: "Every 3D graphics frame, engineering structural mesh, and neural-network layer executes millions of matrix multiplications per second. Matrices encode linear systems and geometric transformations in compact algebraic tables.",
+    conceptualExplanation: "CORE SYLLABUS (NERDC SSS / WAEC Further Math / UTME / Year-1 Engineering): An m × n matrix has m rows and n columns. (1) Addition & Scalar Multiplication: Only conformable matrices of identical shape add entrywise. (2) Matrix Multiplication (AB): Defined iff cols(A) = rows(B); entry (i, j) is the dot product of Row i of A with Column j of B. Multiplication is associative (AB)C = A(BC) but NOT commutative (AB ≠ BA in general). (3) 2×2 Determinant: For A = [[a, b], [c, d]], det(A) = |A| = ad - bc (geometric area scaling factor). A matrix is Singular iff det(A) = 0 (no inverse exists; linear system has zero or infinite solutions). (4) Inverse Matrix: For non-singular A, A⁻¹ = (1 / det(A)) · [[d, -b], [-c, a]], satisfying AA⁻¹ = I. Solving linear system AX = B yields X = A⁻¹B. (5) Orthogonal Vectors: 2D vectors u = (u₁, u₂) and v = (v₁, v₂) are perpendicular iff their dot product u · v = u₁v₁ + u₂v₂ = 0.",
+    conceptualModel: "Row-Column Operator Pipeline: Matrix multiplication chains linear maps right-to-left; det(A) tracks signed area scaling; det = 0 collapses 2D space onto a line or point.",
     keyTermsAndFormulas: [
-      { termOrSymbol: "det(A) = ad - bc", definition: "Determinant of 2×2 matrix; measures area scaling factor under transformation.", practicalExample: "If det(A) = 3, the transformation triples the area of any geometric shape." },
-      { termOrSymbol: "A⁻¹ = (1 / (ad - bc)) · [[d, -b], [-c, a]]", definition: "Inverse matrix formula satisfying A · A⁻¹ = I.", practicalExample: "Inverse of [[2, 1], [3, 2]] (det = 4 - 3 = 1): A⁻¹ = [[2, -1], [-3, 2]]." },
-      { termOrSymbol: "Non-Commutative: AB ≠ BA", definition: "Order of matrix multiplication matters; changing order changes transformation sequence.", practicalExample: "Rotating then reflecting produces a different result than reflecting then rotating." }
+      { termOrSymbol: "det(A) = ad - bc | Singular <=> ad - bc = 0", definition: "2×2 determinant; zero determinant signals non-invertible (singular) transformation.", practicalExample: "[[k, 6], [2, 3]] is singular when 3k - 12 = 0 => k = 4." },
+      { termOrSymbol: "A⁻¹ = (1 / (ad - bc)) · [[d, -b], [-c, a]]", definition: "Exact inverse swapping main diagonal and negating off-diagonal entries.", practicalExample: "If M = [[4, 3], [1, 1]], det = 1, so M⁻¹ = [[1, -3], [-1, 4]]." },
+      { termOrSymbol: "Dot Product Orthogonality: u · v = u₁v₁ + u₂v₂ = 0", definition: "Condition for two nonzero vectors to meet at 90°.", practicalExample: "(3, -4) · (8, k) = 24 - 4k = 0 => k = 6." }
     ],
     workedExamples: [
       {
-        title: "Solving a 2x2 Linear System Using Matrix Inverse",
-        problemStatement: "Use matrix inversion to solve the system: 3x + 2y = 8 and 4x + 3y = 11.",
+        title: "Worked Analysis 1: Solving a 2×2 Linear System Using Matrix Inversion",
+        problemStatement: "Use matrix inversion to solve the simultaneous system: 3x + 2y = 8 and 4x + 3y = 11.",
         steps: [
-          { stepNumber: 1, instruction: "Express the linear system in matrix form AX = B.", reasoning: "[[3, 2], [4, 3]] [[x], [y]] = [[8], [11]]. Matrix A = [[3, 2], [4, 3]], B = [[8], [11]]." },
-          { stepNumber: 2, instruction: "Calculate the determinant of matrix A.", reasoning: "det(A) = ad - bc = (3 × 3) - (2 × 4) = 9 - 8 = 1. Since det(A) = 1 ≠ 0, A is invertible." },
-          { stepNumber: 3, instruction: "Find the inverse matrix A⁻¹.", reasoning: "Swap diagonal entries, negate off-diagonals, divide by det: A⁻¹ = (1/1) [[3, -2], [-4, 3]] = [[3, -2], [-4, 3]]." },
-          { stepNumber: 4, instruction: "Multiply A⁻¹ by vector B to solve for X.", reasoning: "[[x], [y]] = [[3, -2], [-4, 3]] [[8], [11]] = [[3(8) + (-2)(11)], [-4(8) + 3(11)]] = [[24 - 22], [-32 + 33]] = [[2], [1]]." },
-          { stepNumber: 5, instruction: "State final solution.", reasoning: "x = 2, y = 1." }
+          { stepNumber: 1, instruction: "Write the system in matrix equation form AX = B.", reasoning: "A = [[3, 2], [4, 3]], X = [[x], [y]], B = [[8], [11]]." },
+          { stepNumber: 2, instruction: "Evaluate det(A) to confirm invertibility.", reasoning: "det(A) = (3)(3) - (2)(4) = 9 - 8 = 1 ≠ 0, so A⁻¹ exists." },
+          { stepNumber: 3, instruction: "Form adjoint and divide by det(A).", reasoning: "Swap 3 and 3, negate 2 and 4: A⁻¹ = [[3, -2], [-4, 3]]." },
+          { stepNumber: 4, instruction: "Left-multiply B by A⁻¹ via row-by-column dot products.", reasoning: "x = 3(8) + (-2)(11) = 24 - 22 = 2; y = -4(8) + 3(11) = -32 + 33 = 1." }
         ],
-        takeawayRule: "To solve AX = B, multiply both sides on the left by A⁻¹: X = A⁻¹B."
+        takeawayRule: "Always left-multiply B as X = A⁻¹B (never BA⁻¹), because matrix multiplication is non-commutative."
+      },
+      {
+        title: "Worked Analysis 2: Matrix Product AB and Vector Orthogonality",
+        problemStatement: "(a) Multiply A = [[2, 1], [0, 3]] by B = [[4, -1], [2, 5]]. (b) Find k so vectors u = (3, -4) and v = (8, k) are perpendicular.",
+        steps: [
+          { stepNumber: 1, instruction: "Compute Row 1 of AB from Row 1 of A [2, 1] and columns of B.", reasoning: "(1,1): 2(4) + 1(2) = 10; (1,2): 2(-1) + 1(5) = 3." },
+          { stepNumber: 2, instruction: "Compute Row 2 of AB from Row 2 of A [0, 3] and columns of B.", reasoning: "(2,1): 0(4) + 3(2) = 6; (2,2): 0(-1) + 3(5) = 15. Thus AB = [[10, 3], [6, 15]]." },
+          { stepNumber: 3, instruction: "Set up dot product equation for perpendicular vectors.", reasoning: "u · v = 3(8) + (-4)(k) = 24 - 4k = 0." },
+          { stepNumber: 4, instruction: "Solve for k.", reasoning: "4k = 24 => k = 6." }
+        ],
+        takeawayRule: "Each entry (i, j) in AB is the dot product of Row i of A with Column j of B."
       }
     ],
     commonMisconceptionsAndTraps: [
-      { misconception: "Multiplying matrices element-by-element like addition.", whyItIsWrong: "Matrix multiplication requires row-by-column dot products: Row 1 of A combines with Column 1 of B to produce Entry (1, 1).", correctCorrection: "Follow: (Row of A) · (Column of B) = scalar entry." }
+      { misconception: "Multiplying matrices entry-by-entry (Hadamard style) instead of row-by-column.", whyItIsWrong: "True linear transformation composition maps Row i of the left matrix across Column j of the right matrix.", correctCorrection: "Trace Row i horizontally and Column j vertically for each entry (i, j)." },
+      { misconception: "Forgetting to swap main diagonal entries a and d when forming the 2×2 adjoint.", whyItIsWrong: "Negating b and c alone without swapping a and d fails A · A⁻¹ = I.", correctCorrection: "Swap main diagonal (d, a), negate off-diagonal (-b, -c), divide by ad - bc." }
     ],
-    guidedPracticePrompt: "Find the determinant and inverse of the matrix M = [[5, 2], [7, 3]].",
-    summaryRecap: "Matrix multiplication multiplies rows by columns (AB ≠ BA). det(A) = ad - bc. Singular matrices (det = 0) have no inverse. X = A⁻¹B solves linear systems."
+    guidedPracticePrompt: "Find the value of k that makes [[k, 6], [2, 3]] singular (non-invertible).",
+    independentPracticePrompt: "Verify by explicit row-by-column multiplication that [[3, 2], [4, 3]] · [[3, -2], [-4, 3]] equals the 2×2 identity matrix I.",
+    diagnosticSelfCheck: "Can you multiply 2×2 matrices, test singularity via det = 0, invert non-singular matrices, and apply u · v = 0?",
+    transferApplication: "3D computer graphics pipelines, structural finite-element stiffness matrices, electrical mesh analysis, and machine-learning linear layers.",
+    masteryAssessment: "Achieve >= 85% across 5 matrix and vector problems covering determinants, inverses, row-by-column products, singularity, and dot products.",
+    extensionActivity: "Check geometrically why the rotation matrix R(90°) = [[0, -1], [1, 0]] satisfies det(R) = 1 and R⁻¹ = Rᵀ.",
+    summaryRecap: "AB multiplies rows by columns (AB ≠ BA). det(A) = ad - bc. Singular iff det = 0. A⁻¹ = (1/det)[[d, -b], [-c, a]]. Orthogonal iff u · v = 0.",
+    estimatedMinutes: 125
   },
 
   "skill-derivatives": {

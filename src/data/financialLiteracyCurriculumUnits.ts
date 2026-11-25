@@ -141,71 +141,125 @@ export const FINANCIAL_LITERACY_CURRICULUM_UNITS: Unit[] = [
     description: "Protection against phishing, social engineering, SIM-swap attacks, Bank Verification Number (BVN) scams, multi-factor authentication (MFA), and safe digital banking.",
     order: 3,
     category: "core",
+    estimatedHours: 3.5,
+    estimationMethod: "Social-engineering threat triage, Ponzi compounding math proof, 2 worked examples, and 5 tiered cyber-finance questions",
+    provenanceVersion: "2.0.0",
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_NIGERIAN", "WAEC_WASSCE"],
     skills: [
       {
         id: "skill-fin-fraud-prevention",
         unitId: "unit-fin-digital-fraud-safety",
         title: "Digital Banking Safety & Financial Fraud Countermeasures",
         code: "SKL-FIN-203",
-        summary: "Identifying financial scam vectors (phishing, smishing, Ponzi schemes) and implementing robust multi-factor defense.",
+        summary: "Identifying financial scam vectors (phishing, smishing, SIM-swap, Ponzi schemes) and implementing robust multi-factor defense.",
         objectives: [
-          "Recognize social engineering tactics designed to extract Bank Verification Numbers (BVN), PINs, and One-Time Passwords (OTPs)",
-          "Identify the mathematical impossibility of Ponzi/pyramid schemes offering guaranteed unrealistic returns",
-          "Apply security protocols: Multi-Factor Authentication (MFA), biometric locks, and official bank grievance mechanisms"
+          "Recognize social engineering tactics designed to extract Bank Verification Numbers (BVN), PINs, CVVs, and One-Time Passwords (OTPs)",
+          "Prove mathematically why Ponzi/pyramid schemes offering guaranteed extreme monthly yields must collapse",
+          "Apply security protocols: Multi-Factor Authentication (MFA), SIM PINs, USSD quick-freeze codes, and official bank dispute channels"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-fin-compound-interest"],
         lesson: {
           id: "les-fin-fraud-prevention",
-          title: "Digital Financial Security & Scam Defense",
-          hookAndIntuition: "You receive an urgent SMS: 'Your bank account has been blocked due to BVN discrepancy. Call 080-XXXX immediately or click this link to update your debit card PIN.' This is the classic social engineering vector: creating artificial panic to steal credentials.",
-          conceptualExplanation: "As digital banking and mobile payments (USSD, fintech apps, internet banking) expand, financial fraud has shifted from physical theft to digital social engineering. Financial institutions NEVER request customer PINs, CVVs, or OTPs. Furthermore, fraudulent investment schemes (Ponzi schemes) promise guaranteed high returns funded solely by new investor capital, mathematically collapsing when recruitment slows.",
+          title: "Digital Financial Security, Cyber Defense & Ponzi Math Analysis",
+          hookAndIntuition: "You receive an urgent SMS: 'Your bank account has been blocked due to BVN discrepancy. Call 080-XXXX immediately or click this link to update your debit card PIN.' That manufactured urgency is the core weapon of social engineering: bypassing critical thinking to steal your credentials.",
+          conceptualExplanation: "CORE SYLLABUS (NERDC Financial Literacy): Modern fintech and USSD banking rely on multi-layered defense: Something You Know (PIN/password), Something You Have (hardware token/registered SIM), and Something You Are (biometrics). Attackers bypass encryption by targeting human psychology through Phishing (fake emails/websites), Smishing (fake SMS alerts), Vishing (impersonation phone calls), and SIM-Swap hijacking. Legitimate bank staff NEVER request your PIN, 3-digit card CVV, or SMS OTP. Meanwhile, Ponzi schemes violate basic compounding arithmetic: paying out extreme 'guaranteed' returns exclusively from incoming deposits creates exponential liabilities that inevitably collapse when recruitment stalls.",
+          conceptualModel: "Three-Factor Trust Boundary: Never expose Secret Knowledge (PIN/CVV) or Dynamic Possession Tokens (OTP) outside official verified bank channels.",
           keyTermsAndFormulas: [
             {
-              termOrSymbol: "One-Time Password (OTP)",
-              definition: "A dynamic secondary authorization token. Sharing an OTP gives an attacker complete control over a transaction.",
-              practicalExample: "Banks explicitly state: 'Do not disclose this code to anyone, including bank staff.'"
+              termOrSymbol: "One-Time Password (OTP) & CVV",
+              definition: "Dynamic single-use transaction token (OTP) and 3-digit card verification code (CVV); disclosing either hands over spending authority.",
+              practicalExample: "Banks state explicitly: 'Never disclose this OTP to anyone, including bank staff.'"
             },
             {
-              termOrSymbol: "Ponzi Scheme Characteristics",
-              definition: "Guaranteed high returns with 'zero risk', lack of verifiable underlying business operations, pressure to recruit others.",
-              practicalExample: "Schemes promising '30% guaranteed monthly return'—financially impossible over any sustained horizon."
+              termOrSymbol: "Exponential Ponzi Growth: A = P(1 + r)^t",
+              definition: "Shows how seemingly small monthly promises explode beyond real GDP growth within 12 months.",
+              practicalExample: "40% monthly compounded for 12 months = (1.40)¹² = 56.69× initial capital (5,569% APY)."
+            },
+            {
+              termOrSymbol: "SIM-Swap Containment",
+              definition: "Reassigning a victim's phone number to a fraudster's SIM to intercept SMS OTPs; mitigated by SIM lock PINs and authenticator apps.",
+              practicalExample: "Sudden 'No Service' signal loss requires calling your bank immediately to freeze transfers."
             }
           ],
           workedExamples: [
             {
-              title: "Evaluating an Investment Opportunity for Ponzi Risk",
-              problemStatement: "An online platform invites users to deposit ₦100,000 with a promise of 'guaranteed 40% monthly returns' with zero risk, plus a 10% bonus for every friend recruited. Contrast this with the prevailing Central Bank risk-free treasury bill rate of 15% per annum, and analyze the mathematical sustainability.",
+              title: "Worked Analysis 1: Evaluating an Investment Opportunity for Ponzi Risk",
+              problemStatement: "An online platform invites users to deposit ₦100,000 with a promise of 'guaranteed 40% monthly returns' with zero risk, plus a 10% bonus for every friend recruited. Contrast this with the prevailing Central Bank risk-free treasury bill rate of 15% per annum.",
               steps: [
                 {
                   stepNumber: 1,
-                  instruction: "Calculate the compounded annual rate implied by 40% monthly",
-                  reasoning: "At 40% per month, (1 + 0.40)^12 = 1.40^12 ≈ 56.69. This implies a 5,569% annual return, whereas legitimate national economic output grows at 2% to 7% annually."
+                  instruction: "Calculate the compounded annual multiple implied by 40% monthly",
+                  reasoning: "At 40% per month, (1 + 0.40)¹² = 1.40¹² ≈ 56.69, implying a 5,569% annual return!"
                 },
                 {
                   stepNumber: 2,
-                  instruction: "Examine the underlying economic asset",
-                  reasoning: "No productive commercial enterprise yields a risk-free 5,500% annual return. Payouts to existing members can only come from new investors' deposits."
+                  instruction: "Compare against the risk-free benchmark and real economy",
+                  reasoning: "Legitimate businesses earn 5%–25% annually with real risk; Federal Treasury Bills yield ~15% per annum."
                 },
                 {
                   stepNumber: 3,
+                  instruction: "Inspect cash-flow source and recruitment incentives",
+                  reasoning: "Offering 10% bonuses solely for recruiting depositors proves payouts come from new member capital rather than productive output."
+                },
+                {
+                  stepNumber: 4,
                   instruction: "Conclude risk diagnosis",
-                  reasoning: "The platform displays all hallmarks of a classic Ponzi scheme. Once recruitment stalls, the operators flee and late depositors suffer complete capital loss."
+                  reasoning: "The structure is mathematically unsustainable; once exponential recruitment saturates, late depositors lose 100% of principal."
                 }
               ],
               takeawayRule: "Unusually high 'guaranteed' returns coupled with recruitment incentives invariably signal an unsustainable pyramid structure."
+            },
+            {
+              title: "Worked Response 2: Phishing URL Inspection & Immediate SIM-Swap Containment",
+              problemStatement: "Suppose your phone suddenly loses mobile network ('No Service' in a strong signal zone) right after receiving an email from 'security@firstbank-verify-ng.xyz' asking for your PIN and OTP. Execute the safe 4-step response.",
+              steps: [
+                {
+                  stepNumber: 1,
+                  instruction: "Audit the sender domain carefully",
+                  reasoning: "Legitimate banks use their exact official domain (not '.xyz' lookalikes with extra hyphens such as 'firstbank-verify-ng.xyz')."
+                },
+                {
+                  stepNumber: 2,
+                  instruction: "Withhold all credentials and avoid links",
+                  reasoning: "Do not enter PIN, BVN, CVV, or OTP on the linked page."
+                },
+                {
+                  stepNumber: 3,
+                  instruction: "Recognize potential SIM-swap hijacking",
+                  reasoning: "Sudden signal loss means an attacker may have ported your number to steal SMS OTPs."
+                },
+                {
+                  stepNumber: 4,
+                  instruction: "Freeze accounts via verified channels",
+                  reasoning: "Call your bank's official back-of-card helpline or visit a branch immediately to lock transfers and contact your telecom provider."
+                }
+              ],
+              takeawayRule: "Always inspect the root domain, refuse credential links, and treat sudden unexpected 'No Service' status as a high-priority security alert."
             }
           ],
           commonMisconceptionsAndTraps: [
             {
-              misconception: "Assuming a scam message is legitimate because the sender calls you by your real name",
-              whyItIsWrong: "Data breaches and public social media profiles often allow fraudsters to correlate phone numbers with names to build false credibility.",
-              correctCorrection: "Never trust unsolicited callers. Always hang up and contact your bank through its official verified helpline."
+              misconception: "Assuming a message is legitimate because the caller knows your full name and bank branch",
+              whyItIsWrong: "Data leaks allow fraudsters to obtain names and phone numbers beforehand to fake authority.",
+              correctCorrection: "Hang up and initiate verification yourself via your bank's official verified helpline."
+            },
+            {
+              misconception: "Thinking SMS OTP alone protects an account even if SIM-swapping occurs",
+              whyItIsWrong: "If an attacker hijacks your mobile SIM number, all SMS OTPs route straight to their phone.",
+              correctCorrection: "Set a telecom SIM PIN, disable USSD transfer if unused, and enable hardware/app MFA."
             }
           ],
-          guidedPracticePrompt: "List 3 rules you would establish to protect an elderly relative from phone-based bank scams.",
-          diagnosticSelfCheck: "Should you ever share an SMS OTP with a bank customer service representative?",
-          summaryRecap: "Your PIN, CVV, and OTP are the keys to your financial vault. Never disclose them to anyone, verify all requests independently, and reject get-rich-quick schemes."
+          guidedPracticePrompt: "List 3 rules you would establish to protect a family member from phone-based bank scams.",
+          independentPracticePrompt: "Calculate what ₦50,000 would have to grow to in 12 months if a fraudulent scheme promises '25% every month' ((1.25)¹² ≈ 14.55×), and explain why it must fail.",
+          diagnosticSelfCheck: "Should you ever disclose an SMS OTP or 3-digit card CVV to someone claiming to reverse an erroneous debit?",
+          transferApplication: "Safeguarding personal savings accounts, fintech wallets, and business merchant terminals against cyber theft.",
+          masteryAssessment: "Identify phishing/smishing/SIM-swap traps, analyze Ponzi math, and choose safe incident responses across 5 questions.",
+          extensionActivity: "Audit a sample phishing email to highlight 4 red flags: urgent threat, spoofed domain, generic greeting, and credential harvest link.",
+          summaryRecap: "Never share PINs, CVVs, or OTPs; treat 'guaranteed extreme returns' as Ponzi red flags; freeze accounts immediately if unexpected SIM loss occurs.",
+          estimatedMinutes: 50
         },
         questions: [
           {
@@ -222,8 +276,7 @@ export const FINANCIAL_LITERACY_CURRICULUM_UNITS: Unit[] = [
             explanation: "Financial institutions design their core banking systems so that staff never see or need customer PINs or OTPs. Any person asking for your PIN or OTP is attempting fraud.",
             hintLadder: [
               "Banks have administrative access and do not need your private password.",
-              "An OTP authorizes a debit or account transfer.",
-              "Sharing it immediately compromises your funds."
+              "An OTP authorizes a debit or account transfer."
             ],
             misconceptionAlerts: [
               { trigger: "Only when verifying identity during an emergency weekend phone call", note: "Emergency claims are the most common social engineering tactic to induce panic." }
@@ -245,7 +298,6 @@ export const FINANCIAL_LITERACY_CURRICULUM_UNITS: Unit[] = [
             explanation: "Higher expected returns always carry higher risk. When an operator promises guaranteed high returns with zero risk and pays out returns using new deposits, it is mathematically a Ponzi scheme.",
             hintLadder: [
               "The foundational law of finance is the risk-return trade-off.",
-              "No legitimate investment can eliminate all risk while guaranteeing high yields.",
               "Reliance on new members to pay old members defines a pyramid scheme."
             ],
             misconceptionAlerts: [
@@ -253,6 +305,73 @@ export const FINANCIAL_LITERACY_CURRICULUM_UNITS: Unit[] = [
             ],
             skillId: "skill-fin-fraud-prevention",
             difficulty: "medium"
+          },
+          {
+            id: "q-fin-fr-3",
+            type: "multiple_choice",
+            questionText: "You receive an SMS containing a web link to 'http://bank-bvn-update-ng.top/login' warning that your account will be closed in 15 minutes unless you enter your debit card number and CVV. What attack vector is this?",
+            options: [
+              "Smishing (SMS phishing) social engineering",
+              "Routine Central Bank biometric upgrade",
+              "Encrypted hardware key rotation",
+              "Standard ATM cash dispensation"
+            ],
+            correctAnswer: "Smishing (SMS phishing) social engineering",
+            explanation: "Fraudulent SMS messages impersonating trusted institutions with fake lookalike domains and urgent threats to steal credentials are called Smishing.",
+            hintLadder: [
+              "Check the fake '.top' domain and artificial 15-minute panic deadline.",
+              "SMS-based credential theft combines SMS + phishing = Smishing."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Routine Central Bank biometric upgrade", note: "Banks never upgrade BVN records through unverified SMS links asking for card CVV codes." }
+            ],
+            skillId: "skill-fin-fraud-prevention",
+            difficulty: "easy"
+          },
+          {
+            id: "q-fin-fr-4",
+            type: "multiple_choice",
+            questionText: "If your mobile phone suddenly loses cellular service ('No Service') in a strong coverage area shortly after an unknown login alert on your email, what high-risk threat should you suspect and do first?",
+            options: [
+              "A SIM-swap attack; immediately use another phone to call your bank's official line to freeze transfers and contact your telecom provider",
+              "Nothing is wrong; wait 3 days for the signal tower to reboot automatically",
+              "Post your BVN publicly on social media to ask friends for help",
+              "Reply to the email with your transaction PIN to prove your identity"
+            ],
+            correctAnswer: "A SIM-swap attack; immediately use another phone to call your bank's official line to freeze transfers and contact your telecom provider",
+            explanation: "Sudden loss of signal indicates criminals may have transferred your mobile number to their own SIM to intercept SMS OTPs; freezing bank transfers immediately limits losses.",
+            hintLadder: [
+              "SMS OTPs route to whichever SIM holds your phone number.",
+              "Loss of signal + login alert signals SIM hijacking."
+            ],
+            misconceptionAlerts: [
+              { trigger: "Nothing is wrong; wait 3 days for the signal tower to reboot automatically", note: "Delaying allows attackers to intercept OTP codes and drain linked bank accounts." }
+            ],
+            skillId: "skill-fin-fraud-prevention",
+            difficulty: "medium"
+          },
+          {
+            id: "q-fin-fr-5",
+            type: "multiple_choice",
+            questionText: "Suppose an illegal scheme promises 50% return every month compounded monthly ((1.50)^12 ≈ 129.75). Approximately how much money would a single ₦100,000 deposit legally require the scheme to pay out after just 12 months?",
+            mathExpression: "A = 100,000 \\times (1.50)^{12}",
+            options: [
+              "Nearly ₦12,975,000 (an impossible ~130× multiplication in one year)",
+              "₦150,000 total after 12 months",
+              "₦700,000 total after 12 months",
+              "₦1,200,000 total after 12 months"
+            ],
+            correctAnswer: "Nearly ₦12,975,000 (an impossible ~130× multiplication in one year)",
+            explanation: "Compound growth at 50% monthly yields 100,000 × 1.50¹² ≈ ₦12,974,634 in 12 months—proving mathematically that extreme monthly yield promises cannot be sustained by real economic activity.",
+            hintLadder: [
+              "Multiply the principal ₦100,000 by the 12-month compounding factor ≈ 129.75.",
+              "100,000 × 129.75 = ₦12,975,000."
+            ],
+            misconceptionAlerts: [
+              { trigger: "₦700,000 total after 12 months", note: "12 × 50% simple interest is 600% (₦700,000 total), whereas monthly compounding multiplies by (1.5)¹² ≈ 129.75×." }
+            ],
+            skillId: "skill-fin-fraud-prevention",
+            difficulty: "hard"
           }
         ]
       }

@@ -535,6 +535,10 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "SOH-CAH-TOA, Sine and Cosine rules, three-figure bearings, angles of elevation and depression.",
     order: 4,
     category: "core",
+    estimatedHours: 4.5,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-sine-cosine-rule",
@@ -549,6 +553,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations", "skill-quad-factoring"],
         questions: [
           {
             id: "q-trig-1",
@@ -587,6 +592,63 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-sine-cosine-rule",
             difficulty: "easy"
+          },
+          {
+            id: "q-trig-3",
+            type: "multiple_choice",
+            questionText: "In triangle PQR, ∠P = 30°, ∠Q = 45°, and side p = 10 cm opposite ∠P. Find the exact length of side q opposite ∠Q.",
+            mathExpression: "\\frac{q}{\\sin 45^\\circ} = \\frac{10}{\\sin 30^\\circ}",
+            options: ["10\\sqrt{2} \\text{ cm}", "5\\sqrt{2} \\text{ cm}", "10 \\text{ cm}", "20\\sqrt{2} \\text{ cm}"],
+            correctAnswer: "10\\sqrt{2} \\text{ cm}",
+            explanation: "By the Sine Rule: q = 10 × sin(45°) / sin(30°) = 10 × (√2 / 2) / (1 / 2) = 10√2 cm.",
+            hintLadder: [
+              "Set up the Sine Rule: q / sin 45° = p / sin 30°.",
+              "Recall exact trig values: sin 45° = √2 / 2 and sin 30° = 1 / 2.",
+              "Compute 10 × (√2 / 2) × 2 = 10√2 cm."
+            ],
+            misconceptionAlerts: [
+              { trigger: "5\\sqrt{2} \\text{ cm}", note: "Dividing by sin 30° = 1/2 doubles the numerator rather than halving it." }
+            ],
+            skillId: "skill-sine-cosine-rule",
+            difficulty: "medium"
+          },
+          {
+            id: "q-trig-4",
+            type: "multiple_choice",
+            questionText: "Calculate the area of triangle XYZ if side x = 10 cm, side y = 12 cm, and included angle Z = 30°.",
+            mathExpression: "\\text{Area} = \\frac{1}{2} x y \\sin Z",
+            options: ["30 \\text{ cm}^2", "60 \\text{ cm}^2", "30\\sqrt{3} \\text{ cm}^2", "120 \\text{ cm}^2"],
+            correctAnswer: "30 \\text{ cm}^2",
+            explanation: "Area = (1/2) × 10 × 12 × sin 30° = 60 × 0.5 = 30 cm².",
+            hintLadder: [
+              "Apply trigonometric area formula: Area = (1/2) a b sin C.",
+              "Multiply (1/2) × 10 × 12 = 60.",
+              "Multiply 60 × sin 30° (0.5) = 30 cm²."
+            ],
+            misconceptionAlerts: [
+              { trigger: "60 \\text{ cm}^2", note: "Remember to multiply by sin 30° = 0.5 after taking (1/2) × 10 × 12." }
+            ],
+            skillId: "skill-sine-cosine-rule",
+            difficulty: "easy"
+          },
+          {
+            id: "q-trig-5",
+            type: "multiple_choice",
+            questionText: "A surveyor walks 5 km from base B on a bearing of 040° to point C, then turns and walks 8 km on a bearing of 160° to point D. Find the straight-line distance BD.",
+            mathExpression: "BD^2 = 5^2 + 8^2 - 2(5)(8)\\cos(60^\\circ)",
+            options: ["7 \\text{ km}", "9 \\text{ km}", "\\sqrt{129} \\text{ km}", "6 \\text{ km}"],
+            correctAnswer: "7 \\text{ km}",
+            explanation: "Back bearing from C to B = 040° + 180° = 220°. Interior angle ∠BCD = 220° - 160° = 60°. Cosine rule: BD² = 25 + 64 - 2(5)(8)(0.5) = 89 - 40 = 49 => BD = √49 = 7 km.",
+            hintLadder: [
+              "Find back bearing from C to B: 040° + 180° = 220°.",
+              "Subtract forward bearing CD (160°) to get interior angle ∠BCD = 220° - 160° = 60°.",
+              "Apply Cosine Rule: BD² = 25 + 64 - 80 cos 60° = 89 - 40 = 49 => BD = 7 km."
+            ],
+            misconceptionAlerts: [
+              { trigger: "\\sqrt{129} \\text{ km}", note: "√129 arises from using +40 instead of subtracting 2ab cos(60°) in the Cosine Rule." }
+            ],
+            skillId: "skill-sine-cosine-rule",
+            difficulty: "hard"
           }
         ]
       }
@@ -601,6 +663,10 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "Laws of indices, fractional exponents, logarithmic transformations, change of base, and exponential equations.",
     order: 5,
     category: "core",
+    estimatedHours: 4.5,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-logarithms",
@@ -615,6 +681,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-frac-operations", "skill-quad-factoring"],
         questions: [
           {
             id: "q-log-1",
@@ -653,6 +720,63 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-logarithms",
             difficulty: "medium"
+          },
+          {
+            id: "q-log-3",
+            type: "multiple_choice",
+            questionText: "Simplify the fractional and negative index product without a calculator:",
+            mathExpression: "27^{2/3} \\times 4^{-1/2}",
+            options: ["\\frac{9}{2}", "18", "\\frac{3}{2}", "\\frac{9}{4}"],
+            correctAnswer: "\\frac{9}{2}",
+            explanation: "27^(2/3) = (³√27)² = 3² = 9. Meanwhile 4^(-1/2) = 1 / √4 = 1/2. Multiplying gives 9 × (1/2) = 9/2.",
+            hintLadder: [
+              "Take the cube root of 27 first (3), then square it: 3² = 9.",
+              "Evaluate the negative half-power as a reciprocal square root: 4^(-1/2) = 1 / 2.",
+              "Multiply 9 × (1/2) = 9/2."
+            ],
+            misconceptionAlerts: [
+              { trigger: "18", note: "A negative exponent inverts the factor (1/2), rather than multiplying by 2." }
+            ],
+            skillId: "skill-logarithms",
+            difficulty: "easy"
+          },
+          {
+            id: "q-log-4",
+            type: "multiple_choice",
+            questionText: "Given \\log_{10}(2) = 0.3010 and \\log_{10}(3) = 0.4771, evaluate \\log_{10}(18) without a calculator.",
+            mathExpression: "\\log_{10}(18) = \\log_{10}(2 \\times 3^2)",
+            options: ["1.2552", "0.7781", "1.0791", "1.4313"],
+            correctAnswer: "1.2552",
+            explanation: "Factor 18 = 2 × 3². Apply Product & Power laws: log₁₀(18) = log₁₀(2) + 2 log₁₀(3) = 0.3010 + 2(0.4771) = 0.3010 + 0.9542 = 1.2552.",
+            hintLadder: [
+              "Express 18 as a prime power product: 18 = 2 × 3².",
+              "Apply Product and Power laws: log(2) + 2 log(3).",
+              "Add 0.3010 + 2(0.4771) = 0.3010 + 0.9542 = 1.2552."
+            ],
+            misconceptionAlerts: [
+              { trigger: "0.7781", note: "0.3010 + 0.4771 gives log(6), missing the extra factor of 3 in 18 = 2 × 3²." }
+            ],
+            skillId: "skill-logarithms",
+            difficulty: "medium"
+          },
+          {
+            id: "q-log-5",
+            type: "multiple_choice",
+            questionText: "Solve the logarithmic equation over the real numbers, rejecting any extraneous root:",
+            mathExpression: "\\log_3(x + 2) + \\log_3(x) = 1",
+            options: ["x = 1", "x = 1 \\text{ or } x = -3", "x = 3", "x = 2"],
+            correctAnswer: "x = 1",
+            explanation: "Combine logs: log₃[x(x + 2)] = 1 => x² + 2x = 3 => (x + 3)(x - 1) = 0 => x = 1 or x = -3. Since log₃(x) requires x > 0, x = -3 is extraneous, leaving x = 1.",
+            hintLadder: [
+              "Combine the left side via Product Law: log₃[x(x + 2)] = 1.",
+              "Rewrite exponentially: x(x + 2) = 3¹ => x² + 2x - 3 = 0.",
+              "Factor to get x = 1 or x = -3, then reject x = -3 because logarithms require strictly positive arguments."
+            ],
+            misconceptionAlerts: [
+              { trigger: "x = 1 \\text{ or } x = -3", note: "x = -3 makes log₃(x) undefined in the original equation and must be discarded as extraneous." }
+            ],
+            skillId: "skill-logarithms",
+            difficulty: "hard"
           }
         ]
       }
@@ -667,20 +791,25 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "Arithmetic progressions, geometric progressions, sum of n terms, and sum to infinity.",
     order: 6,
     category: "core",
+    estimatedHours: 4.5,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-arithmetic-progression",
         unitId: "unit-sequences-series",
-        title: "Arithmetic Progression (A.P.) Formulas",
+        title: "Arithmetic Progression (A.P.) & Geometric Progression (G.P.) Formulas",
         code: "SKL-AP-301",
-        summary: "Finding the nth term T_n = a + (n-1)d and sum of n terms S_n.",
+        summary: "Finding the nth term T_n = a + (n-1)d, AP sums, GP terms, and convergent infinite series.",
         objectives: [
-          "Compute the common difference d = T_k - T_(k-1)",
-          "Calculate any specified term T_n",
-          "Determine the sum of the first n terms S_n = n/2 [2a + (n-1)d]"
+          "Compute the common difference d = T_k - T_(k-1) and common ratio r = T_k / T_(k-1)",
+          "Calculate any specified term T_n in both AP and GP sequences",
+          "Determine finite sums S_n and convergent sum to infinity S_∞ = a / (1 - r)"
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations", "skill-simultaneous-eq"],
         questions: [
           {
             id: "q-ap-1",
@@ -715,10 +844,67 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
               "64 / (1/2) = 64 × 2 = 128."
             ],
             misconceptionAlerts: [
-              { trigger: "32", note: "Dividing by 1/2 is equivalent to multiplying by 2, not dividing by 2." }
+              { trigger: "96", note: "Dividing 64 by 1/2 is equivalent to multiplying by 2, giving 128." }
             ],
             skillId: "skill-arithmetic-progression",
             difficulty: "medium"
+          },
+          {
+            id: "q-ap-2",
+            type: "multiple_choice",
+            questionText: "Calculate the 15th term of the Arithmetic Progression: 5, 11, 17, 23, ...",
+            mathExpression: "T_{15} = a + (15 - 1)d",
+            options: ["89", "95", "83", "75"],
+            correctAnswer: "89",
+            explanation: "First term a = 5 and common difference d = 11 - 5 = 6. T₁₅ = 5 + 14(6) = 5 + 84 = 89.",
+            hintLadder: [
+              "Find common difference: d = 11 - 5 = 6.",
+              "Apply T_n = a + (n - 1)d with n = 15, so multiply d by 14.",
+              "T₁₅ = 5 + 14 × 6 = 5 + 84 = 89."
+            ],
+            misconceptionAlerts: [
+              { trigger: "95", note: "Using n instead of (n - 1) adds one extra difference d: T₁₅ takes 14 steps from a, not 15." }
+            ],
+            skillId: "skill-arithmetic-progression",
+            difficulty: "easy"
+          },
+          {
+            id: "q-ap-3",
+            type: "multiple_choice",
+            questionText: "The 3rd term of an Arithmetic Progression is 14 and the 8th term is 39. Find the first term (a) and common difference (d).",
+            mathExpression: "\\begin{cases} a + 2d = 14 \\\\ a + 7d = 39 \\end{cases}",
+            options: ["a = 4,\\, d = 5", "a = 5,\\, d = 4", "a = 2,\\, d = 6", "a = 6,\\, d = 4"],
+            correctAnswer: "a = 4,\\, d = 5",
+            explanation: "Subtracting T₃ from T₈ gives 5d = 39 - 14 = 25 => d = 5. Substituting back into a + 2(5) = 14 gives a = 4.",
+            hintLadder: [
+              "Write T₃ = a + 2d = 14 and T₈ = a + 7d = 39.",
+              "Subtract the equations: 5d = 25 => d = 5.",
+              "Substitute d = 5 into a + 2d = 14 => a = 4."
+            ],
+            misconceptionAlerts: [
+              { trigger: "a = 5,\\, d = 4", note: "Check T₈ with a = 5, d = 4: 5 + 7(4) = 33, not 39." }
+            ],
+            skillId: "skill-arithmetic-progression",
+            difficulty: "medium"
+          },
+          {
+            id: "q-gp-2",
+            type: "multiple_choice",
+            questionText: "In a Geometric Progression with first term a = 3 and common ratio r = 2, how many terms n must be summed for the total S_n to equal 189?",
+            mathExpression: "\\frac{3(2^n - 1)}{2 - 1} = 189",
+            options: ["n = 6", "n = 5", "n = 7", "n = 8"],
+            correctAnswer: "n = 6",
+            explanation: "3(2^n - 1) = 189 => 2^n - 1 = 63 => 2^n = 64 = 2⁶, so n = 6. Check: 3 + 6 + 12 + 24 + 48 + 96 = 189.",
+            hintLadder: [
+              "Substitute a = 3 and r = 2 into S_n = a(r^n - 1)/(r - 1).",
+              "Solve 3(2^n - 1) = 189 by dividing both sides by 3 to get 2^n - 1 = 63.",
+              "Thus 2^n = 64, giving n = 6."
+            ],
+            misconceptionAlerts: [
+              { trigger: "n = 5", note: "S₅ = 3(32 - 1) = 93, whereas n = 6 gives 3(64 - 1) = 189." }
+            ],
+            skillId: "skill-arithmetic-progression",
+            difficulty: "hard"
           }
         ]
       }
@@ -733,6 +919,10 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "Gradients of lines, midpoints, distance between coordinates, parallel/perpendicular lines, and circle equations.",
     order: 7,
     category: "core",
+    estimatedHours: 4.0,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-line-gradients",
@@ -747,6 +937,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
         questions: [
           {
             id: "q-geo-1",
@@ -785,6 +976,63 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-line-gradients",
             difficulty: "easy"
+          },
+          {
+            id: "q-geo-3",
+            type: "multiple_choice",
+            questionText: "Find the midpoint coordinates M of the straight line segment joining P(-4, 7) and Q(10, -3).",
+            mathExpression: "M = \\left(\\frac{-4 + 10}{2},\\, \\frac{7 + (-3)}{2}\\right)",
+            options: ["(3,\\, 2)", "(7,\\, 5)", "(6,\\, 4)", "(3,\\, 5)"],
+            correctAnswer: "(3,\\, 2)",
+            explanation: "Average x-coordinates: (-4 + 10)/2 = 3. Average y-coordinates: (7 - 3)/2 = 2. Midpoint M = (3, 2).",
+            hintLadder: [
+              "Use midpoint formula: ((x₁ + x₂)/2, (y₁ + y₂)/2).",
+              "Compute x-midpoint: (-4 + 10)/2 = 6/2 = 3.",
+              "Compute y-midpoint: (7 + (-3))/2 = 4/2 = 2."
+            ],
+            misconceptionAlerts: [
+              { trigger: "(7,\\, 5)", note: "Subtracting instead of adding coordinates measures half the displacement rather than the midpoint average." }
+            ],
+            skillId: "skill-line-gradients",
+            difficulty: "easy"
+          },
+          {
+            id: "q-geo-4",
+            type: "multiple_choice",
+            questionText: "Find the equation of the straight line passing through (2, 5) that is parallel to 3x - y = 7.",
+            mathExpression: "y - 5 = m(x - 2), \\quad m = 3",
+            options: ["y = 3x - 1", "y = 3x + 5", "y = -\\frac{1}{3}x + \\frac{17}{3}", "y = 3x - 7"],
+            correctAnswer: "y = 3x - 1",
+            explanation: "3x - y = 7 rewrites to y = 3x - 7, giving slope m = 3. Passing through (2, 5): y - 5 = 3(x - 2) => y = 3x - 1.",
+            hintLadder: [
+              "Rearrange 3x - y = 7 to slope-intercept form y = 3x - 7 to read m = 3.",
+              "Parallel lines share identical slope m = 3.",
+              "Substitute (2, 5) into y - y₁ = m(x - x₁): y - 5 = 3(x - 2) => y = 3x - 1."
+            ],
+            misconceptionAlerts: [
+              { trigger: "y = 3x + 5", note: "The point (2, 5) is not the y-intercept; plug x = 2, y = 5 into y = 3x + c to find c = -1." }
+            ],
+            skillId: "skill-line-gradients",
+            difficulty: "medium"
+          },
+          {
+            id: "q-geo-5",
+            type: "multiple_choice",
+            questionText: "Find the equation of the perpendicular bisector of the segment joining A(1, 2) and B(5, 10).",
+            mathExpression: "y - 6 = -\\frac{1}{2}(x - 3)",
+            options: ["x + 2y = 15", "2x - y = 0", "x - 2y = -9", "x + 2y = 12"],
+            correctAnswer: "x + 2y = 15",
+            explanation: "Midpoint M = ((1+5)/2, (2+10)/2) = (3, 6). Gradient m_AB = (10-2)/(5-1) = 2, so m_perp = -1/2. Equation: y - 6 = (-1/2)(x - 3) => 2y - 12 = -x + 3 => x + 2y = 15.",
+            hintLadder: [
+              "Find midpoint M of A(1, 2) and B(5, 10): M = (3, 6).",
+              "Compute gradient of AB: (10 - 2)/(5 - 1) = 2, so perpendicular gradient is -1/2.",
+              "Substitute M(3, 6) and m = -1/2 into y - 6 = (-1/2)(x - 3) and clear the denominator."
+            ],
+            misconceptionAlerts: [
+              { trigger: "x - 2y = -9", note: "Check sign: perpendicular gradient to +2 is -1/2, which moves +x with +2y." }
+            ],
+            skillId: "skill-line-gradients",
+            difficulty: "hard"
           }
         ]
       }
@@ -799,6 +1047,10 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "Angle at centre is twice angle at circumference, angles in same segment, cyclic quadrilaterals, tangent-chord theorem.",
     order: 8,
     category: "core",
+    estimatedHours: 4.5,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-circle-theorems",
@@ -813,6 +1065,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-linear-equations"],
         questions: [
           {
             id: "q-circ-1",
@@ -850,6 +1103,63 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-circle-theorems",
             difficulty: "easy"
+          },
+          {
+            id: "q-circ-3",
+            type: "multiple_choice",
+            questionText: "In a circle with diameter AB, point C lies on the circumference. If angle CAB = 34°, find angle ABC.",
+            mathExpression: "\\angle ACB = 90^\\circ \\implies \\angle ABC = 180^\\circ - 90^\\circ - 34^\\circ",
+            options: ["56^\\circ", "34^\\circ", "68^\\circ", "146^\\circ"],
+            correctAnswer: "56^\\circ",
+            explanation: "By the Angle in a Semicircle theorem, ∠ACB = 90°. Since triangle ABC angles sum to 180°, ∠ABC = 180° - 90° - 34° = 56°.",
+            hintLadder: [
+              "Recall the angle subtended by a diameter AB at any circumference point C is 90°.",
+              "Use angle sum of triangle ABC = 180°.",
+              "Compute 180° - (90° + 34°) = 56°."
+            ],
+            misconceptionAlerts: [
+              { trigger: "34^\\circ", note: "Triangle ABC is only isosceles when AC = BC (45° each); here it is a right triangle with 34° and 56°." }
+            ],
+            skillId: "skill-circle-theorems",
+            difficulty: "easy"
+          },
+          {
+            id: "q-circ-4",
+            type: "multiple_choice",
+            questionText: "Line PT is tangent to a circle at point A, and chord AB makes an acute angle ∠TAB = 62° with tangent AT. Find angle ∠ACB subtended by chord AB in the alternate segment.",
+            mathExpression: "\\angle ACB = \\angle TAB",
+            options: ["62^\\circ", "28^\\circ", "118^\\circ", "124^\\circ"],
+            correctAnswer: "62^\\circ",
+            explanation: "By the Alternate Segment Theorem, the angle between a tangent and a chord through the point of contact equals the angle subtended by that chord in the alternate segment: ∠ACB = 62°.",
+            hintLadder: [
+              "Identify the relationship between tangent AT and chord AB.",
+              "Apply the Alternate Segment Theorem.",
+              "Angle ACB in the opposite segment equals ∠TAB = 62°."
+            ],
+            misconceptionAlerts: [
+              { trigger: "28^\\circ", note: "The tangent-chord angle equals the alternate-segment angle directly (62°), not its 90° complement." }
+            ],
+            skillId: "skill-circle-theorems",
+            difficulty: "medium"
+          },
+          {
+            id: "q-circ-5",
+            type: "multiple_choice",
+            questionText: "From an external point P, tangent PT touches a circle of center O and radius OT = 5 cm at T. Given OP = 13 cm, find the length of tangent PT.",
+            mathExpression: "PT = \\sqrt{OP^2 - OT^2}",
+            options: ["12 \\text{ cm}", "8 \\text{ cm}", "\\sqrt{194} \\text{ cm}", "10 \\text{ cm}"],
+            correctAnswer: "12 \\text{ cm}",
+            explanation: "By the Tangent-Radius theorem, ∠OTP = 90°, making OP the hypotenuse. By Pythagoras: PT = √(13² - 5²) = √(169 - 25) = √144 = 12 cm.",
+            hintLadder: [
+              "Tangent PT is perpendicular to radius OT at point T (∠OTP = 90°).",
+              "Recognize OP = 13 cm as the hypotenuse of right triangle OTP.",
+              "Compute PT = √(13² - 5²) = √144 = 12 cm."
+            ],
+            misconceptionAlerts: [
+              { trigger: "\\sqrt{194} \\text{ cm}", note: "Because the 90° angle sits at T, OP is the hypotenuse—subtract 5² from 13², do not add them." }
+            ],
+            skillId: "skill-circle-theorems",
+            difficulty: "hard"
           }
         ]
       }
@@ -864,6 +1174,10 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "Measures of central tendency (mean, median, mode), standard deviation, cumulative frequency curves (ogives), and independent probability.",
     order: 9,
     category: "applied",
+    estimatedHours: 4.5,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_MATH", "WAEC_WASSCE", "NECO_SSCE", "JAMB_UTME", "CORE_SYLLABUS"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-stats-dispersion",
@@ -878,6 +1192,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "intermediate",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-frac-operations", "skill-percent-ratios"],
         questions: [
           {
             id: "q-stat-1",
@@ -915,6 +1230,63 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-stats-dispersion",
             difficulty: "easy"
+          },
+          {
+            id: "q-stat-3",
+            type: "multiple_choice",
+            questionText: "Calculate the population standard deviation of the dataset: 2, 4, 6, 8, 10.",
+            mathExpression: "\\sigma = \\sqrt{\\frac{\\sum (x - \\bar{x})^2}{n}}",
+            options: ["2\\sqrt{2} \\approx 2.83", "8", "4", "\\sqrt{10} \\approx 3.16"],
+            correctAnswer: "2\\sqrt{2} \\approx 2.83",
+            explanation: "Mean x̄ = (2+4+6+8+10)/5 = 6. Deviations from 6 are -4, -2, 0, 2, 4; squared deviations sum to 16+4+0+4+16 = 40. Variance = 40/5 = 8, so standard deviation = √8 = 2√2.",
+            hintLadder: [
+              "Compute the mean x̄ = 30 / 5 = 6.",
+              "Square each deviation from 6: (-4)² + (-2)² + 0² + 2² + 4² = 40.",
+              "Divide by n = 5 to get variance = 8, then take √8 = 2√2."
+            ],
+            misconceptionAlerts: [
+              { trigger: "8", note: "8 is the variance (σ²). Remember to take the square root to obtain the standard deviation σ." }
+            ],
+            skillId: "skill-stats-dispersion",
+            difficulty: "medium"
+          },
+          {
+            id: "q-stat-4",
+            type: "multiple_choice",
+            questionText: "Find the Interquartile Range (IQR = Q₃ - Q₁) of the ordered scores: 11, 14, 17, 20, 23, 27, 31.",
+            mathExpression: "\\text{IQR} = Q_3 - Q_1",
+            options: ["13", "20", "16", "10"],
+            correctAnswer: "13",
+            explanation: "Median Q₂ = 20. The lower half [11, 14, 17] has median Q₁ = 14, and the upper half [23, 27, 31] has median Q₃ = 27. IQR = 27 - 14 = 13.",
+            hintLadder: [
+              "Identify the overall median Q₂ = 20.",
+              "Find Q₁ (median of lower half 11, 14, 17) = 14 and Q₃ (median of upper half 23, 27, 31) = 27.",
+              "Subtract Q₃ - Q₁ = 27 - 14 = 13."
+            ],
+            misconceptionAlerts: [
+              { trigger: "20", note: "20 is the full Range (31 - 11 = 20) as well as the Median—not the Interquartile Range Q₃ - Q₁." }
+            ],
+            skillId: "skill-stats-dispersion",
+            difficulty: "medium"
+          },
+          {
+            id: "q-stat-5",
+            type: "multiple_choice",
+            questionText: "Two fair six-sided dice are rolled simultaneously. What is the probability that the sum of the two numbers shown is strictly greater than 9?",
+            mathExpression: "P(\\text{Sum} > 9) = \\frac{n(\\text{Sum} \\in \\{10, 11, 12\\})}{36}",
+            options: ["\\frac{1}{6}", "\\frac{1}{9}", "\\frac{5}{36}", "\\frac{1}{12}"],
+            correctAnswer: "\\frac{1}{6}",
+            explanation: "Out of 36 ordered pairs, sums > 9 are: sum 10 [(4,6), (5,5), (6,4)], sum 11 [(5,6), (6,5)], and sum 12 [(6,6)]. That gives 6/36 = 1/6.",
+            hintLadder: [
+              "Count total ordered outcomes for two dice: 6 × 6 = 36.",
+              "List every ordered pair summing to 10, 11, or 12 (remember (4,6) and (6,4) are distinct).",
+              "Divide the 6 favorable outcomes by 36: 6/36 = 1/6."
+            ],
+            misconceptionAlerts: [
+              { trigger: "\\frac{1}{9}", note: "Do not forget to count ordered pairs in both orders: (4,6) vs (6,4) and (5,6) vs (6,5)." }
+            ],
+            skillId: "skill-stats-dispersion",
+            difficulty: "hard"
           }
         ]
       }
@@ -929,6 +1301,10 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
     description: "Matrix multiplication, 2x2 and 3x3 determinants, inverse matrices, vector dot products, and geometric transformations.",
     order: 10,
     category: "applied",
+    estimatedHours: 5.0,
+    isDeepSaturated: true,
+    curriculumStandardMappings: ["NERDC_SSS_FURTHER_MATH", "WAEC_FURTHER_MATH", "JAMB_UTME", "YEAR1_LINEAR_ALGEBRA"],
+    provenanceVersion: "2.0.0",
     skills: [
       {
         id: "skill-matrix-operations",
@@ -943,6 +1319,7 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
         ],
         difficulty: "advanced",
         masteryPointsRequired: 100,
+        prerequisiteSkillIds: ["skill-simultaneous-eq"],
         questions: [
           {
             id: "q-mat-1",
@@ -986,6 +1363,68 @@ export const ENRICHED_MATHEMATICS_UNITS: Unit[] = [
             ],
             skillId: "skill-matrix-operations",
             difficulty: "medium"
+          },
+          {
+            id: "q-mat-3",
+            type: "multiple_choice",
+            questionText: "Compute the matrix product AB for A = [[2, 1], [0, 3]] and B = [[4, -1], [2, 5]].",
+            mathExpression: "AB = \\begin{bmatrix} 2 & 1 \\\\ 0 & 3 \\end{bmatrix} \\begin{bmatrix} 4 & -1 \\\\ 2 & 5 \\end{bmatrix}",
+            options: [
+              "\\begin{bmatrix} 10 & 3 \\\\ 6 & 15 \\end{bmatrix}",
+              "\\begin{bmatrix} 8 & -1 \\\\ 0 & 15 \\end{bmatrix}",
+              "\\begin{bmatrix} 10 & -3 \\\\ 6 & 15 \\end{bmatrix}",
+              "\\begin{bmatrix} 8 & 1 \\\\ 6 & 15 \\end{bmatrix}"
+            ],
+            correctAnswer: "\\begin{bmatrix} 10 & 3 \\\\ 6 & 15 \\end{bmatrix}",
+            explanation: "Row 1 × Col 1 = 2(4)+1(2) = 10; Row 1 × Col 2 = 2(-1)+1(5) = 3; Row 2 × Col 1 = 0(4)+3(2) = 6; Row 2 × Col 2 = 0(-1)+3(5) = 15.",
+            hintLadder: [
+              "Take dot product of Row 1 [2, 1] with Column 1 [4, 2] and Column 2 [-1, 5].",
+              "Top row entries: 8 + 2 = 10 and -2 + 5 = 3.",
+              "Bottom row entries from [0, 3]: 0 + 6 = 6 and 0 + 15 = 15."
+            ],
+            misconceptionAlerts: [
+              { trigger: "\\begin{bmatrix} 8 & -1 \\\\ 0 & 15 \\end{bmatrix}", note: "Multiplying corresponding entries element-by-element is invalid for matrix multiplication; use row-by-column dot products." }
+            ],
+            skillId: "skill-matrix-operations",
+            difficulty: "medium"
+          },
+          {
+            id: "q-mat-4",
+            type: "multiple_choice",
+            questionText: "Find the value of k for which the 2×2 matrix P = [[k, 6], [2, 3]] is singular (has no inverse).",
+            mathExpression: "\\det(P) = 3k - (6)(2) = 0",
+            options: ["k = 4", "k = -4", "k = 9", "k = 12"],
+            correctAnswer: "k = 4",
+            explanation: "A matrix is singular iff its determinant equals 0: 3k - 12 = 0 => 3k = 12 => k = 4.",
+            hintLadder: [
+              "Singularity means det(P) = ad - bc = 0.",
+              "Compute det(P) = (k)(3) - (6)(2) = 3k - 12.",
+              "Set 3k - 12 = 0 and solve for k = 4."
+            ],
+            misconceptionAlerts: [
+              { trigger: "k = -4", note: "Since ad - bc = 3k - 12 = 0, moving -12 across gives +12, so k = +4." }
+            ],
+            skillId: "skill-matrix-operations",
+            difficulty: "medium"
+          },
+          {
+            id: "q-mat-5",
+            type: "multiple_choice",
+            questionText: "Find the value of k such that the 2D vectors u = (3, -4) and v = (8, k) are perpendicular (orthogonal).",
+            mathExpression: "\\mathbf{u} \\cdot \\mathbf{v} = (3)(8) + (-4)(k) = 0",
+            options: ["k = 6", "k = -6", "k = 4", "k = -\\frac{32}{3}"],
+            correctAnswer: "k = 6",
+            explanation: "Nonzero vectors are perpendicular iff their dot product vanishes: 3(8) + (-4)(k) = 24 - 4k = 0 => 4k = 24 => k = 6.",
+            hintLadder: [
+              "Perpendicular vectors have dot product u · v = u₁v₁ + u₂v₂ = 0.",
+              "Substitute components: (3)(8) + (-4)(k) = 0.",
+              "Solve 24 - 4k = 0 => k = 6."
+            ],
+            misconceptionAlerts: [
+              { trigger: "k = -\\frac{32}{3}", note: "3k = -32 equates gradients for parallel vectors or confuses cross components; dot product multiplies x with x and y with y." }
+            ],
+            skillId: "skill-matrix-operations",
+            difficulty: "hard"
           }
         ]
       }
@@ -1777,12 +2216,15 @@ import { PRIMARY_CURRICULUM_UNITS } from "./primaryCurriculumUnits";
 import { ECONOMICS_CURRICULUM_UNITS } from "./economicsCurriculumUnits";
 import { FINANCIAL_LITERACY_CURRICULUM_UNITS } from "./financialLiteracyCurriculumUnits";
 import { UNIVERSITY_TERTIARY_CURRICULUM_UNITS } from "./universityTertiaryCurriculumUnits";
+import { P1_MATH_EXPANSION_UNITS } from "./p1MathExpansionUnits";
+import { P3_SCIENCE_EXPANSION_UNITS } from "./p3ScienceExpansionUnits";
 
 export { FLAGSHIP_PHYSICS as SCIENCE_PHYSICS_UNITS, FLAGSHIP_CHEMISTRY as SCIENCE_CHEMISTRY_UNITS, FLAGSHIP_BIOLOGY as SCIENCE_BIOLOGY_UNITS };
 export { FLAGSHIP_COMPUTING as COMPUTING_UNITS };
 export { FLAGSHIP_ENGLISH as LANGUAGE_ENGLISH_UNITS, FLAGSHIP_ENGLISH as LANGUAGE_UNITS, ESL_CURRICULUM_UNITS };
 export { ALL_LEVELS_CURRICULUM_UNITS, PRIMARY_CURRICULUM_UNITS };
 export { ECONOMICS_CURRICULUM_UNITS, FINANCIAL_LITERACY_CURRICULUM_UNITS, UNIVERSITY_TERTIARY_CURRICULUM_UNITS };
+export { P1_MATH_EXPANSION_UNITS, P3_SCIENCE_EXPANSION_UNITS };
 
 import { ALL_CURRICULUM_LESSONS } from "./lessons/index";
 
@@ -1809,7 +2251,9 @@ const RAW_ALL_CURRICULUM_UNITS: Unit[] = [
   ...BUSINESS_FINANCE_UNITS,
   ...ECONOMICS_CURRICULUM_UNITS,
   ...FINANCIAL_LITERACY_CURRICULUM_UNITS,
-  ...UNIVERSITY_TERTIARY_CURRICULUM_UNITS
+  ...UNIVERSITY_TERTIARY_CURRICULUM_UNITS,
+  ...P1_MATH_EXPANSION_UNITS,
+  ...P3_SCIENCE_EXPANSION_UNITS
 ];
 
 export const ALL_CURRICULUM_UNITS: Unit[] = RAW_ALL_CURRICULUM_UNITS.map(enrichUnitWithLessons);
