@@ -10,6 +10,7 @@ import { P1_MATH_BATCH1_VISUALIZATIONS } from "./p1MathVisualizations";
 import { P1_MATH_BATCH2_JSS_VISUALIZATIONS } from "./p1MathBatch2JssVisualizations";
 import { P1_MATH_BATCH2_SSS_VISUALIZATIONS } from "./p1MathBatch2SssVisualizations";
 import { P3_SCIENCE_BATCH3_VISUALIZATIONS } from "./p3ScienceBatch3Visualizations";
+import { P3_SCIENCE_BATCH4_VISUALIZATIONS } from "./p3ScienceBatch4Visualizations";
 
 export const VISUALIZATION_REPOSITORY: Record<string, EducationalVisualization> = {
   "vis-quadratic-parabola": {
@@ -2787,5 +2788,6 @@ export const VISUALIZATION_REPOSITORY: Record<string, EducationalVisualization> 
   ...P1_MATH_BATCH1_VISUALIZATIONS,
   ...P1_MATH_BATCH2_JSS_VISUALIZATIONS,
   ...P1_MATH_BATCH2_SSS_VISUALIZATIONS,
-  ...P3_SCIENCE_BATCH3_VISUALIZATIONS
+  ...P3_SCIENCE_BATCH3_VISUALIZATIONS,
+  ...P3_SCIENCE_BATCH4_VISUALIZATIONS
 };

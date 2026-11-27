@@ -25,7 +25,9 @@ import {
   P1_MATH_BATCH2_SSS_UNITS_A,
   P1_MATH_BATCH2_SSS_UNITS_B,
   P3_SCIENCE_BATCH3_UNITS_A,
-  P3_SCIENCE_BATCH3_UNITS_B
+  P3_SCIENCE_BATCH3_UNITS_B,
+  P3_SCIENCE_BATCH4_UNITS_A,
+  P3_SCIENCE_BATCH4_UNITS_B
 } from "../data/extendedCurriculumUnits";
 import { P1_MATH_EXPANSION_UNITS } from "../data/p1MathExpansionUnits";
 import { P3_SCIENCE_EXPANSION_UNITS } from "../data/p3ScienceExpansionUnits";
@@ -80,7 +82,7 @@ export async function runWorkstream2And3CurriculumSuite(): Promise<{ passed: boo
     // 2. SVG Integrity Check across VISUALIZATION_REPOSITORY
     // -------------------------------------------------------------------------
     const visEntries = Object.values(VISUALIZATION_REPOSITORY);
-    assert.ok(visEntries.length >= 87, `Expected >= 87 visualizations in repository, found ${visEntries.length}`);
+    assert.ok(visEntries.length >= 97, `Expected >= 97 visualizations in repository, found ${visEntries.length}`);
     for (const vis of visEntries) {
       assert.ok(vis.caption && vis.caption.trim().length > 10, `Visualization '${vis.id}' requires descriptive caption`);
       if (vis.diagramSvgSnippet) {
@@ -101,7 +103,7 @@ export async function runWorkstream2And3CurriculumSuite(): Promise<{ passed: boo
     pass(`Verified ${visEntries.length} visualizations with captions, valid <svg> wrappers, and resolved marker <defs>.`);
 
     // -------------------------------------------------------------------------
-    // 3. Workstream 3 + Directive 004 Batches 1–3: Deep Verification & 100% Priority 1
+    // 3. Workstream 3 + Directives 004–005 Batches 1–4: Deep Verification & 100% P1
     // -------------------------------------------------------------------------
     const expansionUnits = [
       ...P1_MATH_EXPANSION_UNITS,
@@ -111,9 +113,11 @@ export async function runWorkstream2And3CurriculumSuite(): Promise<{ passed: boo
       ...P1_MATH_BATCH2_SSS_UNITS_A,
       ...P1_MATH_BATCH2_SSS_UNITS_B,
       ...P3_SCIENCE_BATCH3_UNITS_A,
-      ...P3_SCIENCE_BATCH3_UNITS_B
+      ...P3_SCIENCE_BATCH3_UNITS_B,
+      ...P3_SCIENCE_BATCH4_UNITS_A,
+      ...P3_SCIENCE_BATCH4_UNITS_B
     ];
-    assert.strictEqual(expansionUnits.length, 55, "Expected 55 expansion/batch units (16 WS3 + 10 Batch 1 + 19 Batch 2 + 10 Batch 3)");
+    assert.strictEqual(expansionUnits.length, 65, "Expected 65 expansion/batch units (16 WS3 + 10 Batch 1 + 19 Batch 2 + 10 Batch 3 + 10 Batch 4)");
 
     const allSkillIds = new Set(ALL_CURRICULUM_UNITS.flatMap((u) => u.skills.map((s) => s.id)));
     const recordMap = new Map(records.map((r) => [r.unitId, r]));
@@ -161,7 +165,7 @@ export async function runWorkstream2And3CurriculumSuite(): Promise<{ passed: boo
       0,
       `Expected 0 uncovered Priority 1 mathematics subjects remaining, found: ${openPriority1Subjects.map((s) => s.id).join(", ")}`
     );
-    pass("Verified all 55 expansion/batch units (QA >= 90, 5+ Qs across difficulties, 2+ 4-step worked examples, valid prerequisites, SVG diagrams) and 100% Priority 1 completion.");
+    pass("Verified all 65 expansion/batch units (QA >= 90, 5+ Qs across difficulties, 2+ 4-step worked examples, valid prerequisites, SVG diagrams) and 100% Priority 1 completion.");
 
     // -------------------------------------------------------------------------
     // 4. Domain Routing, Answer Evaluation & Empirical Depth Metrics
@@ -172,7 +176,10 @@ export async function runWorkstream2And3CurriculumSuite(): Promise<{ passed: boo
     assert.strictEqual(getDomainIdForCategory("hall_engineering_gate_prep"), "mathematics");
     assert.strictEqual(getDomainIdForCategory("jss_math_algebra"), "mathematics");
     assert.strictEqual(getDomainIdForCategory("pri_171_plants_animals_ecosystem_relationshi"), "science");
+    assert.strictEqual(getDomainIdForCategory("pri_177_water_sanitation_community_health"), "science");
     assert.strictEqual(getDomainIdForCategory("sss_256_physics_fields_electromagnetic_induc"), "science");
+    assert.strictEqual(getDomainIdForCategory("sss_258_physics_practical_measurement_graphs"), "science");
+    assert.strictEqual(getDomainIdForCategory("sss_264_biology_molecular_genetics_biotechno"), "science");
     assert.strictEqual(getDomainIdForCategory("sss_agricultural_engineering"), "science");
     assert.strictEqual(getDomainIdForCategory("jss_basic_science"), "science");
 
@@ -182,12 +189,12 @@ export async function runWorkstream2And3CurriculumSuite(): Promise<{ passed: boo
 
     const depth = contentQualityEngine.getElevenDepthMetrics(ALL_CURRICULUM_UNITS);
     assert.strictEqual(depth.catalogSubjectsCount, 300, "Catalog must contain 300 subjects");
-    assert.strictEqual(depth.subjectsWithPublishedUnitsCount, 106, "Expected 106 covered subjects across 300-subject catalog");
-    assert.strictEqual(depth.authoredUnitsCount, 186, "Expected 186 total authored units");
-    assert.strictEqual(depth.approvedPublishedUnitsCount, 186, "Expected 186 approved published units");
+    assert.strictEqual(depth.subjectsWithPublishedUnitsCount, 116, "Expected 116 covered subjects across 300-subject catalog");
+    assert.strictEqual(depth.authoredUnitsCount, 196, "Expected 196 total authored units");
+    assert.strictEqual(depth.approvedPublishedUnitsCount, 196, "Expected 196 approved published units");
     assert.strictEqual(depth.isolatedUnitsCount, 0, "Expected 0 isolated units");
     assert.ok(depth.subjectsWithPublishedUnitsCount < depth.catalogSubjectsCount, "Uncovered subjects must stay honestly tracked as queued");
-    pass("Verified domain taxonomy routing, answer evaluator equivalence, and 11 empirical depth metrics (106/300 subjects, 186/186 units).");
+    pass("Verified domain taxonomy routing, answer evaluator equivalence, and 11 empirical depth metrics (116/300 subjects, 196/196 units).");
 
     console.log("\n==========================================================================");
     console.log(`🎉 WORKSTREAM 2 & 3 CURRICULUM SUITE PASSED (${checksPassed} check blocks green)`);
