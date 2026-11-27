@@ -62,71 +62,188 @@ import { bookpreneurService } from "../bookpreneurService";
 import { SEEDED_ADMIN_USER } from "../identityService";
 import { teacherStudioService } from "../teacherStudioService";
 import { agentOrchestrationService } from "../agentOrchestrationService";
+import {
+  computeTotalMasteryPoints,
+  evaluateDirectMasteryUpdate,
+  evaluateSkillMastery
+} from "../masteryEngine";
+import { emailAllowlistService } from "../emailAllowlistService";
+import { achievementService } from "../achievementService";
+import { progressSyncCoordinator } from "../progressSyncCoordinator";
 
 const STORAGE_KEY = "moos_academy_learner_state_v2";
 const TUTOR_SESSIONS_KEY = "moos_academy_tutor_sessions_v1";
 
 export class LocalLearnerRepository implements ILearnerRepository {
   private inMemoryCache: ExtendedLearnerProfile | null = null;
+  private inMemoryCacheKey: string | null = null;
 
   private getTodayString(): string {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
 
+  private getActiveStorageKey(): string {
+    const activeEmail = emailAllowlistService.getActiveVerifiedEmail();
+    return activeEmail ? `${STORAGE_KEY}:${activeEmail.toLowerCase()}` : STORAGE_KEY;
+  }
+
+  private buildInitialProfileForContext(): ExtendedLearnerProfile {
+    const session = emailAllowlistService.getActiveSession();
+    if (!session) {
+      return {
+        ...DEFAULT_EXTENDED_LEARNER_PROFILE,
+        masteryPoints: computeTotalMasteryPoints(DEFAULT_EXTENDED_LEARNER_PROFILE.masteryRecords)
+      };
+    }
+
+    const nowIso = new Date().toISOString();
+    const today = this.getTodayString();
+    return {
+      ...DEFAULT_EXTENDED_LEARNER_PROFILE,
+      id: `usr-${session.email.replace(/[^a-z0-9]/gi, "_")}`,
+      name: session.fullName || session.email.split("@")[0] || "Academy Scholar",
+      email: session.email,
+      role: session.role === "teacher" ? "teacher" : session.role === "admin" || session.role === "owner" ? "admin" : "learner",
+      masteryPoints: 0,
+      xp: 0,
+      level: 1,
+      totalStudyMinutes: 0,
+      streak: { count: 1, lastActiveDate: today, longestStreak: 1 },
+      streakDays: 1,
+      diagnosticsCompleted: false,
+      lastDiagnosticResult: undefined,
+      diagnosticHistory: [],
+      masteryRecords: {},
+      questionAttempts: [],
+      activityHistory: [],
+      examHistory: [],
+      unlockedBadges: [],
+      syncRevision: 0,
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+  }
+
   public async getProfile(_learnerId?: string): Promise<ExtendedLearnerProfile> {
-    if (this.inMemoryCache) {
+    const activeKey = this.getActiveStorageKey();
+    if (this.inMemoryCache && this.inMemoryCacheKey === activeKey) {
       return this.inMemoryCache;
     }
 
+    const fallbackTemplate = this.buildInitialProfileForContext();
+
     try {
       if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = localStorage.getItem(activeKey);
         if (stored) {
           const parsed = JSON.parse(stored);
           const sanitized: ExtendedLearnerProfile = {
-            ...DEFAULT_EXTENDED_LEARNER_PROFILE,
+            ...fallbackTemplate,
             ...parsed,
-            masteryRecords: {
-              ...DEFAULT_EXTENDED_LEARNER_PROFILE.masteryRecords,
-              ...(parsed.masteryRecords || {})
-            },
+            masteryRecords: parsed.masteryRecords && typeof parsed.masteryRecords === "object"
+              ? parsed.masteryRecords
+              : fallbackTemplate.masteryRecords,
             streak: {
-              ...DEFAULT_EXTENDED_LEARNER_PROFILE.streak,
+              ...fallbackTemplate.streak,
               ...(parsed.streak || {})
             },
             preferences: {
-              ...DEFAULT_EXTENDED_LEARNER_PROFILE.preferences,
+              ...fallbackTemplate.preferences,
               ...(parsed.preferences || {})
             },
-            streakDays: parsed.streakDays ?? parsed.streak?.count ?? DEFAULT_EXTENDED_LEARNER_PROFILE.streakDays,
-            questionAttempts: Array.isArray(parsed.questionAttempts) ? parsed.questionAttempts : DEFAULT_EXTENDED_LEARNER_PROFILE.questionAttempts || [],
-            activityHistory: Array.isArray(parsed.activityHistory) ? parsed.activityHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.activityHistory || [],
-            examHistory: Array.isArray(parsed.examHistory) ? parsed.examHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.examHistory || [],
-            diagnosticHistory: Array.isArray(parsed.diagnosticHistory) ? parsed.diagnosticHistory : DEFAULT_EXTENDED_LEARNER_PROFILE.diagnosticHistory || [],
-            unlockedBadges: Array.isArray(parsed.unlockedBadges) ? parsed.unlockedBadges : DEFAULT_EXTENDED_LEARNER_PROFILE.unlockedBadges || []
+            streakDays: parsed.streakDays ?? parsed.streak?.count ?? fallbackTemplate.streakDays,
+            questionAttempts: Array.isArray(parsed.questionAttempts) ? parsed.questionAttempts : fallbackTemplate.questionAttempts || [],
+            activityHistory: Array.isArray(parsed.activityHistory) ? parsed.activityHistory : fallbackTemplate.activityHistory || [],
+            examHistory: Array.isArray(parsed.examHistory) ? parsed.examHistory : fallbackTemplate.examHistory || [],
+            diagnosticHistory: Array.isArray(parsed.diagnosticHistory) ? parsed.diagnosticHistory : fallbackTemplate.diagnosticHistory || [],
+            unlockedBadges: Array.isArray(parsed.unlockedBadges) ? parsed.unlockedBadges : fallbackTemplate.unlockedBadges || []
           };
+
+          if (Object.keys(sanitized.masteryRecords || {}).length > 0) {
+            sanitized.masteryPoints = computeTotalMasteryPoints(sanitized.masteryRecords);
+          }
 
           const updated = this.checkStreakHealth(sanitized);
           this.inMemoryCache = updated;
+          this.inMemoryCacheKey = activeKey;
           return updated;
         }
       }
     } catch (e) {
-      console.warn("Storage retrieval warning, using default profile", e);
+      console.warn("Storage retrieval warning, using clean profile", e);
     }
 
-    const defaultProfile = { ...DEFAULT_EXTENDED_LEARNER_PROFILE };
-    this.inMemoryCache = defaultProfile;
-    this.persist(defaultProfile);
-    return defaultProfile;
+    this.inMemoryCache = fallbackTemplate;
+    this.inMemoryCacheKey = activeKey;
+    this.persist(fallbackTemplate, activeKey);
+    return fallbackTemplate;
+  }
+
+  private async commitMutation(
+    profile: ExtendedLearnerProfile,
+    reason: string,
+    evaluateAchievements: boolean = true
+  ): Promise<ExtendedLearnerProfile> {
+    if (Object.keys(profile.masteryRecords || {}).length > 0) {
+      profile.masteryPoints = computeTotalMasteryPoints(profile.masteryRecords);
+    }
+
+    if (evaluateAchievements) {
+      try {
+        const achRes = achievementService.evaluateAndSyncLearnerAchievements(profile);
+        if (achRes.newlyUnlockedBadges.length > 0) {
+          profile.unlockedBadges = Array.from(
+            new Set([...(profile.unlockedBadges || []), ...achRes.newlyUnlockedBadges])
+          );
+        }
+      } catch {
+        // Achievement evaluation should never block progress mutation
+      }
+    }
+
+    profile.syncRevision = (profile.syncRevision || 0) + 1;
+    profile.updatedAt = new Date().toISOString();
+
+    const activeKey = this.getActiveStorageKey();
+    this.inMemoryCache = profile;
+    this.inMemoryCacheKey = activeKey;
+    this.persist(profile, activeKey);
+
+    try {
+      await progressSyncCoordinator.syncProfileMutation(profile, reason);
+    } catch (err) {
+      console.warn("Unified cloud sync deferred to offline queue:", err);
+    }
+
+    return profile;
   }
 
   public async saveProfile(profile: ExtendedLearnerProfile): Promise<ExtendedLearnerProfile> {
-    profile.updatedAt = new Date().toISOString();
-    this.inMemoryCache = profile;
-    this.persist(profile);
-    return profile;
+    return this.commitMutation({ ...profile }, "save_profile", false);
+  }
+
+  public async recalculateSkillMastery(
+    learnerId: string,
+    skillId: string
+  ): Promise<ExtendedLearnerProfile> {
+    const profile = await this.getProfile(learnerId);
+    if (!profile.masteryRecords) {
+      profile.masteryRecords = {};
+    }
+
+    const attemptsForSkill = (profile.questionAttempts || []).filter((a) => a.skillId === skillId);
+    const existingRecord = profile.masteryRecords[skillId];
+    if (attemptsForSkill.length > 0) {
+      profile.masteryRecords[skillId] = evaluateSkillMastery({
+        skillId,
+        attempts: profile.questionAttempts || [],
+        existingRecord
+      });
+    }
+
+    profile.masteryPoints = computeTotalMasteryPoints(profile.masteryRecords);
+    return this.commitMutation(profile, `recalculate_mastery:${skillId}`, true);
   }
 
   public async updateMastery(
@@ -137,38 +254,31 @@ export class LocalLearnerRepository implements ILearnerRepository {
   ): Promise<ExtendedLearnerProfile> {
     const profile = await this.getProfile(learnerId);
     if (!profile.masteryRecords) {
-      profile.masteryRecords = { ...DEFAULT_EXTENDED_LEARNER_PROFILE.masteryRecords };
+      profile.masteryRecords = {};
     }
 
-    const existingRecord: MasteryRecord = profile.masteryRecords[skillId] || {
-      skillId,
-      status: "unstarted",
-      points: 0,
-      attempts: 0,
-      correctCount: 0,
-      lastPracticedAt: new Date().toISOString()
-    };
+    const existingRecord = profile.masteryRecords[skillId];
+    const attemptsForSkill = (profile.questionAttempts || []).filter((a) => a.skillId === skillId);
 
-    const newAttempts = existingRecord.attempts + 1;
-    const newCorrect = isCorrect ? existingRecord.correctCount + 1 : existingRecord.correctCount;
-    const newPoints = Math.min(100, Math.max(0, existingRecord.points + deltaPoints));
+    if (attemptsForSkill.length > (existingRecord?.attempts || 0)) {
+      // Evidence-backed attempt exceeds stored count: derive strictly from questionAttempts
+      profile.masteryRecords[skillId] = evaluateSkillMastery({
+        skillId,
+        attempts: profile.questionAttempts || [],
+        existingRecord
+      });
+    } else {
+      // Direct updateMastery call fallback — enforces minimum-evidence & accuracy guards while tracking attempt count
+      profile.masteryRecords[skillId] = evaluateDirectMasteryUpdate(
+        existingRecord,
+        skillId,
+        deltaPoints,
+        isCorrect
+      );
+    }
 
-    let newStatus: "unstarted" | "familiar" | "proficient" | "mastered" = "familiar";
-    if (newPoints >= 90) newStatus = "mastered";
-    else if (newPoints >= 65) newStatus = "proficient";
-    else if (newPoints >= 25) newStatus = "familiar";
-
-    profile.masteryRecords[skillId] = {
-      ...existingRecord,
-      points: newPoints,
-      status: newStatus,
-      attempts: newAttempts,
-      correctCount: newCorrect,
-      lastPracticedAt: new Date().toISOString()
-    };
-
-    profile.masteryPoints = Object.values(profile.masteryRecords).reduce((acc, r) => acc + r.points, 0);
-    return this.saveProfile(profile);
+    profile.masteryPoints = computeTotalMasteryPoints(profile.masteryRecords);
+    return this.commitMutation(profile, `update_mastery:${skillId}`, true);
   }
 
   public async recordActivity(
@@ -182,12 +292,13 @@ export class LocalLearnerRepository implements ILearnerRepository {
       timestamp: new Date().toISOString()
     };
 
-    profile.activityHistory = [newActivity, ...profile.activityHistory].slice(0, 100);
-    profile.xp += activityData.xpEarned || 0;
-    profile.masteryPoints += activityData.pointsEarned || 0;
+    profile.activityHistory = [newActivity, ...(profile.activityHistory || [])].slice(0, 100);
+    profile.xp = (profile.xp || 0) + (activityData.xpEarned || 0);
+    // CRITICAL INVARIANT (Directive 006 WS1): masteryPoints MUST ONLY derive from masteryRecords, never double-counted in recordActivity!
+    profile.masteryPoints = computeTotalMasteryPoints(profile.masteryRecords);
     profile.level = Math.floor(profile.xp / 250) + 1;
 
-    return this.saveProfile(profile);
+    return this.commitMutation(profile, `record_activity:${activityData.type}`, true);
   }
 
   public async recordQuestionAttempt(
@@ -201,11 +312,22 @@ export class LocalLearnerRepository implements ILearnerRepository {
       timestamp: new Date().toISOString()
     };
 
-    profile.questionAttempts = [newAttempt, ...profile.questionAttempts].slice(0, 300);
+    profile.questionAttempts = [newAttempt, ...(profile.questionAttempts || [])].slice(0, 300);
     const addedMinutes = Math.max(1, Math.round((attemptData.timeSpentSeconds || 60) / 60));
-    profile.totalStudyMinutes += addedMinutes;
+    profile.totalStudyMinutes = (profile.totalStudyMinutes || 0) + addedMinutes;
 
-    return this.saveProfile(profile);
+    // Continuously synchronize skill mastery directly from attempt evidence
+    if (!profile.masteryRecords) {
+      profile.masteryRecords = {};
+    }
+    profile.masteryRecords[attemptData.skillId] = evaluateSkillMastery({
+      skillId: attemptData.skillId,
+      attempts: profile.questionAttempts,
+      existingRecord: profile.masteryRecords[attemptData.skillId]
+    });
+    profile.masteryPoints = computeTotalMasteryPoints(profile.masteryRecords);
+
+    return this.commitMutation(profile, `question_attempt:${attemptData.skillId}`, true);
   }
 
   public async recordDiagnostic(
@@ -215,26 +337,26 @@ export class LocalLearnerRepository implements ILearnerRepository {
     const profile = await this.getProfile(learnerId);
     profile.diagnosticsCompleted = true;
     profile.lastDiagnosticResult = result;
-    profile.diagnosticHistory = [result, ...(profile.diagnosticHistory || [])];
-    
-    profile.xp += 150;
+    profile.diagnosticHistory = [result, ...(profile.diagnosticHistory || [])].slice(0, 30);
+
+    profile.xp = (profile.xp || 0) + 150;
     profile.level = Math.floor(profile.xp / 250) + 1;
 
     const activity: LearnerActivity = {
-      id: `act-diag-${Date.now()}`,
+      id: `act-diag-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       type: "diagnostic",
       title: "Diagnostic Baseline Assessment Completed",
       description: `Scored ${result.percentage}% (${result.score}/${result.total} skills). Tier: ${result.tier}`,
       timestamp: new Date().toISOString(),
-      pointsEarned: result.percentage,
+      pointsEarned: 0,
       xpEarned: 150,
       metadata: {
         scorePercentage: result.percentage
       }
     };
-    profile.activityHistory = [activity, ...profile.activityHistory];
+    profile.activityHistory = [activity, ...(profile.activityHistory || [])].slice(0, 100);
 
-    return this.saveProfile(profile);
+    return this.commitMutation(profile, "diagnostic_completed", true);
   }
 
   public async recordExamSubmission(
@@ -244,31 +366,33 @@ export class LocalLearnerRepository implements ILearnerRepository {
     const profile = await this.getProfile(learnerId);
     const newExamRecord: ExamSubmissionRecord = {
       ...submissionData,
-      id: `exam-sub-${Date.now()}`,
+      id: `exam-sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       submittedAt: new Date().toISOString()
     };
 
-    profile.examHistory = [newExamRecord, ...(profile.examHistory || [])];
+    profile.examHistory = [newExamRecord, ...(profile.examHistory || [])].slice(0, 50);
     const earnedXP = submissionData.passed ? 200 : 80;
-    profile.xp += earnedXP;
+    profile.xp = (profile.xp || 0) + earnedXP;
     profile.level = Math.floor(profile.xp / 250) + 1;
+    profile.totalStudyMinutes =
+      (profile.totalStudyMinutes || 0) + Math.max(1, Math.round((submissionData.timeSpentSeconds || 60) / 60));
 
     const activity: LearnerActivity = {
-      id: `act-exam-${Date.now()}`,
+      id: `act-exam-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       type: "exam",
       title: `Exam Completed: ${submissionData.examTitle}`,
       description: `Result: ${submissionData.scorePercentage}% (${submissionData.passed ? "Passed Benchmark" : "Practice Completed"})`,
       timestamp: new Date().toISOString(),
-      pointsEarned: submissionData.scorePercentage,
+      pointsEarned: 0,
       xpEarned: earnedXP,
       metadata: {
         scorePercentage: submissionData.scorePercentage,
         durationSeconds: submissionData.timeSpentSeconds
       }
     };
-    profile.activityHistory = [activity, ...profile.activityHistory];
+    profile.activityHistory = [activity, ...(profile.activityHistory || [])].slice(0, 100);
 
-    return this.saveProfile(profile);
+    return this.commitMutation(profile, `exam_submission:${submissionData.examId}`, true);
   }
 
   public async recordPlayCompletion(
@@ -277,23 +401,34 @@ export class LocalLearnerRepository implements ILearnerRepository {
     skillId: string,
     score: number,
     maxScore: number,
-    pointsDelta: number,
+    _pointsDelta: number,
     xpDelta: number,
     timeSpentSeconds: number
   ): Promise<ExtendedLearnerProfile> {
-    const pct = Math.round((score / maxScore) * 100);
+    const safeMax = Math.max(1, maxScore);
+    const pct = Math.round((score / safeMax) * 100);
     const isPassing = pct >= 70;
 
-    const profile = await this.updateMastery(learnerId, skillId, pointsDelta, isPassing);
-    profile.totalStudyMinutes += Math.max(1, Math.round(timeSpentSeconds / 60));
+    // Record authentic evidence-backed attempt for the skill instead of arbitrary bonus delta
+    const afterAttempt = await this.recordQuestionAttempt(learnerId, {
+      questionId: `play-${skillId}-${Date.now()}`,
+      skillId,
+      selectedOption: `${score}/${safeMax} (${pct}%)`,
+      isCorrect: isPassing,
+      hintsUsedCount: isPassing ? 0 : 1,
+      timeSpentSeconds: Math.max(15, timeSpentSeconds),
+      provenance: "PLATFORM_CONTENT",
+      isAiGenerated: false
+    });
 
+    const earnedPoints = afterAttempt.masteryRecords?.[skillId]?.points || 0;
     const activity: LearnerActivity = {
-      id: `act-play-${Date.now()}`,
+      id: `act-play-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       type: "practice",
       title: `Learn & Play: ${activityTitle}`,
-      description: `Scored ${score}/${maxScore} pts (${pct}% accuracy). Gained +${pointsDelta} Mastery Points.`,
+      description: `Scored ${score}/${maxScore} pts (${pct}% accuracy). Skill mastery now ${earnedPoints} pts.`,
       timestamp: new Date().toISOString(),
-      pointsEarned: pointsDelta,
+      pointsEarned: 0,
       xpEarned: xpDelta,
       metadata: {
         skillId,
@@ -302,19 +437,35 @@ export class LocalLearnerRepository implements ILearnerRepository {
       }
     };
 
-    profile.activityHistory = [activity, ...profile.activityHistory];
-    profile.xp += xpDelta;
-    profile.level = Math.floor(profile.xp / 250) + 1;
+    afterAttempt.activityHistory = [activity, ...(afterAttempt.activityHistory || [])].slice(0, 100);
+    afterAttempt.xp = (afterAttempt.xp || 0) + xpDelta;
+    afterAttempt.level = Math.floor(afterAttempt.xp / 250) + 1;
+    afterAttempt.masteryPoints = computeTotalMasteryPoints(afterAttempt.masteryRecords);
 
-    return this.saveProfile(profile);
+    return this.commitMutation(afterAttempt, `play_completion:${skillId}`, true);
+  }
+
+  public async hydrateFromRemote(learnerId?: string): Promise<ExtendedLearnerProfile> {
+    const localProfile = await this.getProfile(learnerId);
+    const reconciled = await progressSyncCoordinator.hydrateAndReconcileForSession(localProfile);
+    if (Object.keys(reconciled.masteryRecords || {}).length > 0) {
+      reconciled.masteryPoints = computeTotalMasteryPoints(reconciled.masteryRecords);
+    }
+    const activeKey = this.getActiveStorageKey();
+    this.inMemoryCache = reconciled;
+    this.inMemoryCacheKey = activeKey;
+    this.persist(reconciled, activeKey);
+    return reconciled;
   }
 
   public async resetProfile(_learnerId?: string): Promise<ExtendedLearnerProfile> {
-    const defaultProfile = { ...DEFAULT_EXTENDED_LEARNER_PROFILE };
-    defaultProfile.updatedAt = new Date().toISOString();
-    this.inMemoryCache = defaultProfile;
-    this.persist(defaultProfile);
-    return defaultProfile;
+    const freshProfile = this.buildInitialProfileForContext();
+    freshProfile.updatedAt = new Date().toISOString();
+    const activeKey = this.getActiveStorageKey();
+    this.inMemoryCache = freshProfile;
+    this.inMemoryCacheKey = activeKey;
+    this.persist(freshProfile, activeKey);
+    return freshProfile;
   }
 
   private checkStreakHealth(profile: ExtendedLearnerProfile): ExtendedLearnerProfile {
@@ -346,10 +497,10 @@ export class LocalLearnerRepository implements ILearnerRepository {
     return profile;
   }
 
-  private persist(profile: ExtendedLearnerProfile) {
+  private persist(profile: ExtendedLearnerProfile, storageKey: string = this.getActiveStorageKey()) {
     try {
       if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+        localStorage.setItem(storageKey, JSON.stringify(profile));
       }
     } catch (e) {
       console.warn("Storage persist error", e);

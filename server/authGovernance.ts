@@ -24,6 +24,7 @@ import type {
   PublicSignUpRequest,
   VerifiedAuthSession
 } from "../src/types/emailAllowlist";
+import { mergeLearnerProgressPayloads } from "../src/services/progressMerge";
 
 const FIREBASE_PROJECT_ID = "genial-bucksaw-wxctm";
 const FIREBASE_TOKEN_ISSUER = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
@@ -871,8 +872,14 @@ export class ServerAuthGovernance {
       progress: this.learnerProgressStore.get(normTarget) || {
         accountEmail: normTarget,
         masteryRecords: {},
+        questionAttempts: [],
+        activityHistory: [],
+        examHistory: [],
+        diagnosticHistory: [],
+        unlockedBadges: [],
         xp: 0,
         masteryPoints: 0,
+        syncRevision: 0,
         updatedAt: null
       }
     };
@@ -882,7 +889,15 @@ export class ServerAuthGovernance {
     session: VerifiedAuthSession,
     targetAccountEmail: string,
     payload: Record<string, any>
-  ): { statusCode: number; allowed: boolean; progress?: Record<string, any>; message?: string } {
+  ): {
+    statusCode: number;
+    allowed: boolean;
+    conflict?: boolean;
+    conflictResolved?: boolean;
+    staleWriteProtected?: boolean;
+    progress?: Record<string, any>;
+    message?: string;
+  } {
     const normTarget = this.normalizeEmail(targetAccountEmail);
     if (!normTarget) {
       return { statusCode: 400, allowed: false, message: "Target account identifier is required." };
@@ -897,17 +912,40 @@ export class ServerAuthGovernance {
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       return { statusCode: 400, allowed: false, message: "Invalid progress payload." };
     }
-    const existing = this.learnerProgressStore.get(normTarget) || {};
+
+    const existing = this.learnerProgressStore.get(normTarget) || null;
+    if (
+      payload.strictConflictCheck === true &&
+      typeof payload.baseRevision === "number" &&
+      existing &&
+      typeof existing.syncRevision === "number" &&
+      payload.baseRevision < existing.syncRevision
+    ) {
+      return {
+        statusCode: 409,
+        allowed: false,
+        conflict: true,
+        progress: existing,
+        message: `Conflict: Older write (baseRevision ${payload.baseRevision}) cannot overwrite newer server revision (${existing.syncRevision}).`
+      };
+    }
+
+    const { merged, conflictResolved, staleWriteProtected } = mergeLearnerProgressPayloads(
+      existing,
+      payload
+    );
+
     const saved = {
-      ...existing,
-      ...payload,
+      ...merged,
       accountEmail: normTarget,
-      updatedAt: new Date().toISOString()
+      serverSyncedAt: new Date().toISOString()
     };
     this.learnerProgressStore.set(normTarget, saved);
     return {
       statusCode: 200,
       allowed: true,
+      conflictResolved,
+      staleWriteProtected,
       progress: saved
     };
   }

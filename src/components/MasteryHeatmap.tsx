@@ -30,6 +30,7 @@ import { Unit, Skill, EducationalLevel, MasteryStatus } from "../types/curriculu
 import { curriculumService } from "../services/curriculumService";
 import { LEARNING_DOMAINS } from "../data/curriculumData";
 import { contentSaturationService } from "../services/contentSaturationService";
+import { normalizeMasteryStatus, formatMasteryStatusLabel, MASTERY_THRESHOLDS } from "../services/masteryEngine";
 import {
   FlashcardCard,
   EducationalVisualization,
@@ -74,7 +75,8 @@ export interface UnitMasterySummary {
   status: MasteryStatus;
   masteredSkills: number;
   proficientSkills: number;
-  familiarSkills: number;
+  practisingSkills: number;
+  introducedSkills: number;
   unstartedSkills: number;
   skillRecords: Array<{
     skill: Skill;
@@ -125,18 +127,20 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       let earnedPoints = 0;
       let masteredSkills = 0;
       let proficientSkills = 0;
-      let familiarSkills = 0;
+      let practisingSkills = 0;
+      let introducedSkills = 0;
       let unstartedSkills = 0;
 
       const skillRecords = skills.map((skill) => {
         const rec = records[skill.id];
         const points = rec?.points || 0;
-        const status = (rec?.status as MasteryStatus) || "unstarted";
+        const status = normalizeMasteryStatus(rec?.status, points);
 
         earnedPoints += points;
         if (status === "mastered") masteredSkills++;
         else if (status === "proficient") proficientSkills++;
-        else if (status === "familiar") familiarSkills++;
+        else if (status === "practising") practisingSkills++;
+        else if (status === "introduced") introducedSkills++;
         else unstartedSkills++;
 
         return { skill, points, status };
@@ -145,9 +149,10 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       const masteryPercentage = totalSkills > 0 ? Math.round((earnedPoints / maxPoints) * 100) : 0;
 
       let status: MasteryStatus = "unstarted";
-      if (masteryPercentage >= 90) status = "mastered";
-      else if (masteryPercentage >= 50) status = "proficient";
-      else if (masteryPercentage > 0) status = "familiar";
+      if (masteryPercentage >= MASTERY_THRESHOLDS.MASTERED_WEIGHTED_SCORE) status = "mastered";
+      else if (masteryPercentage >= MASTERY_THRESHOLDS.PROFICIENT_WEIGHTED_SCORE) status = "proficient";
+      else if (masteryPercentage >= MASTERY_THRESHOLDS.PRACTISING_WEIGHTED_SCORE) status = "practising";
+      else if (masteryPercentage > 0 || introducedSkills + practisingSkills + proficientSkills + masteredSkills > 0) status = "introduced";
 
       const domain = LEARNING_DOMAINS.find((d) => d.id === unit.category) || { name: unit.category };
 
@@ -161,7 +166,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         status,
         masteredSkills,
         proficientSkills,
-        familiarSkills,
+        practisingSkills,
+        introducedSkills,
         unstartedSkills,
         skillRecords
       };
@@ -173,7 +179,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     const totalUnits = unitSummaries.length;
     const masteredUnits = unitSummaries.filter((u) => u.status === "mastered").length;
     const proficientUnits = unitSummaries.filter((u) => u.status === "proficient").length;
-    const familiarUnits = unitSummaries.filter((u) => u.status === "familiar").length;
+    const practisingUnits = unitSummaries.filter((u) => u.status === "practising").length;
+    const introducedUnits = unitSummaries.filter((u) => u.status === "introduced").length;
     const unstartedUnits = unitSummaries.filter((u) => u.status === "unstarted").length;
 
     const totalEarnedPoints = unitSummaries.reduce((sum, u) => sum + u.earnedPoints, 0);
@@ -184,7 +191,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       totalUnits,
       masteredUnits,
       proficientUnits,
-      familiarUnits,
+      practisingUnits,
+      introducedUnits,
       unstartedUnits,
       overallPercentage
     };
@@ -325,18 +333,22 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
 
   // Helper color styling for heatmap tiles
   const getTileStyles = (status: MasteryStatus, isCurrentActive: boolean) => {
+    const normalized = normalizeMasteryStatus(status);
     let bg = "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200 hover:border-slate-300";
     let badgeBg = "bg-slate-200 text-slate-700";
 
-    if (status === "mastered") {
+    if (normalized === "mastered") {
       bg = "bg-emerald-600 border-emerald-700 text-white hover:bg-emerald-700 shadow-xs";
       badgeBg = "bg-emerald-500/40 text-white";
-    } else if (status === "proficient") {
+    } else if (normalized === "proficient") {
       bg = "bg-indigo-600 border-indigo-700 text-white hover:bg-indigo-700 shadow-xs";
       badgeBg = "bg-indigo-500/40 text-white";
-    } else if (status === "familiar") {
+    } else if (normalized === "practising") {
       bg = "bg-amber-400 border-amber-500 text-amber-950 hover:bg-amber-500 shadow-xs";
       badgeBg = "bg-amber-300/60 text-amber-950 font-bold";
+    } else if (normalized === "introduced") {
+      bg = "bg-sky-200 border-sky-300 text-sky-950 hover:bg-sky-300 shadow-xs";
+      badgeBg = "bg-sky-100 text-sky-900 font-bold";
     }
 
     if (isCurrentActive) {
@@ -347,10 +359,11 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   };
 
   const getSkillDotColor = (status: MasteryStatus) => {
-    switch (status) {
+    switch (normalizeMasteryStatus(status)) {
       case "mastered": return "bg-emerald-400";
       case "proficient": return "bg-indigo-300";
-      case "familiar": return "bg-amber-400";
+      case "practising": return "bg-amber-400";
+      case "introduced": return "bg-sky-400";
       default: return "bg-slate-300";
     }
   };
@@ -439,8 +452,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         </div>
       </div>
 
-      {/* 2. Interactive KPI Legend & Status Filters */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+      {/* 2. Interactive KPI Legend & 4-State Progression Filters */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Overall Completion Card */}
         <div className="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex flex-col justify-between">
           <div className="flex items-center justify-between">
@@ -474,7 +487,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             <span className={`text-[11px] font-bold uppercase tracking-wider ${
               statusFilter === "mastered" ? "text-emerald-100" : "text-emerald-800"
             }`}>
-              Mastered (90-100%)
+              Mastered (88%+)
             </span>
             <CheckCircle2 className={`h-4 w-4 ${statusFilter === "mastered" ? "text-white" : "text-emerald-600"}`} />
           </div>
@@ -503,7 +516,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             <span className={`text-[11px] font-bold uppercase tracking-wider ${
               statusFilter === "proficient" ? "text-indigo-100" : "text-indigo-800"
             }`}>
-              Proficient (50-89%)
+              Proficient (70-87%)
             </span>
             <Trophy className={`h-4 w-4 ${statusFilter === "proficient" ? "text-white" : "text-indigo-600"}`} />
           </div>
@@ -517,30 +530,59 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           </div>
         </button>
 
-        {/* Familiar Pill / Filter */}
+        {/* Practising Pill / Filter */}
         <button
           type="button"
-          id="filter-status-familiar-btn"
-          onClick={() => setStatusFilter(statusFilter === "familiar" ? "all" : "familiar")}
+          id="filter-status-practising-btn"
+          onClick={() => setStatusFilter(statusFilter === "practising" ? "all" : "practising")}
           className={`p-3.5 rounded-2xl border text-left transition ${
-            statusFilter === "familiar"
+            statusFilter === "practising"
               ? "bg-amber-500 border-amber-600 text-slate-950 shadow-sm ring-2 ring-amber-400/30"
               : "bg-amber-50/70 border-amber-200 hover:bg-amber-100/80 text-amber-950"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className={`text-[11px] font-bold uppercase tracking-wider ${
-              statusFilter === "familiar" ? "text-amber-950 font-black" : "text-amber-800"
+              statusFilter === "practising" ? "text-amber-950 font-black" : "text-amber-800"
             }`}>
-              Familiar (1-49%)
+              Practising (40-69%)
             </span>
             <Flame className="h-4 w-4 text-amber-600" />
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
             <span className="text-2xl font-black">
-              {overallStats.familiarUnits}
+              {overallStats.practisingUnits}
             </span>
             <span className="text-xs text-amber-800">
+              Units
+            </span>
+          </div>
+        </button>
+
+        {/* Introduced Pill / Filter */}
+        <button
+          type="button"
+          id="filter-status-introduced-btn"
+          onClick={() => setStatusFilter(statusFilter === "introduced" ? "all" : "introduced")}
+          className={`p-3.5 rounded-2xl border text-left transition ${
+            statusFilter === "introduced"
+              ? "bg-sky-600 border-sky-700 text-white shadow-sm ring-2 ring-sky-400/30"
+              : "bg-sky-50/70 border-sky-200 hover:bg-sky-100/80 text-sky-950"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${
+              statusFilter === "introduced" ? "text-sky-100" : "text-sky-800"
+            }`}>
+              Introduced (1-39%)
+            </span>
+            <Zap className={`h-4 w-4 ${statusFilter === "introduced" ? "text-white" : "text-sky-600"}`} />
+          </div>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-black">
+              {overallStats.introducedUnits}
+            </span>
+            <span className={`text-xs ${statusFilter === "introduced" ? "text-sky-100" : "text-sky-700"}`}>
               Units
             </span>
           </div>
@@ -551,7 +593,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           type="button"
           id="filter-status-unstarted-btn"
           onClick={() => setStatusFilter(statusFilter === "unstarted" ? "all" : "unstarted")}
-          className={`col-span-2 sm:col-span-1 p-3.5 rounded-2xl border text-left transition ${
+          className={`p-3.5 rounded-2xl border text-left transition ${
             statusFilter === "unstarted"
               ? "bg-slate-800 border-slate-900 text-white shadow-sm ring-2 ring-slate-400/30"
               : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800"
@@ -875,12 +917,14 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                         ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                         : summary.status === "proficient"
                         ? "bg-indigo-100 text-indigo-800 border-indigo-300"
-                        : summary.status === "familiar"
+                        : summary.status === "practising"
                         ? "bg-amber-100 text-amber-800 border-amber-300"
+                        : summary.status === "introduced"
+                        ? "bg-sky-100 text-sky-800 border-sky-300"
                         : "bg-slate-100 text-slate-600 border-slate-200"
                     }`}
                   >
-                    {summary.status.toUpperCase()} ({summary.masteryPercentage}%)
+                    {formatMasteryStatusLabel(summary.status, summary.masteryPercentage).toUpperCase()} ({summary.masteryPercentage}%)
                   </span>
                 </div>
 
@@ -906,8 +950,10 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                           ? "bg-emerald-500"
                           : summary.status === "proficient"
                           ? "bg-indigo-600"
-                          : summary.status === "familiar"
+                          : summary.status === "practising"
                           ? "bg-amber-500"
+                          : summary.status === "introduced"
+                          ? "bg-sky-500"
                           : "bg-slate-300"
                       }`}
                       style={{ width: `${summary.masteryPercentage}%` }}
@@ -1000,15 +1046,17 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                       ? "bg-emerald-500"
                       : inspectedUnit.status === "proficient"
                       ? "bg-indigo-600"
-                      : inspectedUnit.status === "familiar"
+                      : inspectedUnit.status === "practising"
                       ? "bg-amber-500"
+                      : inspectedUnit.status === "introduced"
+                      ? "bg-sky-500"
                       : "bg-slate-300"
                   }`}
                   style={{ width: `${inspectedUnit.masteryPercentage}%` }}
                 />
               </div>
 
-              <div className="grid grid-cols-4 gap-2 pt-1 text-center text-[11px]">
+              <div className="grid grid-cols-5 gap-2 pt-1 text-center text-[11px]">
                 <div className="rounded-lg bg-white p-1.5 border border-slate-200">
                   <div className="font-bold text-emerald-600">{inspectedUnit.masteredSkills}</div>
                   <div className="text-slate-400">Mastered</div>
@@ -1018,8 +1066,12 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                   <div className="text-slate-400">Proficient</div>
                 </div>
                 <div className="rounded-lg bg-white p-1.5 border border-slate-200">
-                  <div className="font-bold text-amber-600">{inspectedUnit.familiarSkills}</div>
-                  <div className="text-slate-400">Familiar</div>
+                  <div className="font-bold text-amber-600">{inspectedUnit.practisingSkills}</div>
+                  <div className="text-slate-400">Practising</div>
+                </div>
+                <div className="rounded-lg bg-white p-1.5 border border-slate-200">
+                  <div className="font-bold text-sky-600">{inspectedUnit.introducedSkills}</div>
+                  <div className="text-slate-400">Introduced</div>
                 </div>
                 <div className="rounded-lg bg-white p-1.5 border border-slate-200">
                   <div className="font-bold text-slate-500">{inspectedUnit.unstartedSkills}</div>
@@ -1159,12 +1211,14 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                               ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                               : status === "proficient"
                               ? "bg-indigo-100 text-indigo-800 border-indigo-300"
-                              : status === "familiar"
+                              : status === "practising"
                               ? "bg-amber-100 text-amber-800 border-amber-300"
+                              : status === "introduced"
+                              ? "bg-sky-100 text-sky-800 border-sky-300"
                               : "bg-slate-100 text-slate-600 border-slate-200"
                           }`}
                         >
-                          {status.toUpperCase()} ({points} pts)
+                          {formatMasteryStatusLabel(status, points).toUpperCase()} ({points} pts)
                         </span>
                       </div>
 

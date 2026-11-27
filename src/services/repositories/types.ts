@@ -45,6 +45,7 @@ export interface ILearnerRepository {
   getProfile(learnerId?: string): Promise<ExtendedLearnerProfile>;
   saveProfile(profile: ExtendedLearnerProfile): Promise<ExtendedLearnerProfile>;
   updateMastery(learnerId: string, skillId: string, deltaPoints: number, isCorrect: boolean): Promise<ExtendedLearnerProfile>;
+  recalculateSkillMastery(learnerId: string, skillId: string): Promise<ExtendedLearnerProfile>;
   recordActivity(learnerId: string, activity: Omit<LearnerActivity, "id" | "timestamp">): Promise<ExtendedLearnerProfile>;
   recordQuestionAttempt(learnerId: string, attempt: Omit<QuestionAttempt, "id" | "timestamp">): Promise<ExtendedLearnerProfile>;
   recordDiagnostic(learnerId: string, result: DiagnosticResult): Promise<ExtendedLearnerProfile>;
@@ -59,6 +60,7 @@ export interface ILearnerRepository {
     xpDelta: number,
     timeSpentSeconds: number
   ): Promise<ExtendedLearnerProfile>;
+  hydrateFromRemote(learnerId?: string): Promise<ExtendedLearnerProfile>;
   resetProfile(learnerId?: string): Promise<ExtendedLearnerProfile>;
 }
 

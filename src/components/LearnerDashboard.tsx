@@ -432,19 +432,27 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
               {metrics.masteryDistribution.mastered + metrics.masteryDistribution.proficient} Verified Strengths
             </h3>
             <div className="space-y-1.5 text-xs text-slate-600">
-              {metrics.strengths.slice(0, 3).map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <span className="truncate max-w-[75%]">{item.title}</span>
-                  <span className="font-bold text-emerald-600">{item.points} pts</span>
-                </div>
-              ))}
+              {metrics.strengths.length > 0 ? (
+                metrics.strengths.slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <span className="truncate max-w-[75%]">{item.title}</span>
+                    <span className="font-bold text-emerald-600">{item.points} pts</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-500 leading-relaxed">
+                  No verified strengths yet. Build independent accuracy in Practice Arena to earn Proficient or Mastered status.
+                </p>
+              )}
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>Diagnostic Benchmark</span>
             <span className="text-emerald-700 font-semibold">
-              Tier: {profile.lastDiagnosticResult?.tier || "Proficient"}
+              {profile.diagnosticsCompleted && profile.lastDiagnosticResult?.tier
+                ? `Tier: ${profile.lastDiagnosticResult.tier}`
+                : "Not Assessed"}
             </span>
           </div>
         </div>
@@ -458,11 +466,17 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
             </div>
             <h3 className="font-bold text-slate-900 text-sm">Target Skill Growth</h3>
             <ul className="space-y-1.5 text-xs text-slate-600">
-              {metrics.weaknesses.slice(0, 2).map((item, idx) => (
-                <li key={idx} className="leading-snug">
-                  <strong className="text-slate-800">{item.title}:</strong> {item.recommendation}
+              {metrics.weaknesses.length > 0 ? (
+                metrics.weaknesses.slice(0, 2).map((item, idx) => (
+                  <li key={idx} className="leading-snug">
+                    <strong className="text-slate-800">{item.title}:</strong> {item.recommendation}
+                  </li>
+                ))
+              ) : (
+                <li className="leading-snug text-slate-500">
+                  Attempt practice exercises or complete the diagnostic baseline to identify specific skill gaps.
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
@@ -653,18 +667,27 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
                 <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
-                WAEC / JAMB / IGCSE Readiness
+                Curriculum Exam Readiness
               </span>
-              <span className="text-xs font-extrabold text-indigo-700">
-                Score: {metrics.examReadiness.readinessScore}/100
-              </span>
+              {metrics.examReadiness.readinessCategory === "insufficient_data" ? (
+                <span className="text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                  Insufficient Evidence
+                </span>
+              ) : (
+                <span className="text-xs font-extrabold text-indigo-700">
+                  Score: {metrics.examReadiness.readinessScore}/100
+                </span>
+              )}
             </div>
             <h3 className="text-sm font-extrabold text-slate-900">
               {metrics.examReadiness.headline}
             </h3>
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs text-slate-600">
-                <span>Syllabus Coverage</span>
+                <span>
+                  Syllabus Coverage ({metrics.examReadiness.evaluatedSubjects.length}{" "}
+                  {metrics.examReadiness.evaluatedSubjects.length === 1 ? "Subject" : "Subjects"})
+                </span>
                 <span className="font-bold">{metrics.examReadiness.syllabusCoveragePercentage}%</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -682,7 +705,7 @@ export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({
           </div>
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
             <span className="text-xs text-slate-500">
-              {metrics.examReadiness.proficientOrMasteredCount} of {metrics.examReadiness.totalSyllabusSkillsCount} Core Skills Mastered
+              {metrics.examReadiness.proficientOrMasteredCount} of {metrics.examReadiness.totalSyllabusSkillsCount} Target Skills Proficient+
             </span>
             <button
               type="button"

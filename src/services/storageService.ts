@@ -1,7 +1,6 @@
 import { ExtendedLearnerProfile, LearnerActivity, QuestionAttempt, ExamSubmissionRecord } from "../types/learner";
 import { DiagnosticResult } from "../types/curriculum";
 import { repositories } from "./repositories";
-import { firebaseSyncService } from "./firebaseSyncService";
 
 export interface ILearnerStorageService {
   getProfile(): Promise<ExtendedLearnerProfile>;
@@ -12,6 +11,8 @@ export interface ILearnerStorageService {
   recordExamSubmission(submission: Omit<ExamSubmissionRecord, "id" | "submittedAt">): Promise<ExtendedLearnerProfile>;
   recordPlayCompletion(activityTitle: string, skillId: string, score: number, maxScore: number, pointsDelta: number, xpDelta: number, timeSpentSeconds: number): Promise<ExtendedLearnerProfile>;
   updateMastery(skillId: string, deltaPoints: number, isCorrect: boolean): Promise<ExtendedLearnerProfile>;
+  recalculateSkillMastery(skillId: string): Promise<ExtendedLearnerProfile>;
+  hydrateFromRemote(): Promise<ExtendedLearnerProfile>;
   resetToInitial(): Promise<ExtendedLearnerProfile>;
 }
 
@@ -21,12 +22,7 @@ class DelegatingLearnerStorageService implements ILearnerStorageService {
   }
 
   public async saveProfile(profile: ExtendedLearnerProfile): Promise<ExtendedLearnerProfile> {
-    const saved = await repositories.learner.saveProfile(profile);
-    // Background fire-and-forget sync to Firestore if user is authenticated
-    firebaseSyncService.syncLearnerProfileToCloud(saved).catch((e) => {
-      console.warn("Background Firestore sync skipped/failed:", e);
-    });
-    return saved;
+    return repositories.learner.saveProfile(profile);
   }
 
   public async recordActivity(activityData: Omit<LearnerActivity, "id" | "timestamp">): Promise<ExtendedLearnerProfile> {
@@ -74,6 +70,15 @@ class DelegatingLearnerStorageService implements ILearnerStorageService {
   public async updateMastery(skillId: string, pointsGained: number, isCorrect: boolean): Promise<ExtendedLearnerProfile> {
     const profile = await this.getProfile();
     return repositories.learner.updateMastery(profile.id, skillId, pointsGained, isCorrect);
+  }
+
+  public async recalculateSkillMastery(skillId: string): Promise<ExtendedLearnerProfile> {
+    const profile = await this.getProfile();
+    return repositories.learner.recalculateSkillMastery(profile.id, skillId);
+  }
+
+  public async hydrateFromRemote(): Promise<ExtendedLearnerProfile> {
+    return repositories.learner.hydrateFromRemote();
   }
 
   public async resetToInitial(): Promise<ExtendedLearnerProfile> {

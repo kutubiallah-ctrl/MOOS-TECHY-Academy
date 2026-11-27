@@ -111,7 +111,13 @@ export interface CanonicalCompetency {
   canonicalSkillIds: string[];
 }
 
-export type MasteryStatus = "unstarted" | "familiar" | "proficient" | "mastered";
+export type MasteryStatus =
+  | "unstarted"
+  | "introduced"
+  | "practising"
+  | "proficient"
+  | "mastered"
+  | "familiar";
 
 export interface LearningDomain {
   id: string;
@@ -248,6 +254,13 @@ export interface MasteryRecord {
   attempts: number;
   correctCount: number;
   lastPracticedAt: string;
+  independentCorrectCount?: number;
+  assistedCorrectCount?: number;
+  independentAccuracy?: number; // 0 to 100
+  weightedAccuracy?: number; // 0 to 100
+  recentAccuracy?: number; // 0 to 100
+  distinctQuestionsCount?: number;
+  masteryStateReason?: string;
 }
 
 export interface Badge {

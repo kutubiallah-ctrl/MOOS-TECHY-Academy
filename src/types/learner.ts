@@ -122,8 +122,10 @@ export interface LearnerProfile {
   examHistory: ExamSubmissionRecord[];
   unlockedBadges: string[];
   
-  // Settings
+  // Settings & Sync Metadata
   preferences: LearnerPreferences;
+  syncRevision?: number;
+  lastSyncedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -453,7 +453,7 @@ export default function App() {
       {!authSession || !emailAllowlistService.hasGateAccess() ? (
         <EmailEntryGate onAccessGranted={handleAccessGranted} />
       ) : (
-        <LearnerProvider>
+        <LearnerProvider key={authSession.email}>
           <MainAppContent authSession={authSession} onSignOut={handleSignOut} />
         </LearnerProvider>
       )}

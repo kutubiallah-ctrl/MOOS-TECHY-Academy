@@ -28,6 +28,7 @@ import { learningSupplyService } from "../services/learningSupplyService";
 import { VariationEngine } from "../services/variationEngine";
 import { curriculumService } from "../services/curriculumService";
 import { teacherStudioService } from "../services/teacherStudioService";
+import { formatMasteryStatusLabel, normalizeMasteryStatus } from "../services/masteryEngine";
 
 interface PracticeArenaProps {
   skill: Skill;
@@ -185,7 +186,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
     }
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     setSelectedOption(null);
     setTypedAnswer("");
     setHasSubmitted(false);
@@ -196,13 +197,10 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
     if (currentQuestionIndex + 1 < allQuestions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // Completed all questions in this set
-      const delta = Math.round(((score + 1) / Math.max(allQuestions.length, 1)) * 30) + 10;
-      const newPoints = Math.min(100, (currentMasteryRecord?.points || 0) + delta);
       const scorePct = Math.round((score / Math.max(1, allQuestions.length)) * 100);
-      
-      // Update persistent mastery
-      recordPracticeCompletion(effectiveSkill.id, delta, score > 0);
+
+      // Recalculate persistent evidence-based mastery without completion inflation
+      await recordPracticeCompletion(effectiveSkill.id, 0, score > 0);
 
       // Synchronize with active classroom assignment if present
       if (activeAssignment) {
@@ -216,7 +214,9 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
       }
 
       if (onSkillComplete) {
-        onSkillComplete(newPoints);
+        const verifiedPoints =
+          profile.masteryRecords?.[effectiveSkill.id]?.points ?? currentMasteryRecord?.points ?? 0;
+        onSkillComplete(verifiedPoints);
       }
     }
   };
@@ -345,9 +345,14 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
           <div className="flex items-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-100 px-3.5 py-2">
             <Trophy className="h-4 w-4 text-amber-500" />
             <div>
-              <div className="text-[10px] text-indigo-600 uppercase font-semibold">Mastery Points</div>
+              <div className="text-[10px] text-indigo-600 uppercase font-semibold">
+                {formatMasteryStatusLabel(
+                  normalizeMasteryStatus(currentMasteryRecord?.status, currentMasteryRecord?.points),
+                  currentMasteryRecord?.points
+                )}
+              </div>
               <div className="text-sm font-bold text-indigo-900">
-                {currentMasteryRecord?.points || 0} / 100
+                {currentMasteryRecord?.points || 0} / 100 pts
               </div>
             </div>
           </div>

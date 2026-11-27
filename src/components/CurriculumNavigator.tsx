@@ -68,6 +68,7 @@ import {
 } from "../types/curriculum";
 import { curriculumService } from "../services/curriculumService";
 import { videoLearningService } from "../services/videoLearningService";
+import { normalizeMasteryStatus, formatMasteryStatusLabel } from "../services/masteryEngine";
 import { lessonNoteService, RequiredLessonNote } from "../services/lessonNoteService";
 import { RequiredLessonNoteOutput } from "./RequiredLessonNoteOutput";
 import { courseDiscoveryService } from "../services/courseDiscoveryService";
@@ -2287,7 +2288,8 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                   {unit.skills.map((skill) => {
                     const record = (masteryRecords || {})[skill.id];
                     const points = record?.points || 0;
-                    const status = record?.status || "unstarted";
+                    const status = normalizeMasteryStatus(record?.status, points);
+                    const statusLabel = formatMasteryStatusLabel(status, points);
 
                     let statusBadge = (
                       <span className="flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
@@ -2299,20 +2301,26 @@ export const CurriculumNavigator: React.FC<CurriculumNavigatorProps> = ({
                       statusBadge = (
                         <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                           <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                          <span>Mastered (100 pts)</span>
+                          <span>{statusLabel} ({points} pts)</span>
                         </span>
                       );
                     } else if (status === "proficient") {
                       statusBadge = (
                         <span className="flex items-center gap-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
                           <Trophy className="h-3 w-3 text-indigo-600" />
-                          <span>Proficient ({points} pts)</span>
+                          <span>{statusLabel} ({points} pts)</span>
                         </span>
                       );
-                    } else if (status === "familiar") {
+                    } else if (status === "practising") {
                       statusBadge = (
                         <span className="flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                          <span>Familiar ({points} pts)</span>
+                          <span>{statusLabel} ({points} pts)</span>
+                        </span>
+                      );
+                    } else if (status === "introduced") {
+                      statusBadge = (
+                        <span className="flex items-center gap-1 text-[11px] font-medium text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full">
+                          <span>{statusLabel} ({points} pts)</span>
                         </span>
                       );
                     }

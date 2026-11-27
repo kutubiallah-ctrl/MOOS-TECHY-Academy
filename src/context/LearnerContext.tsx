@@ -20,6 +20,9 @@ import { storageService } from "../services/storageService";
 import { AnalyticsService, DashboardMetrics } from "../services/analyticsService";
 import { curriculumService } from "../services/curriculumService";
 import { firebaseSyncService } from "../services/firebaseSyncService";
+import { emailAllowlistService } from "../services/emailAllowlistService";
+import { progressSyncCoordinator } from "../services/progressSyncCoordinator";
+import { formatMasteryStatusLabel } from "../services/masteryEngine";
 import { MATHEMATICS_UNITS, DEFAULT_EXTENDED_LEARNER_PROFILE } from "../data/curriculumData";
 
 interface LearnerContextType {
@@ -52,13 +55,15 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [activeUnit, setActiveUnit] = useState<Unit>(defaultUnit);
   const [activeSkill, setActiveSkill] = useState<Skill>(defaultSkill);
 
-  // Initialize from storage service on mount and subscribe to Firebase auth sync
+  // Initialize from unified storage/cloud reconciliation on mount and subscribe to auth & online recovery
   useEffect(() => {
     let isSubscribed = true;
 
     async function init() {
       try {
-        const loadedProfile = await storageService.getProfile();
+        const loadedProfile = emailAllowlistService.hasGateAccess()
+          ? await storageService.hydrateFromRemote()
+          : await storageService.getProfile();
         if (loadedProfile && isSubscribed) {
           setProfile(loadedProfile);
 
@@ -90,11 +95,9 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
       if (!isSubscribed) return;
       if (firebaseUser) {
         try {
-          const currentLocal = await storageService.getProfile();
-          const reconciled = await firebaseSyncService.reconcileLearnerProfile(currentLocal);
+          const reconciled = await storageService.hydrateFromRemote();
           if (reconciled && isSubscribed) {
             setProfile(reconciled);
-            await storageService.saveProfile(reconciled);
           }
         } catch (e) {
           console.warn("LearnerContext cloud reconciliation deferred:", e);
@@ -102,9 +105,29 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
       }
     });
 
+    const handleOnline = async () => {
+      if (!isSubscribed) return;
+      try {
+        await progressSyncCoordinator.flushPendingSync();
+        const refreshed = await storageService.hydrateFromRemote();
+        if (refreshed && isSubscribed) {
+          setProfile(refreshed);
+        }
+      } catch (e) {
+        console.warn("LearnerContext online recovery deferred:", e);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", handleOnline);
+    }
+
     return () => {
       isSubscribed = false;
       unsubscribeAuth();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("online", handleOnline);
+      }
     };
   }, []);
 
@@ -152,21 +175,29 @@ export const LearnerProvider: React.FC<{ children: ReactNode }> = ({ children })
     setProfile(updated);
   };
 
-  const recordPracticeCompletion = async (skillId: string, deltaPoints: number, isCorrect: boolean) => {
+  const recordPracticeCompletion = async (skillId: string, _deltaPoints: number, isCorrect: boolean) => {
     if (!profile) return;
-    
-    // Update mastery in storage
-    const updated = await storageService.updateMastery(skillId, deltaPoints, isCorrect);
-    
-    // Log practice activity
+
+    const latestBefore = await storageService.getProfile();
+    const beforePoints = latestBefore.masteryRecords?.[skillId]?.points || 0;
+
+    // Recalculate authentic evidence-based mastery strictly from recorded questionAttempts
+    const afterMastery = await storageService.recalculateSkillMastery(skillId);
+    const updatedRecord = afterMastery.masteryRecords?.[skillId];
+    const afterPoints = updatedRecord?.points || 0;
+    const netChange = afterPoints - beforePoints;
+    const stateLabel = formatMasteryStatusLabel(updatedRecord?.status, afterPoints);
+
+    // Log practice activity without double-counting masteryPoints
     const skill = curriculumService.getSkillById(skillId);
-    const skillTitle = skill?.title || "Mathematical Skill";
+    const skillTitle = skill?.title || "Curriculum Skill";
+    const changeSummary = netChange >= 0 ? `+${netChange}` : `${netChange}`;
 
     const afterActivity = await storageService.recordActivity({
       type: "practice",
       title: `Practiced ${skillTitle}`,
-      description: `Gained +${deltaPoints} Mastery Pts. Status: ${isCorrect ? "Correct Solution" : "Reviewed with Socratic Hints"}`,
-      pointsEarned: deltaPoints,
+      description: `Evidence score: ${afterPoints}/100 (${changeSummary} pts) • Stage: ${stateLabel}`,
+      pointsEarned: 0,
       xpEarned: isCorrect ? 50 : 20,
       metadata: {
         skillId

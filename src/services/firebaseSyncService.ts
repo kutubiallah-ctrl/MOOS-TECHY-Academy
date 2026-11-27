@@ -203,35 +203,70 @@ export class FirebaseSyncService {
     }
   }
 
-  public async syncLearnerProfileToCloud(profile: ExtendedLearnerProfile): Promise<void> {
-    if (!this.currentUser) return;
-    const path = `learnerProfiles/${this.currentUser.uid}`;
+  public async syncLearnerProfileToCloud(
+    profile: ExtendedLearnerProfile
+  ): Promise<{ synced: boolean; error?: string }> {
+    if (!this.currentUser) {
+      return { synced: false, error: "NOT_AUTHENTICATED" };
+    }
     try {
       const profileDocRef = doc(db, "learnerProfiles", this.currentUser.uid);
-      await setDoc(profileDocRef, {
-        userId: this.currentUser.uid,
-        name: profile.name || this.currentUser.displayName || "Academy Scholar",
-        targetLevel: profile.targetLevel || "Senior Secondary",
-        academicContext: profile.academicContext || null,
-        streakDays: profile.streakDays || 0,
-        totalMinutesStudied: profile.totalStudyMinutes || (profile as any).totalMinutesStudied || 0,
-        xp: profile.xp || 0,
-        masteryPoints: profile.masteryPoints || 0,
-        masteryRecords: profile.masteryRecords || {},
-        completedSkills: Object.keys(profile.masteryRecords || {}),
-        unlockedBadges: profile.unlockedBadges || [],
-        recentActivities: ((profile.activityHistory || (profile as any).recentActivities || []) as any[]).slice(0, 30),
-        lastActiveDate: profile.streak?.lastActiveDate || profile.updatedAt || new Date().toISOString(),
-        updatedAt: profile.updatedAt || new Date().toISOString()
-      }, { merge: true });
+      const boundedAttempts = (profile.questionAttempts || []).slice(0, 300);
+      const boundedActivities = (
+        profile.activityHistory ||
+        (profile as any).recentActivities ||
+        []
+      ).slice(0, 100);
+      const boundedExams = (profile.examHistory || []).slice(0, 50);
+      const boundedDiagnostics = (profile.diagnosticHistory || []).slice(0, 30);
+
+      await setDoc(
+        profileDocRef,
+        {
+          userId: this.currentUser.uid,
+          email: profile.email || this.currentUser.email || "",
+          name: profile.name || this.currentUser.displayName || "Academy Scholar",
+          role: profile.role || "learner",
+          targetLevel: profile.targetLevel || "senior_secondary",
+          curriculum: profile.curriculum || "WAEC_WASSCE",
+          selectedSubjectIds: profile.selectedSubjectIds || [],
+          activeSubjectId: profile.activeSubjectId || "math_core",
+          activeUnitId: profile.activeUnitId || "",
+          academicContext: profile.academicContext || null,
+          streak: profile.streak || { count: profile.streakDays || 1, lastActiveDate: new Date().toISOString().slice(0, 10), longestStreak: profile.streakDays || 1 },
+          streakDays: profile.streakDays || profile.streak?.count || 0,
+          totalStudyMinutes: profile.totalStudyMinutes || (profile as any).totalMinutesStudied || 0,
+          totalMinutesStudied: profile.totalStudyMinutes || (profile as any).totalMinutesStudied || 0,
+          xp: profile.xp || 0,
+          level: profile.level || 1,
+          masteryPoints: profile.masteryPoints || 0,
+          masteryRecords: profile.masteryRecords || {},
+          completedSkills: Object.keys(profile.masteryRecords || {}),
+          questionAttempts: boundedAttempts,
+          activityHistory: boundedActivities,
+          recentActivities: boundedActivities.slice(0, 30),
+          examHistory: boundedExams,
+          diagnosticsCompleted: Boolean(profile.diagnosticsCompleted),
+          lastDiagnosticResult: profile.lastDiagnosticResult || null,
+          diagnosticHistory: boundedDiagnostics,
+          unlockedBadges: profile.unlockedBadges || [],
+          preferences: profile.preferences || null,
+          syncRevision: profile.syncRevision || 1,
+          lastActiveDate: profile.streak?.lastActiveDate || profile.updatedAt || new Date().toISOString(),
+          updatedAt: profile.updatedAt || new Date().toISOString()
+        },
+        { merge: true }
+      );
+      return { synced: true };
     } catch (err: any) {
-      console.warn("Firestore profile sync error (retained locally):", err?.message || err);
+      const msg = err?.message || String(err);
+      console.warn("Firestore profile sync error (retained in offline queue):", msg);
+      return { synced: false, error: msg };
     }
   }
 
   public async fetchLearnerProfileFromCloud(): Promise<Partial<ExtendedLearnerProfile> | null> {
     if (!this.currentUser) return null;
-    const path = `learnerProfiles/${this.currentUser.uid}`;
     try {
       const profileDocRef = doc(db, "learnerProfiles", this.currentUser.uid);
       const snap = await getDoc(profileDocRef);
@@ -246,8 +281,8 @@ export class FirebaseSyncService {
   }
 
   /**
-   * Reconciles local and cloud profile state deterministically.
-   * Compares ISO timestamps; newer version wins, while preserving unlocked badges and activities.
+   * Reconciles local and cloud profile state deterministically using conflict-safe union merge.
+   * Preserves questionAttempts, examHistory, activityHistory, diagnosticHistory, masteryRecords, and badges.
    */
   public async reconcileLearnerProfile(localProfile: ExtendedLearnerProfile): Promise<ExtendedLearnerProfile> {
     if (!this.currentUser) {
@@ -257,38 +292,20 @@ export class FirebaseSyncService {
     try {
       const cloudData = await this.fetchLearnerProfileFromCloud();
       if (!cloudData) {
-        // Cloud is empty for this user: initialize cloud with local profile
         await this.syncLearnerProfileToCloud(localProfile);
         return localProfile;
       }
 
-      const localTime = new Date(localProfile.updatedAt || 0).getTime();
-      const cloudTime = new Date(cloudData.updatedAt || 0).getTime();
+      const { mergeLearnerProfiles } = await import("./progressMerge");
+      const merged = mergeLearnerProfiles(localProfile, cloudData);
 
-      if (cloudTime > localTime) {
-        // Cloud has newer data (e.g. from another device)
-        const merged: ExtendedLearnerProfile = {
-          ...localProfile,
-          ...cloudData,
-          id: localProfile.id, // Preserve consistent local identifier
-          // Union of badges to avoid accidental regression
-          unlockedBadges: Array.from(new Set([
-            ...(localProfile.unlockedBadges || []),
-            ...(cloudData.unlockedBadges || [])
-          ])),
-          // Merge mastery records
-          masteryRecords: {
-            ...(localProfile.masteryRecords || {}),
-            ...(cloudData.masteryRecords || {})
-          },
-          updatedAt: cloudData.updatedAt || new Date().toISOString()
-        };
-        return merged;
-      } else {
-        // Local is newer or equal: push to cloud to ensure cloud consistency
-        await this.syncLearnerProfileToCloud(localProfile);
-        return localProfile;
+      const localTime = Date.parse(localProfile.updatedAt || "") || 0;
+      const cloudTime = Date.parse(cloudData.updatedAt || "") || 0;
+      if (localTime >= cloudTime) {
+        await this.syncLearnerProfileToCloud(merged);
       }
+
+      return merged;
     } catch (err) {
       console.warn("Reconciliation deferred; continuing with local profile:", err);
       return localProfile;
