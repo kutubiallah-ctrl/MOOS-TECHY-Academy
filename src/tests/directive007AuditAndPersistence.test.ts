@@ -309,6 +309,40 @@ export async function runDirective007VerificationSuite(): Promise<{ passed: bool
   }
 
   // =========================================================================
+  // Directive 008 WS4: Anti-Suppression Calibration on Legitimate Recovery
+  // =========================================================================
+  {
+    // Mixed independent (2) + lightly hinted (1 hint each on 2 new items) -> earns Proficient
+    const skillMix = "d008-anti-supp-mix";
+    const mixAttempts: QuestionAttempt[] = [
+      makeAttempt(skillMix, 3, true, 1, "q-mix-4", 1),
+      makeAttempt(skillMix, 2, true, 1, "q-mix-3", 2),
+      makeAttempt(skillMix, 1, true, 0, "q-mix-2", 3),
+      makeAttempt(skillMix, 0, true, 0, "q-mix-1", 4)
+    ];
+    const rMix = evaluateSkillMastery({ skillId: skillMix, attempts: mixAttempts, nowMs: fixedNowMs });
+    assert.strictEqual(rMix.status, "proficient", "2 independent + 2 light-hint new items must reach Proficient");
+
+    // Failed q1, immediately fixed misconception on q1, then solved 4 new distinct questions independently
+    const skillRetry = "d008-anti-supp-retry";
+    const retryAttempts: QuestionAttempt[] = [
+      makeAttempt(skillRetry, 5, true, 0, "q-ret-5", 1),
+      makeAttempt(skillRetry, 4, true, 0, "q-ret-4", 2),
+      makeAttempt(skillRetry, 3, true, 0, "q-ret-3", 3),
+      makeAttempt(skillRetry, 2, true, 0, "q-ret-2", 4),
+      makeAttempt(skillRetry, 1, true, 0, "q-ret-1", 5),
+      makeAttempt(skillRetry, 0, false, 0, "q-ret-1", 6)
+    ];
+    const rRetry = evaluateSkillMastery({ skillId: skillRetry, attempts: retryAttempts, nowMs: fixedNowMs });
+    assert.strictEqual(
+      rRetry.status,
+      "mastered",
+      "Learner retrying failed q1 then solving 4 new distinct items independently (5/5 recent) earns Mastered"
+    );
+    pass("D008-WS4 Anti-suppression checks verified: mixed hints & genuine recovery progress without undue penalty.");
+  }
+
+  // =========================================================================
   // WS1 & WS3: Reload Token Exchange + Atomic Server Restart Persistence
   // =========================================================================
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "moos-d007-persist-"));

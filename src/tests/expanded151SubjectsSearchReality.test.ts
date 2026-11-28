@@ -1,14 +1,14 @@
 /**
  * MOOS ACADEMY — EXPANDED SUBJECT CATALOGUE & GLOBAL SEARCH REALITY TEST SUITE
  *
- * Directive 007 Workstream 4 Audit Note:
+ * Directive 007/008 Catalog Integrity Audit Note:
  * - Originally authored for the 151-subject baseline (41 Primary, 90 Secondary, 14 Advanced, 6 Clubs).
- * - Directives 004 and 005 expanded the institutional catalog in src/data/expandedSubjectCategories.ts
- *   from 151 to 300 subjects (79 Primary, 183 Secondary, 30 Advanced, 8 Clubs; SUBJECTS = 310),
- *   retaining the exported symbol EXPANDED_151_SUBJECT_CATEGORIES for backward compatibility.
- * - Root-cause audit confirmed zero functional search or schema regressions; failures were
- *   exclusively stale count expectations. Assertions below verify both the 300-subject
- *   expanded invariants and preservation of core 151-baseline subject codes.
+ * - Directives 004 and 005 expanded src/data/expandedSubjectCategories.ts to 300 offerings
+ *   (79 Primary, 183 Secondary [incl. 5 secondary clubs], 30 Advanced, 8 Cross-stage 'all'
+ *   [6 clubs + sub_268 Data Science/AI + sub_298 Nigerian Academic Decathlon]; 11 total club_* entries).
+ * - SUBJECTS in src/data/curriculumData.ts is [...CANONICAL_CORE_SUBJECTS (10), ...EXPANDED_151_SUBJECTS (300)] = 310.
+ *   All 310 entries have unique identifiers and titles; all 196 ALL_CURRICULUM_UNITS and 10 MATHEMATICS_UNITS
+ *   reference valid SUBJECTS identifiers (0 missing dependencies).
  */
 
 import { describe, it } from "node:test";
@@ -16,12 +16,15 @@ import assert from "node:assert";
 import { courseDiscoveryService } from "../services/courseDiscoveryService";
 import { EXPANDED_151_SUBJECT_CATEGORIES, TOTAL_EXPANDED_SUBJECT_COUNT } from "../data/expandedSubjectCategories";
 import {
+  CANONICAL_CORE_SUBJECTS,
   COMPLETE_151_SUBJECT_DEFINITIONS,
+  MATHEMATICS_UNITS,
   SUBJECTS,
   getSubjectByCode,
   getSubjectsByStage,
   searchCurriculumSubjects
 } from "../data/curriculumData";
+import { ALL_CURRICULUM_UNITS } from "../data/extendedCurriculumUnits";
 
 describe("Expanded 300-Subject Global Search & Catalogue Verification", () => {
   // 1. Invariant Preservation: Core 19 Subject Categories
@@ -45,13 +48,15 @@ describe("Expanded 300-Subject Global Search & Catalogue Verification", () => {
     const primaryCount = expanded.filter((s) => s.stage === "primary").length;
     const secondaryCount = expanded.filter((s) => s.stage === "secondary").length;
     const advancedCount = expanded.filter((s) => s.stage === "advanced").length;
-    const clubsCount = expanded.filter((s) => s.stage === "all").length;
+    const crossStageAllCount = expanded.filter((s) => s.stage === "all").length;
+    const clubPrefixedCount = expanded.filter((s) => s.code.startsWith("club_")).length;
 
     assert.strictEqual(primaryCount, 79, "Must contain exactly 79 primary foundations subjects");
-    assert.strictEqual(secondaryCount, 183, "Must contain exactly 183 junior & senior secondary subjects");
+    assert.strictEqual(secondaryCount, 183, "Must contain exactly 183 junior & senior secondary entries (incl. 5 secondary clubs)");
     assert.strictEqual(advancedCount, 30, "Must contain exactly 30 advanced tertiary & exam hall subjects");
-    assert.strictEqual(clubsCount, 8, "Must contain exactly 8 co-curricular innovation club subjects");
-    assert.strictEqual(primaryCount + secondaryCount + advancedCount + clubsCount, 300);
+    assert.strictEqual(crossStageAllCount, 8, "Must contain exactly 8 stage='all' entries (6 clubs + 2 cross-stage academic offerings)");
+    assert.strictEqual(clubPrefixedCount, 11, "Must contain exactly 11 co-curricular club_* offerings inside the 300 expanded catalog");
+    assert.strictEqual(primaryCount + secondaryCount + advancedCount + crossStageAllCount, 300);
   });
 
   // 3. Field Integrity Across All 300 Subjects
@@ -189,5 +194,27 @@ describe("Expanded 300-Subject Global Search & Catalogue Verification", () => {
 
     const searchRes = searchCurriculumSubjects("calculus", { stage: "secondary" });
     assert.ok(searchRes.length >= 1, "Must find calculus subject in secondary stage");
+  });
+
+  // 10. Directive 008 Workstream 3: Uniqueness & Referential Integrity Reconciliation (310 vs 300)
+  it("Reconciles 310 registered SUBJECTS (10 canonical core + 300 expanded) with zero duplicates or broken unit references", () => {
+    assert.strictEqual(CANONICAL_CORE_SUBJECTS.length, 10);
+    assert.strictEqual(COMPLETE_151_SUBJECT_DEFINITIONS.length, 300);
+    assert.strictEqual(SUBJECTS.length, 310);
+
+    const uniqueIds = new Set(SUBJECTS.map((s) => s.id));
+    const uniqueTitles = new Set(SUBJECTS.map((s) => s.title.toLowerCase().trim()));
+    assert.strictEqual(uniqueIds.size, 310, "All 310 registered subjects must have unique IDs");
+    assert.strictEqual(uniqueTitles.size, 310, "All 310 registered subjects must have unique titles");
+
+    const unitSubjectIds = new Set(ALL_CURRICULUM_UNITS.map((u) => u.subjectId));
+    const missingUnitSubjects = [...unitSubjectIds].filter((id) => !uniqueIds.has(id));
+    assert.deepStrictEqual(missingUnitSubjects, [], "Every unit in ALL_CURRICULUM_UNITS must reference a valid registered subjectId");
+
+    const missingMathUnitSubjects = MATHEMATICS_UNITS.map((u) => u.subjectId).filter((id) => !uniqueIds.has(id));
+    assert.deepStrictEqual(missingMathUnitSubjects, [], "Every unit in MATHEMATICS_UNITS must reference a valid registered subjectId");
+
+    // Verify canonical + expanded coverage totals 116 subjects with curriculum units
+    assert.strictEqual(unitSubjectIds.size, 116);
   });
 });
