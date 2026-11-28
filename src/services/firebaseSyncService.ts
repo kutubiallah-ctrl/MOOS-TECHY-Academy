@@ -33,6 +33,8 @@ export class FirebaseSyncService {
   private syncListeners: ((user: FirebaseUser | null) => void)[] = [];
   private isOnline: boolean = typeof navigator !== "undefined" && typeof navigator.onLine === "boolean" ? navigator.onLine : true;
   private isAuthOperationInProgress: boolean = false;
+  private authInitialized: boolean = false;
+  private authReadyResolvers: Array<(user: FirebaseUser | null) => void> = [];
 
   private constructor() {
     if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
@@ -46,6 +48,11 @@ export class FirebaseSyncService {
 
     onAuthStateChanged(auth, (user) => {
       this.currentUser = user;
+      if (!this.authInitialized) {
+        this.authInitialized = true;
+        const resolvers = this.authReadyResolvers.splice(0);
+        resolvers.forEach((resolve) => resolve(user));
+      }
       this.syncListeners.forEach((listener) => {
         try {
           listener(user);
@@ -66,6 +73,31 @@ export class FirebaseSyncService {
       FirebaseSyncService.instance = new FirebaseSyncService();
     }
     return FirebaseSyncService.instance;
+  }
+
+  public waitForAuthReady(): Promise<FirebaseUser | null> {
+    if (this.authInitialized) {
+      return Promise.resolve(this.currentUser);
+    }
+    if (typeof (auth as any)?.authStateReady === "function") {
+      return (auth as any)
+        .authStateReady()
+        .then(() => {
+          this.currentUser = auth.currentUser;
+          this.authInitialized = true;
+          return this.currentUser;
+        })
+        .catch(() => this.currentUser);
+    }
+    return new Promise((resolve) => {
+      this.authReadyResolvers.push(resolve);
+      setTimeout(() => {
+        if (!this.authInitialized) {
+          this.authInitialized = true;
+          resolve(this.currentUser);
+        }
+      }, 2500);
+    });
   }
 
   public onAuthChange(callback: (user: FirebaseUser | null) => void): () => void {

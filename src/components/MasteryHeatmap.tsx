@@ -516,7 +516,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             <span className={`text-[11px] font-bold uppercase tracking-wider ${
               statusFilter === "proficient" ? "text-indigo-100" : "text-indigo-800"
             }`}>
-              Proficient (70-87%)
+              Proficient (72-87%)
             </span>
             <Trophy className={`h-4 w-4 ${statusFilter === "proficient" ? "text-white" : "text-indigo-600"}`} />
           </div>
@@ -545,7 +545,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             <span className={`text-[11px] font-bold uppercase tracking-wider ${
               statusFilter === "practising" ? "text-amber-950 font-black" : "text-amber-800"
             }`}>
-              Practising (40-69%)
+              Practising (38-71%)
             </span>
             <Flame className="h-4 w-4 text-amber-600" />
           </div>
@@ -574,7 +574,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             <span className={`text-[11px] font-bold uppercase tracking-wider ${
               statusFilter === "introduced" ? "text-sky-100" : "text-sky-800"
             }`}>
-              Introduced (1-39%)
+              Introduced (1-37%)
             </span>
             <Zap className={`h-4 w-4 ${statusFilter === "introduced" ? "text-white" : "text-sky-600"}`} />
           </div>
@@ -747,7 +747,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500 px-1">
             <span>Showing {filteredSummaries.length} curriculum units. Click any tile to inspect skills or practice.</span>
-            <div className="flex items-center gap-3 text-[11px]">
+            <div className="flex items-center gap-3 text-[11px] flex-wrap">
               <span className="flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" /> Mastered
               </span>
@@ -755,7 +755,10 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                 <span className="h-2 w-2 rounded-full bg-indigo-600" /> Proficient
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-amber-400" /> Familiar
+                <span className="h-2 w-2 rounded-full bg-amber-400" /> Practising
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-sky-400" /> Introduced
               </span>
               <span className="flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-slate-200" /> Unstarted

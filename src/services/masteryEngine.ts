@@ -43,10 +43,11 @@ export const MASTERY_THRESHOLDS = {
   HINT_CREDIT_2: 0.50,
   HINT_CREDIT_3_PLUS: 0.35,
 
-  // Recency decay parameters
+  // Recency decay & anti-repeat-farming parameters
   INDEX_DECAY_FACTOR: 0.82,
   HALF_LIFE_DAYS: 45,
-  RECENT_WINDOW_SIZE: 5
+  RECENT_WINDOW_SIZE: 5,
+  REPEAT_CORRECT_DAMPENING: 0.35
 } as const;
 
 /**
@@ -169,6 +170,31 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
     );
   }
 
+  // Chronological pass (oldest -> newest) to dampen repeated identical correct solves
+  // and track distinct questions solved independently without hints.
+  const priorCorrectByQuestion = new Map<string, number>();
+  const distinctIndependentCorrectQuestions = new Set<string>();
+  const repeatFactors = new Array<number>(matching.length).fill(1);
+
+  for (let i = matching.length - 1; i >= 0; i--) {
+    const att = matching[i].attempt;
+    const qKey = att.questionId || att.id;
+    const hints = Math.max(0, Number(att.hintsUsedCount) || 0);
+    if (att.isCorrect) {
+      const priorCorrect = priorCorrectByQuestion.get(qKey) || 0;
+      repeatFactors[i] =
+        priorCorrect === 0
+          ? 1
+          : Math.pow(MASTERY_THRESHOLDS.REPEAT_CORRECT_DAMPENING, priorCorrect);
+      priorCorrectByQuestion.set(qKey, priorCorrect + 1);
+      if (hints === 0) {
+        distinctIndependentCorrectQuestions.add(qKey);
+      }
+    } else {
+      repeatFactors[i] = 1;
+    }
+  }
+
   let totalWeight = 0;
   let weightedCreditSum = 0;
   let correctCount = 0;
@@ -202,7 +228,9 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
         : 0;
     const indexDecay = Math.pow(MASTERY_THRESHOLDS.INDEX_DECAY_FACTOR, rank);
     const timeDecay = Math.pow(0.5, ageDays / MASTERY_THRESHOLDS.HALF_LIFE_DAYS);
-    const weight = Math.max(0.05, indexDecay * timeDecay);
+    const repeatFactor = repeatFactors[rank];
+    const minWeightFloor = repeatFactor < 1 ? 0.02 : 0.05;
+    const weight = Math.max(minWeightFloor, indexDecay * timeDecay * repeatFactor);
 
     totalWeight += weight;
     weightedCreditSum += credit * weight;
@@ -211,8 +239,24 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
   const totalAttempts = matching.length;
   const weightedScore = totalWeight > 0 ? (weightedCreditSum / totalWeight) * 100 : 0;
 
-  // Rolling recent window (up to 5 most recent attempts)
-  const recentSlice = matching.slice(0, MASTERY_THRESHOLDS.RECENT_WINDOW_SIZE);
+  // Rolling recent window (up to 5 recent items, preventing duplicate correct replays
+  // of the same question from evicting recent mistakes out of the window)
+  const seenCorrectInRecent = new Set<string>();
+  const recentSlice: typeof matching = [];
+  for (const entry of matching) {
+    const att = entry.attempt;
+    const qKey = att.questionId || att.id;
+    if (!att.isCorrect || !seenCorrectInRecent.has(qKey)) {
+      recentSlice.push(entry);
+      if (att.isCorrect) {
+        seenCorrectInRecent.add(qKey);
+      }
+      if (recentSlice.length >= MASTERY_THRESHOLDS.RECENT_WINDOW_SIZE) {
+        break;
+      }
+    }
+  }
+
   let recentWeightSum = 0;
   let recentCreditSum = 0;
   let recentCorrect = 0;
@@ -233,6 +277,7 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
       ? Math.round((independentCorrectCount / independentAttemptsCount) * 100)
       : 0;
   const distinctQuestionsCount = distinctQuestions.size;
+  const distinctIndependentQuestionsCount = distinctIndependentCorrectQuestions.size;
   const independentShareOfCorrect =
     correctCount > 0 ? independentCorrectCount / correctCount : 0;
 
@@ -250,6 +295,11 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
     status = "introduced";
     points = Math.min(35, Math.max(10, Math.round(weightedScore * 0.35)));
     reason = `Introduced (${totalAttempts} attempt): insufficient assessment evidence for proficiency.`;
+  } else if (distinctQuestionsCount === 1) {
+    // Anti-repeat-farming guard: repeating a single identical question never grants Practising/Proficient/Mastered.
+    status = "introduced";
+    points = Math.min(37, Math.max(12, Math.round(weightedScore * 0.37)));
+    reason = `Introduced (${totalAttempts} attempts on 1 distinct item): varied questions required to advance beyond Introduced.`;
   } else if (totalAttempts < MASTERY_THRESHOLDS.MIN_ATTEMPTS_FOR_PROFICIENT) {
     // 2-3 attempts: can reach Practising, guarded from Proficient/Mastered.
     const combined = weightedScore * 0.6 + recentWeightedScore * 0.4;
@@ -259,7 +309,7 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
       reason = `Practising (${totalAttempts} attempts, ${Math.round(combined)}% weighted score); more independent evidence needed for Proficient.`;
     } else {
       status = "introduced";
-      points = Math.min(39, Math.max(5, Math.round(combined * 0.45)));
+      points = Math.min(37, Math.max(5, Math.round(combined * 0.45)));
       reason = `Introduced (${totalAttempts} attempts, ${Math.round(combined)}% weighted score).`;
     }
   } else {
@@ -268,6 +318,7 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
       totalAttempts >= MASTERY_THRESHOLDS.MIN_ATTEMPTS_FOR_MASTERED &&
       independentCorrectCount >= MASTERY_THRESHOLDS.MIN_INDEPENDENT_CORRECT_FOR_MASTERED &&
       distinctQuestionsCount >= MASTERY_THRESHOLDS.MIN_DISTINCT_QUESTIONS_FOR_MASTERED &&
+      distinctIndependentQuestionsCount >= MASTERY_THRESHOLDS.MIN_DISTINCT_QUESTIONS_FOR_MASTERED &&
       weightedScore >= MASTERY_THRESHOLDS.MASTERED_WEIGHTED_SCORE &&
       recentWeightedScore >= MASTERY_THRESHOLDS.MASTERED_RECENT_WEIGHTED_SCORE &&
       recentRawAccuracy >= MASTERY_THRESHOLDS.MASTERED_RECENT_RAW_ACCURACY &&
@@ -277,6 +328,7 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
       totalAttempts >= MASTERY_THRESHOLDS.MIN_ATTEMPTS_FOR_PROFICIENT &&
       independentCorrectCount >= MASTERY_THRESHOLDS.MIN_INDEPENDENT_CORRECT_FOR_PROFICIENT &&
       distinctQuestionsCount >= MASTERY_THRESHOLDS.MIN_DISTINCT_QUESTIONS_FOR_PROFICIENT &&
+      distinctIndependentQuestionsCount >= MASTERY_THRESHOLDS.MIN_INDEPENDENT_CORRECT_FOR_PROFICIENT &&
       weightedScore >= MASTERY_THRESHOLDS.PROFICIENT_WEIGHTED_SCORE &&
       recentWeightedScore >= MASTERY_THRESHOLDS.PROFICIENT_RECENT_WEIGHTED_SCORE &&
       recentRawAccuracy >= MASTERY_THRESHOLDS.PROFICIENT_RECENT_RAW_ACCURACY;
@@ -289,7 +341,7 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
       reason = `Mastered across ${totalAttempts} attempts (${distinctQuestionsCount} distinct items, ${independentCorrectCount} independent correct).`;
     } else if (meetsProficient) {
       status = "proficient";
-      points = Math.min(89, Math.max(70, Math.round(combinedScore)));
+      points = Math.min(89, Math.max(72, Math.round(combinedScore)));
       reason = `Proficient with ${independentCorrectCount} independent correct out of ${totalAttempts} attempts.`;
     } else if (
       combinedScore >= MASTERY_THRESHOLDS.PRACTISING_WEIGHTED_SCORE ||
@@ -297,14 +349,14 @@ export function evaluateSkillMastery(input: EvaluateSkillMasteryInput): MasteryR
     ) {
       status = "practising";
       const assistedCap = independentCorrectCount < MASTERY_THRESHOLDS.MIN_INDEPENDENT_CORRECT_FOR_PROFICIENT ? 59 : 69;
-      points = Math.min(assistedCap, Math.max(40, Math.round(combinedScore * 0.72)));
+      points = Math.min(assistedCap, Math.max(38, Math.round(combinedScore * 0.72)));
       reason =
         independentCorrectCount === 0
           ? `Practising (assisted accuracy only — independent unassisted solves required to advance to Proficient).`
           : `Practising (${Math.round(recentWeightedScore)}% recent weighted score across ${totalAttempts} attempts).`;
     } else {
       status = "introduced";
-      points = Math.min(39, Math.max(0, Math.round(combinedScore * 0.55)));
+      points = Math.min(37, Math.max(0, Math.round(combinedScore * 0.55)));
       reason = `Introduced / needs consolidation (recent accuracy ${Math.round(recentRawAccuracy * 100)}%).`;
     }
   }

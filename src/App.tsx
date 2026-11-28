@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LearnerProvider, useLearner } from "./context/LearnerContext";
 import { Navbar, ActiveView } from "./components/Navbar";
 import { LearnerDashboard } from "./components/LearnerDashboard";
@@ -437,9 +437,62 @@ export default function App() {
   const [authSession, setAuthSession] = useState<VerifiedAuthSession | null>(() =>
     emailAllowlistService.getActiveSession()
   );
+  const [isRestoringSession, setIsRestoringSession] = useState<boolean>(
+    () => !emailAllowlistService.hasGateAccess()
+  );
+
+  useEffect(() => {
+    let active = true;
+
+    async function syncFromFirebaseUser(
+      fbUser: ReturnType<typeof firebaseSyncService.getCurrentUser>
+    ) {
+      if (!active) return;
+      if (fbUser && fbUser.emailVerified) {
+        const current = emailAllowlistService.getActiveSession();
+        if (!current || current.authProvider === "firebase") {
+          const restored = await emailAllowlistService.ensureFirebaseSessionSynced(fbUser);
+          if (active && restored) {
+            setAuthSession(restored);
+          }
+        }
+      } else if (!fbUser) {
+        const current = emailAllowlistService.getActiveSession();
+        if (current && current.authProvider === "firebase") {
+          await emailAllowlistService.logoutSession();
+          if (active) {
+            setAuthSession(null);
+          }
+        }
+      }
+    }
+
+    (async () => {
+      try {
+        const readyUser = await firebaseSyncService.waitForAuthReady();
+        await syncFromFirebaseUser(readyUser);
+      } finally {
+        if (active) {
+          setIsRestoringSession(false);
+        }
+      }
+    })();
+
+    const unsubscribe = firebaseSyncService.onAuthChange((fbUser) => {
+      if (fbUser) {
+        void syncFromFirebaseUser(fbUser);
+      }
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
 
   const handleAccessGranted = (_email: string, _token: string, session?: VerifiedAuthSession | null) => {
     setAuthSession(session || emailAllowlistService.getActiveSession());
+    setIsRestoringSession(false);
   };
 
   const handleSignOut = () => {
@@ -447,6 +500,19 @@ export default function App() {
     firebaseSyncService.signOutUser().catch(() => {});
     setAuthSession(null);
   };
+
+  if (isRestoringSession && (!authSession || !emailAllowlistService.hasGateAccess())) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+          <span className="text-xs font-bold tracking-wider uppercase text-slate-300">
+            Verifying MOOS Academy Session...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

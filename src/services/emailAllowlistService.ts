@@ -25,6 +25,8 @@ export class EmailAllowlistService {
 
   private activeSession: VerifiedAuthSession | null = null;
   private activeVerificationToken: string | null = null;
+  private inFlightFirebaseSync: Promise<GateVerificationResult> | null = null;
+  private inFlightFirebaseEmail: string | null = null;
 
   private constructor() {}
 
@@ -262,6 +264,53 @@ export class EmailAllowlistService {
         message: "Unable to contact authentication server for Firebase verification.",
         verifiedAt: now
       };
+    }
+  }
+
+  /**
+   * Idempotently restores or upgrades the server-verified Bearer session from a persisted
+   * Firebase Authentication user across page reloads and federated Google sign-in flows.
+   */
+  public async ensureFirebaseSessionSynced(
+    firebaseUser: { email?: string | null; emailVerified?: boolean; getIdToken: (forceRefresh?: boolean) => Promise<string> } | null
+  ): Promise<VerifiedAuthSession | null> {
+    if (!firebaseUser || !firebaseUser.email || !firebaseUser.emailVerified) {
+      return this.getActiveSession();
+    }
+
+    const normEmail = this.normalizeEmail(firebaseUser.email);
+    const existing = this.getActiveSession();
+    if (existing && existing.email === normEmail && existing.authProvider === "firebase") {
+      return existing;
+    }
+
+    if (this.inFlightFirebaseSync && this.inFlightFirebaseEmail === normEmail) {
+      const res = await this.inFlightFirebaseSync;
+      return res.isAllowed ? this.getActiveSession() : null;
+    }
+
+    this.inFlightFirebaseEmail = normEmail;
+    this.inFlightFirebaseSync = (async () => {
+      try {
+        const idToken = await firebaseUser.getIdToken();
+        return await this.exchangeFirebaseIdToken(idToken);
+      } catch {
+        return {
+          isAllowed: false,
+          status: "INVALID_CREDENTIALS" as const,
+          email: normEmail,
+          message: "Unable to acquire Firebase ID token for session restoration.",
+          verifiedAt: new Date().toISOString()
+        };
+      }
+    })();
+
+    try {
+      const res = await this.inFlightFirebaseSync;
+      return res.isAllowed ? this.getActiveSession() : null;
+    } finally {
+      this.inFlightFirebaseSync = null;
+      this.inFlightFirebaseEmail = null;
     }
   }
 

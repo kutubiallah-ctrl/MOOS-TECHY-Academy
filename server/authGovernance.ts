@@ -13,6 +13,8 @@
  */
 
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 import type { Request, Response, NextFunction } from "express";
 import type {
   AllowlistEntry,
@@ -68,6 +70,16 @@ export interface AuthenticatedRequest extends Request {
   authSession?: VerifiedAuthSession;
 }
 
+function resolveDefaultPersistencePath(): string | null {
+  if (process.env.MOOS_GOVERNANCE_STATE_PATH && process.env.MOOS_GOVERNANCE_STATE_PATH.trim().length > 0) {
+    return path.resolve(process.env.MOOS_GOVERNANCE_STATE_PATH.trim());
+  }
+  if (process.env.MOOS_SKIP_AUTO_LISTEN === "true" || process.env.NODE_ENV === "test") {
+    return null;
+  }
+  return path.resolve(process.cwd(), ".data", "moos-governance-state.json");
+}
+
 export class ServerAuthGovernance {
   private static instance: ServerAuthGovernance;
   private directory: Map<string, InternalUserRecord> = new Map();
@@ -75,9 +87,12 @@ export class ServerAuthGovernance {
   private learnerProgressStore: Map<string, Record<string, any>> = new Map();
   private googleCertCache: CertCache | null = null;
   private testFirebaseCerts: Record<string, string> | null = null;
+  private persistenceFilePath: string | null = null;
 
   private constructor() {
+    this.persistenceFilePath = resolveDefaultPersistencePath();
     this.seedBaseline();
+    this.loadPersistedState();
   }
 
   public static getInstance(): ServerAuthGovernance {
@@ -85,6 +100,74 @@ export class ServerAuthGovernance {
       ServerAuthGovernance.instance = new ServerAuthGovernance();
     }
     return ServerAuthGovernance.instance;
+  }
+
+  private loadPersistedState(): void {
+    if (!this.persistenceFilePath) return;
+    try {
+      if (!fs.existsSync(this.persistenceFilePath)) return;
+      const raw = fs.readFileSync(this.persistenceFilePath, "utf8");
+      if (!raw.trim()) return;
+      const parsed = JSON.parse(raw) as {
+        directoryEntries?: Record<string, InternalUserRecord>;
+        learnerProgress?: Record<string, Record<string, any>>;
+      };
+
+      if (parsed.directoryEntries && typeof parsed.directoryEntries === "object") {
+        for (const [normKey, record] of Object.entries(parsed.directoryEntries)) {
+          if (!record || typeof record !== "object") continue;
+          const norm = this.normalizeEmail(normKey || record.email);
+          if (!norm) continue;
+          if (this.isOwner(norm)) {
+            const existingOwner = this.directory.get(norm);
+            if (existingOwner) {
+              this.directory.set(norm, {
+                ...existingOwner,
+                fullName: record.fullName || existingOwner.fullName,
+                passwordHash: existingOwner.passwordHash || record.passwordHash,
+                status: "ENABLED",
+                role: "owner"
+              });
+            }
+          } else {
+            this.directory.set(norm, {
+              ...record,
+              normalizedEmail: norm
+            });
+          }
+        }
+      }
+
+      if (parsed.learnerProgress && typeof parsed.learnerProgress === "object") {
+        for (const [normKey, progress] of Object.entries(parsed.learnerProgress)) {
+          if (!progress || typeof progress !== "object") continue;
+          const norm = this.normalizeEmail(normKey || progress.accountEmail);
+          if (!norm) continue;
+          this.learnerProgressStore.set(norm, progress);
+        }
+      }
+    } catch (err: any) {
+      console.warn("Unable to load persisted server governance state:", err?.message || err);
+    }
+  }
+
+  private persistState(): void {
+    if (!this.persistenceFilePath) return;
+    try {
+      const dir = path.dirname(this.persistenceFilePath);
+      fs.mkdirSync(dir, { recursive: true });
+      const payload = {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        directoryEntries: Object.fromEntries(this.directory.entries()),
+        learnerProgress: Object.fromEntries(this.learnerProgressStore.entries())
+      };
+      const tmpPath = `${this.persistenceFilePath}.tmp-${process.pid}-${Date.now()}`;
+      fs.writeFileSync(tmpPath, JSON.stringify(payload), "utf8");
+      fs.renameSync(tmpPath, this.persistenceFilePath);
+    } catch (err: any) {
+      console.warn("Unable to persist server governance state:", err?.message || err);
+    }
   }
 
   public normalizeEmail(email: string): string {
@@ -377,6 +460,7 @@ export class ServerAuthGovernance {
     };
 
     this.directory.set(norm, record);
+    this.persistState();
     const { token, session } = this.issueSessionToken({
       email: norm,
       role: assignedRole,
@@ -642,11 +726,13 @@ export class ServerAuthGovernance {
         notes: isOwnerAccount ? "Designated Owner (Verified via Firebase Auth)" : "Verified Firebase Auth Scholar"
       };
       this.directory.set(norm, existing);
+      this.persistState();
     } else if (isOwnerAccount) {
       existing.role = "owner";
       existing.status = "ENABLED";
       existing.isEmailVerified = true;
       existing.updatedAt = now;
+      this.persistState();
     }
 
     const { token, session } = this.issueSessionToken({
@@ -722,6 +808,7 @@ export class ServerAuthGovernance {
     };
 
     this.directory.set(norm, updated);
+    this.persistState();
     return {
       success: true,
       statusCode: 200,
@@ -760,6 +847,7 @@ export class ServerAuthGovernance {
     entry.status = status;
     entry.updatedAt = new Date().toISOString();
     this.directory.set(norm, entry);
+    this.persistState();
 
     return {
       success: true,
@@ -794,6 +882,7 @@ export class ServerAuthGovernance {
     if (!deleted) {
       return { success: false, statusCode: 404, message: `Email '${targetEmail}' was not in directory.` };
     }
+    this.persistState();
 
     return {
       success: true,
@@ -941,6 +1030,7 @@ export class ServerAuthGovernance {
       serverSyncedAt: new Date().toISOString()
     };
     this.learnerProgressStore.set(normTarget, saved);
+    this.persistState();
     return {
       statusCode: 200,
       allowed: true,
@@ -966,11 +1056,28 @@ export class ServerAuthGovernance {
     }
   }
 
+  public setPersistencePathForTesting(filePath: string | null): void {
+    if (process.env.MOOS_SKIP_AUTO_LISTEN === "true" || process.env.NODE_ENV === "test") {
+      this.persistenceFilePath = filePath ? path.resolve(filePath) : null;
+    }
+  }
+
+  public simulateRestartReloadForTesting(): void {
+    if (process.env.MOOS_SKIP_AUTO_LISTEN === "true" || process.env.NODE_ENV === "test") {
+      this.directory.clear();
+      this.revokedTokens.clear();
+      this.learnerProgressStore.clear();
+      this.seedBaseline();
+      this.loadPersistedState();
+    }
+  }
+
   public resetForTesting(): void {
     this.directory.clear();
     this.revokedTokens.clear();
     this.learnerProgressStore.clear();
     this.testFirebaseCerts = null;
+    this.persistenceFilePath = null;
     this.seedBaseline();
   }
 }

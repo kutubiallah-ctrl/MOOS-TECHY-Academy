@@ -37,6 +37,7 @@ import { firebaseSyncService } from "../services/firebaseSyncService";
 import { User as FirebaseUser } from "firebase/auth";
 import { mfaService } from "../services/mfaService";
 import { MfaModal } from "./mfa/MfaModal";
+import { emailAllowlistService } from "../services/emailAllowlistService";
 import { VerifiedAuthSession } from "../types/emailAllowlist";
 
 export type ActiveView =
@@ -123,8 +124,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     try {
       setIsSigningIn(true);
       const user = await firebaseSyncService.signInWithGoogle();
-      if (!user) {
-        // User closed or dismissed popup, or triggered MFA challenge
+      if (user && user.emailVerified) {
+        await emailAllowlistService.ensureFirebaseSessionSynced(user);
       }
     } catch (err: any) {
       const code = err?.code || "";
@@ -144,6 +145,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   const handleSignOut = async () => {
     try {
       await firebaseSyncService.signOutUser();
+      if (authSession?.authProvider === "firebase") {
+        onSignOutAcademy?.();
+      }
     } catch (err) {
       console.error("Sign out failure:", err);
     }
